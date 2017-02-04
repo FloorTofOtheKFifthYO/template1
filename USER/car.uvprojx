@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\SPI;..\HARDWARE\flash;..\HARDWARE\CAN;..\HARDWARE\vega;..\HARDWARE\TIM;..\HARDWARE\EXTI;..\HARDWARE\encoder;..\HARDWARE\step</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\HARDWARE\encoder;..\HARDWARE\step;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -459,39 +459,14 @@
           <GroupName>HARDWARE</GroupName>
           <Files>
             <File>
-              <FileName>spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\SPI\spi.c</FilePath>
-            </File>
-            <File>
               <FileName>controller.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\controller\controller.c</FilePath>
             </File>
             <File>
-              <FileName>flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\flash\flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>can.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\CAN\can.c</FilePath>
-            </File>
-            <File>
               <FileName>vega.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\vega\vega.c</FilePath>
-            </File>
-            <File>
-              <FileName>TIM.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\TIM\TIM.c</FilePath>
-            </File>
-            <File>
-              <FileName>exti.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\EXTI\exti.c</FilePath>
             </File>
             <File>
               <FileName>encoder.c</FileName>
@@ -522,6 +497,31 @@
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\usart\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>can.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\CAN\can.c</FilePath>
+            </File>
+            <File>
+              <FileName>exti.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\EXTI\exti.c</FilePath>
+            </File>
+            <File>
+              <FileName>flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\flash\flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\SPI\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>TIM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\TIM\TIM.c</FilePath>
             </File>
           </Files>
         </Group>
