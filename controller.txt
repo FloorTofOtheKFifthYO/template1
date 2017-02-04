@@ -1,0 +1,32 @@
+DATA
+
+6         8                            
+|Leftstick|Rightstick|
+
+4
+0x10 up
+0x20 right
+0x40 down
+0x80 left
+
+5
+0x10 ¡÷
+0x20 ¡ð
+0x40 ¡Á
+0x80 ¡õ
+
+0x01 L2
+0x02 R2
+0x04 L1
+0x08 R1
+
+r_spd = 0x7f - data[8];
+spd_x = data[6] - 0x80;
+spd_y = 0x7f - data[7];
+
+struct key_t {
+	uint8_t data_pos;
+	uint8_t id;
+	bool is_pressed;
+	uint16_t pressed_times;
+};
