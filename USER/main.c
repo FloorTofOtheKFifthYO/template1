@@ -1,5 +1,6 @@
 #include "main.h" 
 #include "sys.h"
+#include "chassis.h"
 
 //extern u8 cmd, sticks[4];
 //extern u8 ptr;
@@ -21,12 +22,11 @@ int WantSpeed = 0;//飞轮目标速度
 
 float Default_angle;
 int Chassis_motor0 =0 , Chassis_motor1 =0 , Chassis_motor2 =0 ;
-float CH_angle_M0 = -PI + 2*PI/3, CH_angle_M1 = -PI - 2*PI/3, CH_angle_M2 = -PI;
+
 
 float Speed_Duty = 770;
 float Speed_P = 0.0030, Speed_D = 0.3000 , Speed_I = 0.0f;
 
-POSITION END, START;
 SwitchTIM encoder;
 
 #define MAXSPEED 970
@@ -53,7 +53,6 @@ void set_params(){
 }
 
 void TIM2_IRQHandler(void){
-	int i;
 	if( TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET ) 
 	{
 		ms++;
@@ -77,15 +76,10 @@ void TIM2_IRQHandler(void){
 			{	USART_SendString(UART5,"Good to go\n");
 				USART_ITConfig(UART5, USART_IT_RXNE, ENABLE);wait_cnt=-1;}
 		TIM_ClearITPendingBit(TIM2,TIM_FLAG_Update);//必须清除中断标志位否则一直中断*/
-		for (i=0;i<12;i++) 
-		 {
-			 if (b[i]->cnt>0) b[i]->cnt--;
-			 if (b[i]->cnt==0)
-				 b[i]->ispressed=false;
-		 }
-		 if(load_count)
+		control_usart_TIM();
+		if(load_count)
 			load_count--;
-		 if(hit_count)
+		if(hit_count)
 			hit_count--;
 		TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);//必须清除中断标志位否则一直中断
 	}	
@@ -115,8 +109,8 @@ int main(void)
 	u8 POS_Mark = 0;
 	float Pre_ErrorY = 0;
 	
-	static int TURN_speed;
-	static int ChassisSpeed;
+	int TURN_speed;
+	int ChassisSpeed;
 	
 	rcc_config();
 	gpio_config();
@@ -130,15 +124,15 @@ int main(void)
 	Step1_Init();
 	Step2_Init();
 //	SPI2_Init();
-	usart_init(&Hx, &Hy);
+	usart_init(bluetooth,115200);
+	usart_init(MOTOR_USARTx, 115200);
+	controller_usart_init(&Hx, &Hy);
 	cmd_init();
 	param_init();
 //	can_add_callback();
 
 	can_init();
-    vega_init(&g_vega_pos_x,&g_vega_pos_y,&g_vega_angle);
-    vega_reset();
-	delay_ms(1000);
+	chassis_init();
 	encoder_init(&encoder);
 	SetUsed(4,1);
 	delay_ms(1000);
@@ -152,14 +146,8 @@ int main(void)
 	
 	USART_SendString(MOTOR_USARTx,"5HO\r6HO\r");
 	set_params();
-	direction_angle = PI/2;
-	START.X = g_vega_pos_x* 0.0001 * 0.81;
-	START.Y = g_vega_pos_y* 0.0001 * 0.81;
-	START.ANG = (g_vega_angle/180.f)*PI;
 	OPEN_Hander = 1;
 	
-	END = START;
-	car_state = car_stop;
 	pitch_state = pitch_ready;
 	load_state = load_ready;
 	hit_state = hit_ready;
@@ -189,7 +177,6 @@ int main(void)
 							pitch_state = pitch_up;
 							hit_flag_count = 0;
 							pitch_flag = true;
-							pur_pitch = 5;
 							//USART_SendString(bluetooth,"msg: pitch_up\r");
 						}
 						break;
@@ -263,8 +250,8 @@ int main(void)
 					case hit_ready:
 						if(hit_flag && load_state == load_turn)
 						{	
-							Step2_moveto(3000);
-							USART_SendString(MOTOR_USARTx,"5LA%d\r",(int)(0*10000));
+							Step2_moveto(pur_step);
+							USART_SendString(MOTOR_USARTx,"5LA%d\r",(int)(pur_pull*10000));
 							USART_SendString(MOTOR_USARTx,"5M\r5M\r5M\r");
 							hit_count = 1000;
 							hit_state = hit_pull;
@@ -415,103 +402,7 @@ int main(void)
 			{
 				/********手柄部分***********/
 				//USART_SendString(CMD_USARTx,"Ohi\n");
-				errorAngle = angle;
-				Xianding = 0;
-				if (RU.ispressed)
-				{ PGout(11) = !GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_11);
-					USART_SendString(bluetooth,"msg: RU is pressed\n");
-				}
-				if (RR.ispressed) {
-					PGout(12) = !GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_12);
-					USART_SendString(bluetooth,"msg: RR is pressed\n");
-				}
-				if (RD.ispressed) {
-					PGout(13) = !GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_13);
-					USART_SendString(bluetooth,"msg: RD is pressed\n");
-				}
-				if (RL.ispressed) {
-					if (TIM9->CCR2<1500) TIM_SetCompare2(TIM9,1800);
-					else TIM_SetCompare2(TIM9,1060);
-					USART_SendString(bluetooth,"msg: RL is pressed\n");
-				}
-				if (L2.ispressed) {
-					if (LU.ispressed){
-						TIM14->CCER |= TIM_CCER_CC1E;
-						PFout(5) = 0;
-					}else				
-					if (LD.ispressed){
-						PFout(5) = 1;
-						TIM14->CCER |= TIM_CCER_CC1E;
-					}else{ 
-					//USART_SendString(bluetooth,"msg: 000!\n");
-						TIM14->CCER &= ~TIM_CCER_CC1E;
-					}Xianding=0;
-					if (LR.ispressed) Xianding -=2000;					
-					if (LL.ispressed) Xianding +=2000;
-					if (Xianding !=0){
-						//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-						USART_SendString(UART4,"5V%d\r",Xianding);
-					}else{
-						//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-						USART_SendString(UART4,"5V0\r");
-					}
-				}else{ 
-					//USART_SendString(bluetooth,"msg: 000!\n");
-						TIM14->CCER &= ~TIM_CCER_CC1E;
-						USART_SendString(UART4,"5V0\r");
-				}
-				if (R2.ispressed){
-					Xianding=0;
-					if (LU.ispressed) Xianding +=200;					
-					if (LD.ispressed) Xianding -=200;
-					if (Xianding !=0){
-						//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-						USART_SendString(UART4,"3V%d\r",Xianding);
-					}else{
-						USART_SendString(UART4,"3V0\r");
-					}
-					Xianding=0;
-					if (LL.ispressed) Xianding +=200;					
-					if (LR.ispressed) Xianding -=200;
-					if (Xianding !=0){
-						//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-						USART_SendString(UART4,"4V%d\r",Xianding);
-					}else{
-						USART_SendString(UART4,"4V0\r");
-					}
-				}else{
-					USART_SendString(UART4,"3V0\r4v0\r");
-				}
-				Xianding=0;
-				if (L1.ispressed) Xianding +=200;					
-				if (R1.ispressed) Xianding -=200;
-				if (Xianding !=0){
-					//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-					USART_SendString(UART4,"6V%d\r",Xianding);
-				}else{
-					USART_SendString(UART4,"6V0\r");
-				}
-				ChassisSpeed = 1000;
-				if (!L2.ispressed&&!R2.ispressed){
-				if (LU.ispressed) direction_angle = -PI/2;
-				else if (LD.ispressed) direction_angle = PI/2;
-				else if (LL.ispressed) direction_angle = PI;
-				else if (LR.ispressed) direction_angle = 0;
-				else ChassisSpeed = 0;}else
-				ChassisSpeed = 0;
-				
-				Chassis_motor0 = -1* (ChassisSpeed/7*3*cos((CH_angle_M0 + errorAngle) - direction_angle)+TURN_speed);
-				Chassis_motor1 = (ChassisSpeed/7*3*cos((CH_angle_M1 + errorAngle) - direction_angle)+TURN_speed);
-				Chassis_motor2 = -1* (ChassisSpeed/7*3*cos((CH_angle_M2 + errorAngle) - direction_angle)+TURN_speed);
-				USART_SendString(MOTOR_USARTx,"1v%d\r2v%d\r0v%d\r",Chassis_motor1 , Chassis_motor2 , Chassis_motor0);
-//				if (Chassis_motor0 != 0) USART_SendString(UART5,"msg: C0:%d\n",Chassis_motor0);
-//				if (Chassis_motor1 != 0) USART_SendString(UART5,"msg: C1:%d\n",Chassis_motor1);
-//				if (Chassis_motor2 != 0) USART_SendString(UART5,"msg: C2:%d\n",Chassis_motor2);
-				if(OPEN_Hander == 1){
-					END.X=pos_x;
-					END.Y=pos_y;
-					END.ANG=angle;
-				}
+				control_usart_main();
 			}
 			
 			if (pitch_flag)
