@@ -26,26 +26,25 @@
 //extern u16 USART1_RX_STA;
 
 //无刷配置
-#ifndef BRUSHLESS
-
 #define BRUSHLESS
 #define BRUSHLESS_TIM 		TIM9			//定时器
 #define BRUSHLESS_OC 		1				//通道
-#define BRUSHLESS_GPIOx 	GPIOE			//GPIO
-#define BRUSHLESS_PIN GPIO_	Pin_5			//管脚
-#define BRUSHLESS_PINSOURCE GPIO_PinSource5 //复用管脚
-#define BRUSHLESS_AF 		GPIO_AF_TIM9	//管脚复用功能
 
-#endif
-
-#ifndef CHASSIS
+//底盘
 #define CHASSIS
-
 #define MOTOR0_ID 0x0A
 #define MOTOR1_ID 0x0B
 #define MOTOR2_ID 0x0C
 
-#endif
+#define ROLL
+#define ROLL_ID 		4
+#define ROLL_SP			2000
+#define ROLL_GETTIMX	4
+
+#define TURN
+#define TURN_ID			6
+
+#define FLY PGout(11)
 
 extern float direction_angle;
 extern u8 Hand_flag;

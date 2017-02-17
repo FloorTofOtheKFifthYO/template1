@@ -5,14 +5,11 @@
 #include "configuration.h"
 
 /*应定义出
-	#ifndef CHASSIS
 	#define CHASSIS
 
 	#define MOTOR0_ID 0x0A
 	#define MOTOR1_ID 0x0B
 	#define MOTOR2_ID 0x0C
-
-	#endif
 */
 #ifndef CHASSIS
 #error 未定义底盘

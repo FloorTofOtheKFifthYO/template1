@@ -2,6 +2,7 @@
 #define MOTOR_BRUSHLESS_H_
 
 #include "sys.h"
+#include "TIM.h"
 
 /* ÎÞË¢µç»ú
  */

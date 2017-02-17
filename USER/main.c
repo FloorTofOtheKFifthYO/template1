@@ -154,9 +154,7 @@ int main(void)
     while(1) 
 	{
 		if(g_stop_flag){//Õ£÷π“ª«–‘À∂Ø
-			USART_SendString(MOTOR_USARTx,"0v0\r1v0\r2v0\r");
-			USART_SendString(MOTOR_USARTx,"3v0\r4v0\r");
-			USART_SendString(MOTOR_USARTx,"5v0\r6v0\r");
+			
 		}else{
 			//if((encoder.GetTim5-temp_speed)!=0)
 			//	USART_SendString(UART5,"msg: %d\n",encoder.GetTim5);

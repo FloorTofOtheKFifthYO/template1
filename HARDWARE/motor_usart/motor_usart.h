@@ -13,11 +13,12 @@ typedef struct
 {
 	USART_TypeDef* usartx;
 	int id;		//节点号
+	float rate;	//调节参数
+	
 	int AC; 	//加速度 0~30000
 	int DEC; 	//减速度 0~30000
 	int SP; 	//最大速度 0~30000
 	int MV;		//最小速度 0~30000
-	float rate;	//调节参数
 }motor_usart;
 
 /**
@@ -90,14 +91,14 @@ void motor_usart_SP(motor_usart motor_struct);
 	
 //相对位置
 #define motor_usart_relpos(motor_struct, relpos) \
-	USART_SendString(MOTOR_USARTx,"%dLR%d\r", motor_struct.id, relpos); \
+	USART_SendString(motor_struct.usartx,"%dLR%d\r", motor_struct.id, relpos); \
 	USART_SendString(MOTOR_USARTx,"%dM\r%dM\r%dM\r",motor_struct.id,motor_struct.id,motor_struct.id);
 
 
 //绝对位置
 #define motor_usart_abspos(motor_struct, abspos) \
-	USART_SendString(MOTOR_USARTx,"%dLA%d\r", motor_struct.id, abspos); \
-	USART_SendString(MOTOR_USARTx,"%dM\r%dM\r%dM\r",motor_struct.id,motor_struct.id,motor_struct.id);
+	USART_SendString(motor_struct.usartx,"%dLA%d\r", motor_struct.id, abspos); \
+	USART_SendString(motor_struct.usartx,"%dM\r%dM\r%dM\r",motor_struct.id,motor_struct.id,motor_struct.id);
 
 #endif
 

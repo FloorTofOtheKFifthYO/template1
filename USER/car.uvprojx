@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\HARDWARE\encoder;..\HARDWARE\step;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM;..\HARDWARE\motor_usart;..\MODULE\flywheel;..\MODULE\hit;..\MODULE\chassis;..\HARDWARE\motor_brushless;..\HARDWARE\controller_usart;..\HARDWARE\putter;..\HARDWARE\motorCtrl</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\HARDWARE\encoder;..\HARDWARE\step;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM;..\HARDWARE\motor_usart;..\MODULE\flywheel;..\MODULE\hit;..\MODULE\chassis;..\HARDWARE\motor_brushless;..\HARDWARE\controller_usart;..\HARDWARE\putter;..\HARDWARE\motorCtrl;..\HARDWARE\relay</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

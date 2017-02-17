@@ -65,7 +65,7 @@ void putter_main(putter putter_struct)
 	
 	if (putter_struct.putter_flag)
 	{
-		d = putter_struct.pur_pos - (*(putter_struct.position));
+		d = putter_struct.pur_pos - (*(putter_struct.position) / 10000.f);
 		dd = d - putter_struct.d_last;
 		putter_struct.d_last = d;
 		if (fabs(d) < 0.01)
