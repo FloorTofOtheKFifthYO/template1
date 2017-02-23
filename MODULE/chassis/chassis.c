@@ -23,6 +23,7 @@ void chassis_init(void)
 	delay_ms(500);
 	RoboModule_CHOICE_mode(SpeedMode ,MOTOR0_ID ,MOTOR0_ID,MOTOR0_ID,0);
 	delay_ms(500);
+	RoboModule_Check(MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,0);
 	
 	chassis.Speed_min = 30;
 	chassis.Speed_max = 6000;
@@ -39,10 +40,20 @@ void chassis_init(void)
 	chassis.END = chassis.START;
 	chassis.car_state = car_stop;
 	
+	if(CheckMOTOR() != 0xFF)
+	{
+		USART_SendString(bluetooth,"底盘电机出错\n");
+		while(1) ;
+	}
+	if(chassis.START.ANG == 0)
+	{
+		USART_SendString(bluetooth,"全场定位出错\n");
+		while(1) ;
+	}
 }
 
 //主循环轮询更新
-void chassis_updata()
+void chassis_update()
 {
 	chassis.pos_x = chassis.g_vega_pos_x* 0.0001 * 0.81;
 	chassis.pos_y = chassis.g_vega_pos_y* 0.0001 * 0.81;

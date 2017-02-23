@@ -16,7 +16,6 @@ static cmd_struct cmd_tbl[] = {
     CMD_ADD("help"," Print all command and usage ",cmd_help_func),
     CMD_ADD("reboot"," 重启程序 ",cmd_reboot_func),
    // CMD_ADD("sensor","查看传感器状态 ",cmd_sensor_func),
-    CMD_ADD("switch"," 查看触碰开关状态 ",cmd_switch_func),
     CMD_ADD("hello"," ",cmd_hello_func),
 //    CMD_ADD("speed"," 设置底盘运动速度 ",cmd_speed_func),
     CMD_ADD("launch"," 设置发射参数 ",cmd_launch_func),

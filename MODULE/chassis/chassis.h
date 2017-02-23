@@ -49,6 +49,8 @@ typedef struct
 	float Start_distance;
 } Chassis;
 
+extern Chassis chassis;
+
 /** 底盘初始化
   * 包括全场定位的初始化
   *
@@ -56,7 +58,7 @@ typedef struct
 void chassis_init(void);
 
 //主循环轮询更新
-void chassis_updata();
+void chassis_update();
 
 /**主循环中手柄控制
   *参数：float directoion 	方向角

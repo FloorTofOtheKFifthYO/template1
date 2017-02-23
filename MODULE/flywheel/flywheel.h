@@ -49,9 +49,20 @@
 
 typedef struct
 {
+	//成员
 	Brushless wheel;
 	putter roll;
 	motor_usart turn;
+	
+	//状态
+	enum {fly_ready, fly_adj, fly} state;
+	
+	//控制
+	bool fly_flag;
+	float pur_duty;
+	float pur_roll;
+	float pur_turn;
+	
 }Flywheel;
 
 extern Flywheel flywheel;
@@ -103,5 +114,41 @@ void flywheel_setBrushless(float duty);
 void flywheel_setTurn(float turn);
 
 void flywheel_fly();
+
+/**
+  * @brief  tim2中调用，进行延时等操作
+  *     
+  * @note
+  *
+  * @param 旋转平台
+  *          
+  * @retval 
+  */
+void flywheel_TIM();
+
+/**
+  * @brief 完成n次飞
+  *     
+  * @note int n,	次数
+		float duty, 无刷占空比
+		float roll,	俯仰角
+		float turn  转角
+  *
+  * @param 旋转平台
+  *          
+  * @retval 
+  */
+void flywheel_flyn(int n, float duty, float roll, float turn);
+
+/**
+  * @brief main大循环中检查
+  *     
+  * @note
+  *
+  * @param
+  *          
+  * @retval 
+  */
+void flywheel_main();
 
 #endif

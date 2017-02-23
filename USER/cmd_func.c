@@ -1,6 +1,8 @@
 #include "cmd_func.h"
 #include "cmd.h"
-#include "stdlib.h"
+#include <stdlib.h>
+#include "chassis.h"
+#include "flywheel.h"
 #include "step.h"
 #include "encoder.h"
 #include "configuration.h"
@@ -10,16 +12,10 @@
 #include "param.h"
 
 extern s8 ptrS,ptrB;
-extern enum {car_stop, car_running, car_ready} car_state;//车的运动状态
 extern Param * param;
 extern bool g_stop_flag;
-extern float pos_x;
-extern float pos_y;
-extern float angle;
 extern int WantSpeed;
 extern int truespeed;
-extern float Move_radium,Angle_radium;
-extern int Speed_min,Speed_max,Angle_speed,Move_speed;
 
 u8 target=1;       				//目标0-6
 
@@ -97,9 +93,9 @@ void cmd_pos_func(int argc,char *argv[])
     int erro_no;
     if (strcmp(argv[1], "now") == 0)
     {
-        USART_SendString(CMD_USARTx, "x:%f y:%f\n", pos_x,pos_y);
+        USART_SendString(CMD_USARTx, "x:%f y:%f\n", chassis.pos_x,chassis.pos_y);
 		USART_SendString(CMD_USARTx, "pitch:%f roll:%f speed:%d yaw:%.6f\n",
-				-encoder.GetTim3/10000.f,encoder.GetTim4/10000.f,encoder.GetTim5,angle);
+				-encoder.GetTim3/10000.f,encoder.GetTim4/10000.f,encoder.GetTim5,chassis.angle);
     }else
     if(strcmp(argv[1],"add") == 0){
         if(argc < 5){
@@ -201,11 +197,11 @@ void cmd_action_func(int argc,char *argv[])
         now_pos = now_pos_ptr->data;
 		x = now_pos->x;
 		y = now_pos->y;
-		END.X = x;
-		END.Y = y;
-		END.ANG = angle;
+		chassis.END.X = x;
+		chassis.END.Y = y;
+		chassis.END.ANG = chassis.angle;
 		OPEN_Hander = 0;
-		car_state = car_ready;
+		chassis.car_state = car_ready;
         //跑到下一个点
     }else if (argc == 2){
         no = atoi(argv[1]);
@@ -214,44 +210,47 @@ void cmd_action_func(int argc,char *argv[])
         now_pos_ptr = ptr;
 		x = now_pos->x;
 		y = now_pos->y;
-		END.X = x;
-		END.Y = y;
-		END.ANG = angle;
+		chassis.END.X = x;
+		chassis.END.Y = y;
+		chassis.END.ANG = chassis.angle;
 		OPEN_Hander = 0;
         //跑到指定的点去
     }else if (argc == 3){
         x = atof(argv[1]);
         y = atof(argv[2]);
         //跑到指定的位置
-		END.X = x;
-		END.Y = y;
-		END.ANG = angle;
+		chassis.END.X = x;
+		chassis.END.Y = y;
+		chassis.END.ANG = chassis.angle;
 		OPEN_Hander = 0;
-		car_state = car_ready;
+		chassis.car_state = car_ready;
+    }else if (argc == 4){
+        x = atof(argv[1]);
+        y = atof(argv[2]);
+		yaw = atof(argv[3]);
+        //跑到指定的位置
+		chassis.END.X = x;
+		chassis.END.Y = y;
+		chassis.END.ANG = yaw;
+		OPEN_Hander = 0;
+		chassis.car_state = car_ready;
     }
 	
 }
 
-void cmd_switch_func(int argc,char *argv[])
-{
-    u8 state1,state2;
-    state1 = GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_11);
-    state2 = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14);
-    USART_SendString(CMD_USARTx, "roll_switch:%d pitch_switch:%d", state1, state2);
-}
 void cmd_param_func(int argc,char *argv[]){
 	if (strcmp(argv[1],"speedmax")==0)
-		Speed_max = atoi(argv[2]);
+		chassis.Speed_max = atoi(argv[2]);
 	else if (strcmp(argv[1],"speedmin")==0)
-		Speed_min = atoi(argv[2]);
+		chassis.Speed_min = atoi(argv[2]);
 	else if (strcmp(argv[1],"movespeed")==0)
-		Move_speed = atoi(argv[2]);
+		chassis.Move_speed = atoi(argv[2]);
 	else if (strcmp(argv[1],"moveradium")==0)
-		Move_radium = atof(argv[2]);
+		chassis.Move_radium = atof(argv[2]);
 	else if (strcmp(argv[1],"angleradium")==0)
-		Angle_radium = atof(argv[2]);
+		chassis.Angle_radium = atof(argv[2]);
 	else if (strcmp(argv[1],"anglespeed")==0)
-		Angle_speed = atoi(argv[2]);
+		chassis.Angle_speed = atoi(argv[2]);
 }
 
 void cmd_launch_func(int argc,char *argv[])
@@ -301,11 +300,11 @@ void cmd_launch_func(int argc,char *argv[])
 		pur_roll = roll;
 		roll_flag = true;
 		WantSpeed = speed;
-		END.X = pos_x;
-		END.Y = pos_y;
-		END.ANG = yaw;
+		chassis.END.X = chassis.pos_x;
+		chassis.END.Y = chassis.pos_y;
+		chassis.END.ANG = yaw;
 		OPEN_Hander = 0;
-		car_state = car_running;
+		chassis.car_state = car_running;
     }else if (strcmp(argv[1], "set")==0)
     {
 		if(strcmp(argv[2], "pitch")==0)
@@ -327,9 +326,9 @@ void cmd_launch_func(int argc,char *argv[])
 		}else if(strcmp(argv[2], "yaw")==0)
 		{
 			yaw = atof(argv[3]);
-			END.ANG = yaw;
+			chassis.END.ANG = yaw;
 			OPEN_Hander = 0;
-			car_state = car_ready;
+			chassis.car_state = car_ready;
         }else if(argc == 6) {
 		//直接调整
 			pitch = atof(argv[2]);
@@ -342,7 +341,7 @@ void cmd_launch_func(int argc,char *argv[])
 			roll_flag = true;
 			//Move_speed = speed;
 			TIM_SetCompare1(TIM8,speed/100*1000000/50 - 1);
-			END.ANG = yaw;
+			chassis.END.ANG = yaw;
 			OPEN_Hander = 0;
 		}
 		
