@@ -14,14 +14,12 @@
 extern s8 ptrS,ptrB;
 extern Param * param;
 extern bool g_stop_flag;
-extern int WantSpeed;
 extern int truespeed;
 
 u8 target=1;       				//目标0-6
 
 static list_node * now_pos_ptr;
 static Pos_data * now_pos;     //当前点的数据指针
-static float motor_v;
 
 extern float pur_pitch;
 extern float pur_roll;
@@ -29,7 +27,6 @@ extern int pur_step;
 extern float pur_pull;
 extern SwitchTIM encoder;
 extern bool pitch_flag,roll_flag;
-extern bool hit_flag;
 
 void cmd_reboot_func(int argc,char *argv[]){
     NVIC_SystemReset();
@@ -49,7 +46,6 @@ void cmd_hello_func(int argc,char *argv[]){
 
 void cmd_test_func(int argc,char *argv[]){
 	if(argc == 1){
-		hit_flag = true;
 		OPEN_Hander = 0;
 	}
 	if(argc == 2){
@@ -267,7 +263,6 @@ void cmd_launch_func(int argc,char *argv[])
 		pur_pitch = atof(argv[2]);
 		pur_step = atoi(argv[3]);
 		pur_pull = atof(argv[4]);
-		hit_flag = true;
 		OPEN_Hander = 0;
     }else if(strcmp(argv[1],"fly")==0)
     {
@@ -299,7 +294,6 @@ void cmd_launch_func(int argc,char *argv[])
 		pitch_flag = true;
 		pur_roll = roll;
 		roll_flag = true;
-		WantSpeed = speed;
 		chassis.END.X = chassis.pos_x;
 		chassis.END.Y = chassis.pos_y;
 		chassis.END.ANG = yaw;

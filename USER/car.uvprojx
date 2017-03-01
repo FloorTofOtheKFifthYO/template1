@@ -651,7 +651,7 @@
             <File>
               <FileName>flash.md</FileName>
               <FileType>5</FileType>
-              <FilePath>..\HARDWARE\flash\flash.md</FilePath>
+              <FilePath>..\SYSTEM\flash\flash.md</FilePath>
             </File>
           </Files>
         </Group>

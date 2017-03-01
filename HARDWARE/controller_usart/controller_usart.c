@@ -14,11 +14,9 @@ sticks* s[2]={&L,&R};
 s8 ptrB,ptrS;
 static int *x,*y;
 
-extern float pos_x,pos_y, angle; 
 extern u8 OPEN_Hander;
 
 extern Chassis chassis;
-static float CH_angle_M0 = -PI + 2*PI/3, CH_angle_M1 = -PI - 2*PI/3, CH_angle_M2 = -PI;
 
 void USART1_IRQHandler(void)                	
 {
@@ -217,9 +215,9 @@ void control_usart_main()
 	ChassisSpeed = 0;
 	chassis_handle(direction_angle, ChassisSpeed);
 	if(OPEN_Hander == 1){
-		chassis.END.X=pos_x;
-		chassis.END.Y=pos_y;
-		chassis.END.ANG=angle;
+		chassis.END.X=chassis.pos_x;
+		chassis.END.Y=chassis.pos_y;
+		chassis.END.ANG=chassis.angle;
 	}
 }
 
