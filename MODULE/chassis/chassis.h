@@ -4,12 +4,20 @@
 #include <stdbool.h>
 #include "configuration.h"
 
+#define CHASSIS_FIRST_RUN 0
+#define CHASSIS_FLASH_SETOR FLASH_Sector_6 //  扇区6
+#define CHASSIS_FLASH_ADDR_START ((uint32_t)0x08040000)
+#define CHASSIS_FLASH_ADDR_END ((uint32_t)0x0805FFFF)
+
 /*应定义出
+	#ifndef CHASSIS
 	#define CHASSIS
 
 	#define MOTOR0_ID 0x0A
 	#define MOTOR1_ID 0x0B
 	#define MOTOR2_ID 0x0C
+
+	#endif
 */
 #ifndef CHASSIS
 #error 未定义底盘
@@ -29,7 +37,7 @@ typedef struct
 	int g_vega_pos_y;   
 	float g_vega_angle;
 	
-	int pos_x,pos_y;
+	float pos_x,pos_y;
 	float angle;
 	
 	//状态
@@ -39,13 +47,13 @@ typedef struct
 	POSITION END, START;
 	
 	//参数
-	float direction_angle;
-	int Speed_min;
-	int Speed_max;
-	float Move_radium;
 	float Angle_radium;
 	int Angle_speed;
+	float factor;
+	float Move_radium;
 	int Move_speed;
+	int Speed_max;
+	int Speed_min;
 	float Start_distance;
 } Chassis;
 
@@ -56,6 +64,10 @@ extern Chassis chassis;
   *
   */
 void chassis_init(void);
+
+/**保存参数
+  */
+int chassis_save();
 
 //主循环轮询更新
 void chassis_update();
@@ -71,5 +83,11 @@ void chassis_handle(float directoion, int speed);
   * 通过改chassis.END来控制目的地
   */
 void chassis_auto();
+
+//stop
+void chassis_stop();
+
+
+void chassis_param_print();
 
 #endif

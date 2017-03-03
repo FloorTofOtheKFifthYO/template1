@@ -1,4 +1,5 @@
 #include "param.h"
+#include "usart.h"
 #include "flash.h"
 #include <stdlib.h>
 
@@ -122,8 +123,6 @@ int param_save(void)
 
 		pos_ptr = pos_ptr->link;
 	}
-	
-	
 	
     FLASH_DataCacheCmd(ENABLE);
     FLASH_Lock();  //  写保护

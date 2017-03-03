@@ -3,12 +3,10 @@
 #include "chassis.h"
 #include "flywheel.h"
 
-
 SwitchTIM encoder;
 bool g_stop_flag = false;
 
 int ms = 0;
-
 
 void TIM2_IRQHandler(void){
 	if( TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET ) 
@@ -55,6 +53,8 @@ int main(void)
 		}else{
 			//if((encoder.GetTim5-temp_speed)!=0)
 			//	USART_SendString(UART5,"msg: %d\n",encoder.GetTim5);
+			
+			
 			
 			bottons_check();
 			sticks_check(Hx,Hy);

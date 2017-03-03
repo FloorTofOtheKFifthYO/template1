@@ -51,21 +51,21 @@
 			return temp;
 		}
 
-		u16 STMFLASH_ReadHalfWord_Inc(u32 faddr)
+		u16 STMFLASH_ReadHalfWord_Inc(u32* faddr)
 		{
 			u16 temp = *(vu32*)(* faddr);
 			faddr += 2;
 			return temp;
 		}
 
-		u8 STMFLASH_ReadByte_Inc(u32 faddr)
+		u8 STMFLASH_ReadByte_Inc(u32* faddr)
 		{
 			u8 temp = *(vu32*)(* faddr);
 			faddr += 1;
 			return temp;
 		}
 
-		float STMFLASH_ReadFloat_Inc(u32 faddr)
+		float STMFLASH_ReadFloat_Inc(u32* faddr)
 		{
 			float temp = *(vu32*)(* faddr);
 			faddr += sizeof(float);

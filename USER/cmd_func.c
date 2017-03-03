@@ -85,7 +85,6 @@ void cmd_pos_func(int argc,char *argv[])
     float x,y;
     Pos_data *data;
     list_node * ptr;
-    int start_no,end_no;
     int erro_no;
     if (strcmp(argv[1], "now") == 0)
     {
@@ -180,14 +179,10 @@ void cmd_pos_func(int argc,char *argv[])
 void cmd_action_func(int argc,char *argv[])
 {
     int no;
-    float x, y, v;
+    float x, y;
     float yaw;
     list_node * ptr;
-    if (strcmp(argv[1],"rotate")==0){
-        v = atof(argv[2]);
-        yaw = atof(argv[3]);
-        //测试底盘电机转动到一定角度
-    }else if (argc == 1)
+    if (argc == 1)
     {
         now_pos_ptr = now_pos_ptr->link;
         now_pos = now_pos_ptr->data;
@@ -247,6 +242,14 @@ void cmd_param_func(int argc,char *argv[]){
 		chassis.Angle_radium = atof(argv[2]);
 	else if (strcmp(argv[1],"anglespeed")==0)
 		chassis.Angle_speed = atoi(argv[2]);
+	else if (strcmp(argv[1],"start")==0)
+		chassis.Start_distance = atof(argv[2]);
+	else if (strcmp(argv[1],"factor")== 0)
+		chassis.factor = atof(argv[2]);
+	else if (strcmp(argv[1],"save") == 0)
+		chassis_save();
+	else if (strcmp(argv[1],"print") == 0)
+		chassis_param_print();
 }
 
 void cmd_launch_func(int argc,char *argv[])

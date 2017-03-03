@@ -33,7 +33,7 @@ typedef struct 		//参数总结构线性表
 #define FIRST_RUN 1
 #define PARAM_FLASH_SETOR ((uint16_t)0x0028) //  扇区5
 #define PARAM_FLASH_ADDR_START ((uint32_t)0x08020000)
-#define PARAM_FLASH_ADDR_END ((uint32_t)0x08020FFF)
+#define PARAM_FLASH_ADDR_END ((uint32_t)0x0803FFFF)
 
 int param_init(void); //初始化参数，从flash读取参数
 
