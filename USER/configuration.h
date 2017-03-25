@@ -25,33 +25,31 @@
 //extern u8  USART1_RX_BUF[USART_REC_LEN];    
 //extern u16 USART1_RX_STA;
 
-//无刷配置
-#define BRUSHLESS
-#define BRUSHLESS_TIM 		TIM9			//定时器
-#define BRUSHLESS_OC 		1				//通道
+#define FLYWHEEL_RIGHT
+#define CLIENT_ID_RIGHT 	0x32
+#define TURN_ID_RIGHT		0x08
+#define PITCH_ID_RIGHT		0x04
+#define YAW_ID_RIGHT		0x06
+#define FLY_RIGHT		2
+
+#define FLYWHEEL_LEFT
+#define CLIENT_ID_LEFT 	0x31
+#define PITCH_ID_LEFT	0x09
+#define YAW_ID_LEFT		0x05
+#define FLY_LEFT		2
+
 
 //底盘
 #define CHASSIS
 #define MOTOR0_ID 0x0A
 #define MOTOR1_ID 0x0B
 #define MOTOR2_ID 0x0C
+#define MOTOR3_ID 0x0D
 
-#define ROLL
-#define ROLL_ID 		4
-#define ROLL_SP			2000
-#define ROLL_GETTIMX	4
 
-#define TURN
-#define TURN_ID			6
 
-#define FLY PGout(11)
-
-extern float direction_angle;
-extern u8 Hand_flag;
-extern int WANTSPEED;
-extern u8 Turn_R_Flag ,Turn_L_Flag ;
-extern u8 TURN_Flag;
 extern u8 OPEN_Hander;
+extern u8 LEFT_RIGHT;
 
 void rcc_config(void);
 void gpio_config(void);

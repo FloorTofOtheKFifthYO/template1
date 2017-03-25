@@ -1,3 +1,6 @@
+#ifndef _LINK_LIST_H_
+#define _LINK_LIST_H_
+
 #include "stm32f4xx.h"
 #include "configuration.h"
 
@@ -22,3 +25,4 @@ int list_remove(link_list *first,void *data,bool (*cmp)(void *,void *));
 void list_copy(link_list *dest,link_list *src);
 //void list_print(USART_TypeDef *USARTx,link_list *first,int param_group);
 
+#endif

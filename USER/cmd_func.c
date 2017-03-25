@@ -2,8 +2,8 @@
 #include "cmd.h"
 #include <stdlib.h>
 #include "chassis.h"
-#include "flywheel.h"
-#include "step.h"
+#include "flywheel_left.h"
+#include "flywheel_right.h"
 #include "encoder.h"
 #include "configuration.h"
 #include "string.h"
@@ -14,11 +14,12 @@
 extern s8 ptrS,ptrB;
 extern Param * param;
 extern bool g_stop_flag;
-extern int truespeed;
+extern bool switch_side;
 
-u8 target=1;       				//目标0-6
+u8 target=0;       				//目标0-6
 
 static list_node * now_pos_ptr;
+static int pos_no = 0;
 static Pos_data * now_pos;     //当前点的数据指针
 
 extern float pur_pitch;
@@ -45,35 +46,16 @@ void cmd_hello_func(int argc,char *argv[]){
 }
 
 void cmd_test_func(int argc,char *argv[]){
-	if(argc == 1){
-		OPEN_Hander = 0;
-	}
-	if(argc == 2){
-		OPEN_Hander = 0;
-		USART_SendString(MOTOR_USARTx,"5LA%d\r",(int)(atof(argv[1])*10000));
-		//delay_ms(1000);
-		USART_SendString(MOTOR_USARTx,"5M\r5M\r5M\r");
-	}else if(argc == 3){
-		if(strcmp(argv[1],"air") == 0)
-		{
-			if(strcmp(argv[2],"1") == 0){
-				PGout(12) = !PGout(12);
-			}else if(strcmp(argv[2],"2") == 0){
-				PGout(11) = !PGout(11);
-			}
-		}else{
-			
-		}
-	}else if(argc == 4){
-		if(strcmp(argv[1],"step") == 0)
-		{
-			OPEN_Hander = 0;
-			if(strcmp(argv[2],"1") == 0){
-				Step1_moveto(atoi(argv[3]));
-			}else if(strcmp(argv[2],"2") == 0){
-				Step2_moveto(atoi(argv[3]));
-			}
-		}
+	if(strcmp(argv[1],"left") == 0)
+	{
+		flywheel_left.fly_flag = true;
+		if(argc == 3)
+			flywheel_left_flyn(atoi(argv[2]),7.7,0,0,6);
+	}else if(strcmp(argv[1],"right") == 0)
+	{	
+		flywheel_right.fly_flag = true;
+		if(argc == 3)
+			flywheel_right_flyn(atoi(argv[2]),7.7,0,0,0,6);
 	}
 }
 
@@ -82,31 +64,54 @@ void cmd_pos_func(int argc,char *argv[])
     int no;
     int no0;
     int i;
-    float x,y;
+    float x,y,ang;
     Pos_data *data;
     list_node * ptr;
     int erro_no;
     if (strcmp(argv[1], "now") == 0)
     {
-        USART_SendString(CMD_USARTx, "x:%f y:%f\n", chassis.pos_x,chassis.pos_y);
-		USART_SendString(CMD_USARTx, "pitch:%f roll:%f speed:%d yaw:%.6f\n",
-				-encoder.GetTim3/10000.f,encoder.GetTim4/10000.f,encoder.GetTim5,chassis.angle);
-    }else
-    if(strcmp(argv[1],"add") == 0){
-        if(argc < 5){
+        USART_SendString(CMD_USARTx, "x:%f y:%f yaw:%f\n", chassis.pos_x,chassis.pos_y,chassis.angle);
+    }else if(strcmp(argv[1],"select") == 0){
+		if(argc < 2){
             USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
-            USART_SendString(CMD_USARTx,"msg:    pos add <no> <x> <y>\n");
+            USART_SendString(CMD_USARTx,"msg:    pos select <no> \n");
+			return;
+        }else if(argc == 2)
+		{
+			USART_SendString(bluetooth,"pos: %d", pos_no);
+		}
+		no = atoi(argv[2]);
+		now_pos_ptr = list_locate(&param->pos_ptr, no);
+		if(now_pos_ptr == NULL)
+		{
+            USART_SendString(CMD_USARTx,"msg: Error NO.\n");
+			return;
+		}else
+		{
+			pos_no = no;
+			now_pos = now_pos_ptr->data;
+		}
+	}
+	else if(strcmp(argv[1],"add") == 0){
+        if(argc < 6){
+            USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
+            USART_SendString(CMD_USARTx,"msg:    pos add <no> <x> <y> <ang>\n");
+			return;
         }
         no = atoi(argv[2]);
         x = atof(argv[3]);
         y = atof(argv[4]);
+		ang = atof(argv[5]);
         data = (Pos_data *)malloc(sizeof(Pos_data));
         data->x = x;
         data->y =  y;
+		data->ang = ang;
         for (i = 0; i < 7; ++i)
         {
             data->d[i].launch_num = 0;
             list_init(&data->d[i].launch_ptr);
+			data->r[i].launch_num = 0;
+            list_init(&data->r[i].launch_ptr);
         }
         if((erro_no = list_insert(&param-> pos_ptr, no, data)) <= 0){
             USART_SendString(CMD_USARTx,"msg: Error:%d\n",erro_no);
@@ -114,11 +119,17 @@ void cmd_pos_func(int argc,char *argv[])
 			param->pos_num++;
 			now_pos_ptr = list_locate(&param->pos_ptr,no);
 			now_pos = now_pos_ptr->data;
+			pos_no = no;
 		}
 		print_pos_list(param->pos_ptr->link);
     }else if(strcmp(argv[1],"print") == 0){
         print_pos_list(param->pos_ptr->link);
     }else if(strcmp(argv[1],"del") == 0){
+		if(argc < 3){
+            USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
+            USART_SendString(CMD_USARTx,"msg:    pos del <no>\n");
+			return;
+        }
         no = atoi(argv[2]);
         ptr = list_locate(&param->pos_ptr, no);
         if (ptr != NULL)
@@ -127,6 +138,7 @@ void cmd_pos_func(int argc,char *argv[])
             for (i = 0; i < 7; ++i)
             {
                 clear_launch(&data->d[i].launch_ptr); 
+				clear_launch(&data->r[i].launch_ptr); 
             }
             free(data);
             list_remove_num(&param->pos_ptr,no);
@@ -141,25 +153,31 @@ void cmd_pos_func(int argc,char *argv[])
         erro_no = param_save();
         if(erro_no < 0){
             USART_SendString(CMD_USARTx,"msg: Save error:%d\n",erro_no);
-        }
+        }else
+			USART_SendString(CMD_USARTx,"msg: Save success:%d\n",erro_no);
+        
     }else if(strcmp(argv[1],"modi") == 0){
         no = atoi(argv[2]);
         if((data = local_pos(no)) == NULL){
             USART_SendString(CMD_USARTx,"msg: Not found point No:%d\n",no);
             return;
         }
-        if(argc < 5){
+        if(argc < 6){
             USART_SendString(CMD_USARTx,"msg: Error cmd format\n");
             return;
         }
-         x = atof(argv[3]);
-         y = atof(argv[4]);
 
-        data->x =  x;
-        data->y =  y;
+        data->x =  atof(argv[3]);
+        data->y =  atof(argv[4]);
+		data->ang = atof(argv[5]);
         print_pos_list(param->pos_ptr->link);
     }else if (strcmp(argv[1], "jmp")==0)
     {
+		if(argc < 3){
+            USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
+            USART_SendString(CMD_USARTx,"msg:    pos jmp <no> <no0>\n");
+			return;
+        }
         no = atoi(argv[2]);
         no0 = atoi(argv[3]);
         ptr = list_locate(&param->pos_ptr, no);
@@ -179,50 +197,51 @@ void cmd_pos_func(int argc,char *argv[])
 void cmd_action_func(int argc,char *argv[])
 {
     int no;
-    float x, y;
-    float yaw;
     list_node * ptr;
     if (argc == 1)
-    {
-        now_pos_ptr = now_pos_ptr->link;
-        now_pos = now_pos_ptr->data;
-		x = now_pos->x;
-		y = now_pos->y;
-		chassis.END.X = x;
-		chassis.END.Y = y;
-		chassis.END.ANG = chassis.angle;
-		OPEN_Hander = 0;
-		chassis.car_state = car_ready;
-        //跑到下一个点
+    {//跑到下一个点
+		if(now_pos_ptr->link == NULL)
+		{
+			USART_SendString(bluetooth, "mag: no pos\n");
+			return;
+		}else if(now_pos_ptr->link->data == NULL)
+		{
+			USART_SendString(bluetooth, "msg: data error\n");
+			return;
+		}else{
+			now_pos_ptr = now_pos_ptr->link;
+			now_pos = now_pos_ptr->data;
+			
+			chassis.END.X = now_pos->x;
+			chassis.END.Y = now_pos->y;
+			chassis.END.ANG = now_pos->ang;
+			OPEN_Hander = 0;
+			chassis.car_state = car_ready;
+		}
     }else if (argc == 2){
         no = atoi(argv[1]);
         ptr = list_locate(&param->pos_ptr, no);
+		if(ptr == NULL)
+		{
+			USART_SendString(bluetooth, "msg: no error\n");
+			return;
+		}else if(ptr->data == NULL)
+		{
+			USART_SendString(bluetooth, "msg: data error\n");
+			return;
+		}
         now_pos = ptr->data;
         now_pos_ptr = ptr;
-		x = now_pos->x;
-		y = now_pos->y;
-		chassis.END.X = x;
-		chassis.END.Y = y;
-		chassis.END.ANG = chassis.angle;
+		chassis.END.X = now_pos->x;
+		chassis.END.Y = now_pos->y;
+		chassis.END.ANG = now_pos->ang;
 		OPEN_Hander = 0;
         //跑到指定的点去
-    }else if (argc == 3){
-        x = atof(argv[1]);
-        y = atof(argv[2]);
-        //跑到指定的位置
-		chassis.END.X = x;
-		chassis.END.Y = y;
-		chassis.END.ANG = chassis.angle;
-		OPEN_Hander = 0;
-		chassis.car_state = car_ready;
     }else if (argc == 4){
-        x = atof(argv[1]);
-        y = atof(argv[2]);
-		yaw = atof(argv[3]);
         //跑到指定的位置
-		chassis.END.X = x;
-		chassis.END.Y = y;
-		chassis.END.ANG = yaw;
+		chassis.END.X = atof(argv[1]);
+		chassis.END.Y = atof(argv[2]);
+		chassis.END.ANG = atof(argv[3]);
 		OPEN_Hander = 0;
 		chassis.car_state = car_ready;
     }
@@ -247,42 +266,63 @@ void cmd_param_func(int argc,char *argv[]){
 	else if (strcmp(argv[1],"factor")== 0)
 		chassis.factor = atof(argv[2]);
 	else if (strcmp(argv[1],"save") == 0)
-		chassis_save();
+	{	
+		if(chassis_save()<0)
+		{
+			USART_SendString(bluetooth,"msg: 写入flash出错\n");
+			while(1);
+		}
+	}
 	else if (strcmp(argv[1],"print") == 0)
 		chassis_param_print();
+}
+
+void cmd_switch_func(int argc,char *argv[])
+{
+	if(strcmp(argv[1],"left") == 0)
+	{
+		LEFT_RIGHT = 0;
+		switch_side = true;
+	}
 }
 
 void cmd_launch_func(int argc,char *argv[])
 {
     int no, no0;
     int erro_no;
-    static float pitch, roll, speed =7.7, yaw;
+    static float pitch, turn, speed =7.7, yaw, jmp;
     Launch_data * data;
     list_node * ptr;
-    if (argc == 1)
+    if(strcmp(argv[1],"fly")==0)
     {
-    }else if (strcmp(argv[1],"hit")==0)
-    {//完成一次击打
-		pur_pitch = atof(argv[2]);
-		pur_step = atoi(argv[3]);
-		pur_pull = atof(argv[4]);
-		OPEN_Hander = 0;
-    }else if(strcmp(argv[1],"fly")==0)
-    {
-		PGout(11) = !GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_11);
+		if(argc < 3){
+            USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
+            USART_SendString(CMD_USARTx,"msg:    launch fly <l or r> \n");
+			return;
+        }
+		if(strcmp(argv[2],"l")==0)
+		{
+			flywheel_left_fly();
+		}else{
+			flywheel_right_fly();
+		}			
 		//USART_SendString(bluetooth,"msg: fly\r");
 	}else if (strcmp(argv[1],"stop")==0)
     {
-		//WantSpeed = 0;
-		TIM_SetCompare1(TIM8,7.7/100*1000000/50 - 1);
-        
-    }else if (strcmp(argv[1],"pushstop")==0)
-    {
-        
+		flywheel_left_setBrushless(7.7);
+        flywheel_right_setBrushless(7.7);
     }else if (strcmp(argv[1],"load")==0)
     {
-        no = atoi(argv[2]);
-        ptr = list_locate(&now_pos->d[target].launch_ptr, no);
+		if(argc < 3){
+            USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
+            USART_SendString(CMD_USARTx,"msg:    launch load <l or r> <no>\n");
+			return;
+        }
+        no = atoi(argv[3]);
+		if(strcmp(argv[2], "l") == 0)
+			ptr = list_locate(&now_pos->d[target].launch_ptr, no);
+		else
+			ptr = list_locate(&now_pos->r[target].launch_ptr, no);
         if (ptr == NULL)
         {
             USART_SendString(CMD_USARTx, "msg: Error\n");
@@ -290,144 +330,260 @@ void cmd_launch_func(int argc,char *argv[])
         }
         data = ptr->data;
         pitch = data->pitch;
-        roll = data->roll;
+        turn = data->turn;
         speed = data->speed;
         yaw = data->yaw;
-        pur_pitch = pitch;
-		pitch_flag = true;
-		pur_roll = roll;
-		roll_flag = true;
-		chassis.END.X = chassis.pos_x;
-		chassis.END.Y = chassis.pos_y;
-		chassis.END.ANG = yaw;
+		jmp = data->jmp;
+        //调整姿态
+		if(strcmp(argv[2], "l") == 0)
+		{	flywheel_left_setBrushless(speed);//左边调整
+			flywheel_left_setPitch(pitch);
+			flywheel_left_setYaw(yaw);
+			flywheel_left_setJmp(jmp);
+		}else{
+			flywheel_right_setBrushless(speed);//左边调整
+			flywheel_right_setPitch(pitch);
+			flywheel_right_setYaw(yaw);
+			flywheel_right_setTurn(turn);
+			flywheel_right_setJmp(jmp);
+		}
 		OPEN_Hander = 0;
-		chassis.car_state = car_running;
     }else if (strcmp(argv[1], "set")==0)
     {
-		if(strcmp(argv[2], "pitch")==0)
+		if(strcmp(argv[3], "pitch")==0)
 		{
 			OPEN_Hander = 0;
-			pitch = atof(argv[3]);//0-100
-			pur_pitch = pitch;
-			pitch_flag = true;
-		}else if(strcmp(argv[2], "roll")==0)
+			pitch = atof(argv[4]);//0-100
+			if(strcmp(argv[2], "l") == 0)
+				flywheel_left_setPitch(pitch);//左边调整
+			else
+				flywheel_right_setPitch(pitch);//右边调整
+		}else if(strcmp(argv[3], "turn")==0)
 		{
 			OPEN_Hander = 0;
-			roll = atof(argv[3]);
-			pur_roll = roll;
-			roll_flag = true;
-        }else if(strcmp(argv[2], "speed")==0)
+			turn = atof(argv[4]);
+			//上面的转角调整
+			if(strcmp(argv[2], "l") == 0)
+				;//左边调整
+			else
+				flywheel_right_setTurn(turn);//右边调整
+        }else if(strcmp(argv[3], "speed")==0)
 		{
-			speed = atof(argv[3]);
-			TIM_SetCompare1(TIM9,speed/100*1000000/50 - 1);
-		}else if(strcmp(argv[2], "yaw")==0)
-		{
-			yaw = atof(argv[3]);
-			chassis.END.ANG = yaw;
-			OPEN_Hander = 0;
-			chassis.car_state = car_ready;
-        }else if(argc == 6) {
-		//直接调整
-			pitch = atof(argv[2]);
-			roll = atof(argv[3]);
 			speed = atof(argv[4]);
-			yaw = atof(argv[5]);
-			pur_pitch = pitch;
-			pitch_flag = true;
-			pur_roll = roll;
-			roll_flag = true;
-			//Move_speed = speed;
-			TIM_SetCompare1(TIM8,speed/100*1000000/50 - 1);
-			chassis.END.ANG = yaw;
-			OPEN_Hander = 0;
+			if(strcmp(argv[2], "l") == 0)
+				flywheel_left_setBrushless(speed);//左边调整
+			else
+				flywheel_right_setBrushless(speed);//右边调整
+		}else if(strcmp(argv[3], "yaw")==0)
+		{
+			yaw = atof(argv[4]);
+			if(strcmp(argv[2], "l") == 0)
+				flywheel_left_setYaw(yaw);//左边调整
+			else
+				flywheel_right_setYaw(yaw);//右边调整
+        }else if(strcmp(argv[3], "jmp")==0)
+		{
+			jmp = atof(argv[4]);
+			//跳台调整
+			if(strcmp(argv[2], "l") == 0)
+				flywheel_left_setJmp(jmp);//左边调整
+			else
+				flywheel_right_setJmp(jmp);//右边调整
+        }
+		else if(argc == 8) {
+		//直接调整
+			pitch = atof(argv[3]);
+			turn = atof(argv[4]);
+			speed = atof(argv[5]);
+			yaw = atof(argv[6]);
+			jmp = atof(argv[7]);
+			//调整姿态
+			if(strcmp(argv[2], "l") == 0)
+			{	
+				flywheel_left_setBrushless(speed);//左边调整
+				flywheel_left_setPitch(pitch);
+				flywheel_left_setYaw(yaw);
+				flywheel_left_setJmp(jmp);
+			}else{
+				flywheel_right_setBrushless(speed);//左边调整
+				flywheel_right_setPitch(pitch);
+				flywheel_right_setYaw(yaw);
+				flywheel_right_setTurn(turn);
+				flywheel_right_setJmp(jmp);
+			}
 		}
 		
     }else if (strcmp(argv[1], "print")==0)
     {
-        print_launch_list(now_pos->d[target].launch_ptr->link);
+		if(strcmp(argv[2], "l") == 0)
+			print_launch_list(now_pos->d[target].launch_ptr->link);//左边打印
+		else
+			print_launch_list(now_pos->r[target].launch_ptr->link);//右边打印
     }else if (strcmp(argv[1], "add")==0)
     {
-        if(argc < 7){
+        if(argc < 9){
             USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
-            USART_SendString(CMD_USARTx,"msg:   launch add <no> <pitch> <roll> <speed> <yaw>\n");
+            USART_SendString(CMD_USARTx,"msg:   launch add <l or r> <no> <pitch> <turn> <speed> <yaw> <jmp>\n");
             return;
         }
-        no = atoi(argv[2]);
-        pitch = atof(argv[3]);
-        roll = atof(argv[4]);
-        speed = atof(argv[5]);
-        yaw = atof(argv[6]);
+        no = atoi(argv[3]);
+        pitch = atof(argv[4]);
+        turn = atof(argv[5]);
+        speed = atof(argv[6]);
+        yaw = atof(argv[7]);
+		jmp = atof(argv[8]);
         data = (Launch_data *) malloc(sizeof(Launch_data));
         data->pitch = pitch;
-        data->roll = roll;
+        data->turn = turn;
         data->speed = speed;
         data->yaw = yaw;
-        if((erro_no = list_insert(&now_pos->d[target].launch_ptr, no, data)) <= 0){
+		data->jmp = jmp;
+		
+		if(strcmp(argv[2], "l") == 0)
+		{
+				if((erro_no = list_insert(&now_pos->d[target].launch_ptr, no, data)) <= 0){
+				USART_SendString(CMD_USARTx,"msg: Error:%d\n",erro_no);
+			}else
+				now_pos->d[target].launch_num++;
+			print_launch_list(now_pos->d[target].launch_ptr->link);
+		}
+		else
+		{
+			if((erro_no = list_insert(&now_pos->r[target].launch_ptr, no, data)) <= 0){
             USART_SendString(CMD_USARTx,"msg: Error:%d\n",erro_no);
-        }else
-			now_pos->d[target].launch_num++;
-        print_launch_list(now_pos->d[target].launch_ptr->link);
+			}else
+				now_pos->r[target].launch_num++;
+			print_launch_list(now_pos->r[target].launch_ptr->link);
+		}
     }else if (strcmp(argv[1], "modi")==0)
     {
-        if(argc < 7){
+        if(argc < 9){
             USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
-            USART_SendString(CMD_USARTx,"msg:   launch add <no> <pitch> <roll> <speed> <yaw>\n");
+            USART_SendString(CMD_USARTx,"msg:   launch modi <l or r> <no> <pitch> <turn> <speed> <yaw> <jmp>\n");
             return;
         }
-        no = atoi(argv[2]);
-        ptr = list_locate(&now_pos->d[target].launch_ptr, no);
+        no = atoi(argv[3]);
+		if(strcmp(argv[2], "l") == 0)
+			ptr = list_locate(&now_pos->d[target].launch_ptr, no);
+		else
+			ptr = list_locate(&now_pos->r[target].launch_ptr, no);
+        
         if (ptr == NULL)
         {
             USART_SendString(CMD_USARTx, "msg: Error\n");
             return;
         }
         data = ptr->data;
-        data->pitch = atof(argv[3]);
-        data->roll = atof(argv[4]);
-        data->speed = atof(argv[5]);
-        data->yaw = atof(argv[6]);
-        print_launch_list(now_pos->d[target].launch_ptr->link);
+        data->pitch = atof(argv[4]);
+        data->turn = atof(argv[5]);
+        data->speed = atof(argv[6]);
+        data->yaw = atof(argv[7]);
+		data->jmp = atof(argv[8]);
+        if(strcmp(argv[2], "l") == 0)
+			print_launch_list(now_pos->d[target].launch_ptr->link);//左边打印
+		else
+			print_launch_list(now_pos->r[target].launch_ptr->link);//右边打印
     }else if (strcmp(argv[1], "jmp")==0)
     {
-        no = atoi(argv[2]);
-        no0 = atoi(argv[3]);
-        ptr = list_locate(&now_pos->d[target].launch_ptr, no);
+        no = atoi(argv[3]);
+        no0 = atoi(argv[4]);
+        if(strcmp(argv[2], "l") == 0)
+			ptr = list_locate(&now_pos->d[target].launch_ptr, no);
+		else
+			ptr = list_locate(&now_pos->r[target].launch_ptr, no);
         if (ptr != NULL)
         {
-            node_move(&now_pos->d[target].launch_ptr, no0, ptr);
+			if(strcmp(argv[2], "l") == 0)
+				node_move(&now_pos->d[target].launch_ptr, no0, ptr);//左边jmp
+			else
+				node_move(&now_pos->r[target].launch_ptr, no0, ptr);//右边jmp
+            
         }else{
             USART_SendString(CMD_USARTx, "msg: Error\n");
         }
-        print_launch_list(now_pos->d[target].launch_ptr->link);
+        if(strcmp(argv[2], "l") == 0)
+			print_launch_list(now_pos->d[target].launch_ptr->link);//左边打印
+		else
+			print_launch_list(now_pos->r[target].launch_ptr->link);//右边打印
     }else if (strcmp(argv[1], "del")==0)
     {
-        no = atoi(argv[2]);
-        ptr = list_locate(&now_pos->d[target].launch_ptr, no);
+        no = atoi(argv[3]);
+        if(strcmp(argv[2], "l") == 0)
+			ptr = list_locate(&now_pos->d[target].launch_ptr, no);
+		else
+			ptr = list_locate(&now_pos->r[target].launch_ptr, no);
         if (ptr != NULL)
         {
             data = ptr->data;
             free(data);
-            list_remove_num(&now_pos->d[target].launch_ptr,no);
-            now_pos->d[target].launch_num-=1;
-			USART_SendString(CMD_USARTx,"msg: del success\n");
+			
+			if(strcmp(argv[2], "l") == 0)
+			{
+				if(list_remove_num(&now_pos->d[target].launch_ptr,no))
+				{	
+					now_pos->d[target].launch_num-=1;
+					USART_SendString(CMD_USARTx,"msg: del success\n");
+				}
+			}
+			else
+			{
+				if(list_remove_num(&now_pos->r[target].launch_ptr,no))
+				{	
+					now_pos->r[target].launch_num-=1;
+					USART_SendString(CMD_USARTx,"msg: del success\n");
+				}
+			}
         }
-        print_launch_list(now_pos->d[target].launch_ptr->link);
+        if(strcmp(argv[2], "l") == 0)
+			print_launch_list(now_pos->d[target].launch_ptr->link);//左边打印
+		else
+			print_launch_list(now_pos->r[target].launch_ptr->link);//右边打印
     }else if (strcmp(argv[1], "pop")==0)
     {
-        ptr = list_locate(&now_pos->d[target].launch_ptr, now_pos->d[target].launch_num);
+        if(strcmp(argv[2], "l") == 0)
+			ptr = list_locate(&now_pos->d[target].launch_ptr, no);
+		else
+			ptr = list_locate(&now_pos->r[target].launch_ptr, no);
         if (ptr != NULL)
         {
             data = ptr->data;
             free(data);
-            list_remove_num(&now_pos->d[target].launch_ptr, now_pos->d[target].launch_num);
-            now_pos->d[target].launch_num-=1;
-			USART_SendString(CMD_USARTx,"msg: pop success\n");
+			
+			if(strcmp(argv[2], "l") == 0)
+			{
+				if(list_remove_num(&now_pos->d[target].launch_ptr, now_pos->d[target].launch_num))
+				{	
+					now_pos->d[target].launch_num-=1;
+					USART_SendString(CMD_USARTx,"msg: pop success\n");
+				}
+			}
+			else
+			{
+				if(list_remove_num(&now_pos->r[target].launch_ptr, now_pos->d[target].launch_num))
+				{	
+					now_pos->r[target].launch_num-=1;
+					USART_SendString(CMD_USARTx,"msg: pop success\n");
+				}
+			}
         }
-        print_launch_list(now_pos->d[target].launch_ptr->link);
+        if(strcmp(argv[2], "l") == 0)
+			print_launch_list(now_pos->d[target].launch_ptr->link);//左边打印
+		else
+			print_launch_list(now_pos->r[target].launch_ptr->link);//右边打印
     }else if(strcmp(argv[1],"clear") == 0)
 	{
-		clear_launch(&now_pos->d[target].launch_ptr);
-		now_pos->d[target].launch_num = 0;
+		
+		if(strcmp(argv[2], "l") == 0)
+		{
+			clear_launch(&now_pos->d[target].launch_ptr);
+			now_pos->d[target].launch_num = 0;
+		}
+		else
+		{
+			clear_launch(&now_pos->r[target].launch_ptr);
+			now_pos->r[target].launch_num = 0;
+		}
+		
 	}else if(strcmp(argv[1],"target") == 0)
 	{
 		if (argc == 2)
@@ -436,6 +592,20 @@ void cmd_launch_func(int argc,char *argv[])
 			no = atoi(argv[2]);
 			target = no;
 			USART_SendString(CMD_USARTx,"target:%d\n",target);
+		}
+	}else if(argc == 8) {
+	//发射n个
+		pitch = atof(argv[2]);
+		turn = atof(argv[3]);
+		speed = atof(argv[4]);
+		yaw = atof(argv[5]);
+		jmp = atof(argv[6]);
+		//调整姿态
+		if(strcmp(argv[1], "l") == 0)
+		{
+			flywheel_left_flyn(atoi(argv[8]),speed,pitch,yaw,jmp);
+		}else{
+			flywheel_right_flyn(atoi(argv[8]),speed,turn,pitch,yaw,jmp);
 		}
 	}
 }

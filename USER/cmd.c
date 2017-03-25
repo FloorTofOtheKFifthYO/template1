@@ -23,7 +23,8 @@ static cmd_struct cmd_tbl[] = {
     CMD_ADD("action"," 使用命令执行各种动作 ",cmd_action_func),
     CMD_ADD("stop"," ",cmd_stop_func),
 	CMD_ADD("param","系统参数",cmd_param_func),
-	CMD_ADD("test", "haha!",cmd_test_func)
+	CMD_ADD("test", "haha!",cmd_test_func),
+	CMD_ADD("switch", "切换!",cmd_switch_func)
 };
 
 static char cmd_line[MAX_CMD_LINE_LENGTH + 1];

@@ -7,9 +7,10 @@
 typedef struct 		//launch链表节点数据
 {
 	float pitch;	//俯仰角
-	float roll;		//滚转角
+	float turn;		//上面的转盘
 	float yaw;		//偏航角
 	float speed;	//飞轮转速
+	float jmp;		//跳台舵机
 }Launch_data;
 
 typedef struct 		//目标线性表
@@ -20,8 +21,9 @@ typedef struct 		//目标线性表
 
 typedef struct 		//pos链表节点数据
 {
-	float x,y;
+	float x,y,ang;
 	Target d[7];
+	Target r[7];
 }Pos_data;
 
 typedef struct 		//参数总结构线性表
@@ -29,6 +31,8 @@ typedef struct 		//参数总结构线性表
 	u32 pos_num;
 	link_list pos_ptr;
 }Param;
+
+extern Param * param;//参数
 
 #define FIRST_RUN 1
 #define PARAM_FLASH_SETOR ((uint16_t)0x0028) //  扇区5

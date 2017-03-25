@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include "string.h"
 
+#define COUNT_NUM 5000
+
 u8 motor_message[8];
 BackDATA *Backdata = NULL;
 BackDATA *TempData = NULL;
@@ -23,6 +25,7 @@ void RoboModule_RESET(char Number , ...){
 	int i = 0;
 	va_list arg_ptr;
 	char number;
+	int count=5000;
 	
 	if (Backdata == NULL)
 	{
@@ -30,7 +33,7 @@ void RoboModule_RESET(char Number , ...){
 	}
 	if (TempData == NULL)
 	{
-		TempData = (BackDATA *)malloc(sizeof(BackDATA));
+		TempData = (BackDATA *)malloc(sizeof(BackDATA)*16);
 	}
 	
 	if(Number > 15){
@@ -60,14 +63,21 @@ void RoboModule_RESET(char Number , ...){
 		if (number >15||number ==0){
 			break;
 		}
+		memset(&(TempData[number]),0,sizeof(BackDATA));
 		CANID = CANID_OFFSET_MOTORRESET;
 		CANID |= number<<4;
+		count = COUNT_NUM;
+		while(count-->0);
 		can_send_msg(CANID , motor_message , 8);
+		
 		i++;
 	}
 	
+	memset(&(TempData[Number]),0,sizeof(BackDATA));
 	CANID = CANID_OFFSET_MOTORRESET;
 	CANID |= Number<<4;
+	count = COUNT_NUM;
+	while(count-->0);
 	can_send_msg(CANID , motor_message , 8);
 	
 	va_end(arg_ptr);
@@ -84,6 +94,7 @@ void RoboModule_CHOICE_mode(u8 Mode , char Number , ...){
 	u8 CANID = CANID_OFFSET_MOTORMODE;
 	char buffer[MOTOR_MAX];
 	int i = 0;
+	int count=5000;
 	va_list arg_ptr;
 	char number = 0;
 	
@@ -110,11 +121,15 @@ void RoboModule_CHOICE_mode(u8 Mode , char Number , ...){
 		}
 		CANID = CANID_OFFSET_MOTORMODE;
 		CANID |= number<<4;
+		count = COUNT_NUM;
+		while(count-->0);
 		can_send_msg(CANID , motor_message , 8);
 		i++;
 	}
 	CANID = CANID_OFFSET_MOTORMODE;
 	CANID |= Number<<4;
+	count = COUNT_NUM;
+	while(count-->0);
 	can_send_msg(CANID , motor_message , 8);
 	
 	va_end(arg_ptr);
@@ -135,6 +150,7 @@ void  RoboModule_SETUP(u8 Time ,u8 CTL1 , char Number , ...){
 	int i = 0;
 	va_list arg_ptr;
 	char number;
+	int count = COUNT_NUM;
 	
 	if (Number > 15){
 		return ;
@@ -158,12 +174,16 @@ void  RoboModule_SETUP(u8 Time ,u8 CTL1 , char Number , ...){
 		}
 		CANID = CANID_OFFSET_MOTORSETUP;
 		CANID |= number<<4;
+		count = COUNT_NUM;
+		while(count-->0);
 		can_send_msg(CANID , motor_message , 8);
 		i++;
 	}
 	
 	CANID = CANID_OFFSET_MOTORSETUP;
 	CANID |= Number<<4;
+	count = COUNT_NUM;
+	while(count-->0);
 	can_send_msg(CANID , motor_message , 8);
 	
 	va_end(arg_ptr);
@@ -178,6 +198,7 @@ void  RoboModule_SETUP(u8 Time ,u8 CTL1 , char Number , ...){
 */
 void RoboModule_SET_speed(u8 Number ,u16 PWM , int speed){
 	u8 CANID = CANID_OFFSET_MOTORSPEED;
+	int count = COUNT_NUM;
 	if(Number > 15){
 		return ;
 	}
@@ -192,7 +213,8 @@ void RoboModule_SET_speed(u8 Number ,u16 PWM , int speed){
 	motor_message[5] = 0x55;
 	motor_message[6] = 0x55;
 	motor_message[7] = 0x55;
-	
+	count = COUNT_NUM;
+	while(count-->0);
 	can_send_msg(CANID , motor_message , 8);
 }
 
@@ -203,8 +225,8 @@ void RoboModule_SET_speed(u8 Number ,u16 PWM , int speed){
 *	   PositionÉèÖÃÎ»ÖÃ£¬·¶Î§0 ~ 2^31
 *
 */
-void RoboModule_SET_Position(u8 Number ,u16 PWM , s32 Position){
-	
+void RoboModule_SET_Position(u8 Number ,u16 PWM , s32 Position, int speed){
+	int count = COUNT_NUM;
 	u8 CANID = CANID_OFFSET_MOTORPLACE;
 	if(Number > 15){
 		return ;
@@ -214,13 +236,14 @@ void RoboModule_SET_Position(u8 Number ,u16 PWM , s32 Position){
 	
 	motor_message[0] = (unsigned char)((PWM>>8)&0xff);
 	motor_message[1] = (unsigned char)((PWM)&0xff);
-	motor_message[2] = 0x55;
-	motor_message[3] = 0x55;
+	motor_message[2] = (unsigned char)((speed>>8)&0xff);
+	motor_message[3] = (unsigned char)(speed&0xff);
 	motor_message[4] = (unsigned char)((Position>>24)&0xff);
 	motor_message[5] = (unsigned char)((Position>>16)&0xff);
 	motor_message[6] = (unsigned char)((Position>>8)&0xff);
 	motor_message[7] = (unsigned char)(Position&0xff);
-	
+	count = COUNT_NUM;
+	while(count-->0);
 	can_send_msg(CANID , motor_message , 8);
 }
 
@@ -237,6 +260,7 @@ void RoboModule_Check(char Number , ...){
 	int i = 0;
 	va_list arg_ptr;
 	char number;
+	int count = COUNT_NUM;
 	
 	motor_message[0] = 0x55;
 	motor_message[1] = 0x55;
@@ -265,6 +289,8 @@ void RoboModule_Check(char Number , ...){
 			CANID = CANID_OFFSET_MOTORSCHECK;
 			CANID |= number<<4;
 			CheckMotor &= ~(0x01<<(number-1));
+			count = COUNT_NUM;
+			while(count-->0);
 			can_send_msg(CANID , motor_message , 8);
 			i++;
 		}
@@ -272,11 +298,10 @@ void RoboModule_Check(char Number , ...){
 		CANID = CANID_OFFSET_MOTORSCHECK;
 		CANID |= Number<<4;
 		CheckMotor &= ~(0x01<<(Number-1));
+		count = COUNT_NUM;
+		while(count-->0);
 		can_send_msg(CANID , motor_message , 8);
 		va_end(arg_ptr);
-		
-		i = 2000;
-		while(i--);
 	}
 	
 }

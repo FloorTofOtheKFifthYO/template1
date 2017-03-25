@@ -10,10 +10,10 @@ Chassis chassis;
 
 static int ChassisSpeed;
 static int TURN_speed;
-static int Chassis_motor0 =0 , Chassis_motor1 =0 , Chassis_motor2 = 0, Chassis_motor3 =0;
+static int Chassis_motor0 =0 , Chassis_motor1 =0 , Chassis_motor2 =0 ;
 
 //根据vega安装方式决定各个轮子的偏角
-static float CH_angle_M0 = PI/2, CH_angle_M1 = PI/2 - PI/2, CH_angle_M2 = PI/2 - 2*PI/2, CH_angle_M3 = PI/2 - 3*PI/2; 
+static float CH_angle_M0 = PI/2 - 2*PI/3, CH_angle_M1 = PI/2, CH_angle_M2 = PI/2 + 2*PI/3; 
 
 void chassis_init(void)
 {
@@ -21,15 +21,17 @@ void chassis_init(void)
 	
 	vega_init(&(chassis.g_vega_pos_x),&(chassis.g_vega_pos_y),&(chassis.g_vega_angle));
     vega_reset();
-	delay_ms(600);
-	RoboModule_RESET(MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,MOTOR3_ID,0);
+	delay_ms(1000);
+	RoboModule_RESET(MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,0);
 	delay_ms(500);
-	RoboModule_CHOICE_mode(SpeedMode ,MOTOR0_ID ,MOTOR1_ID,MOTOR2_ID,MOTOR3_ID,0);
+	RoboModule_CHOICE_mode(SpeedMode ,MOTOR0_ID ,MOTOR1_ID,MOTOR2_ID,0);
 	delay_ms(500);
-	RoboModule_Add_Callback(databack,RoboModule_Feedback_Callback,MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,MOTOR3_ID,0);
-	RoboModule_SETUP(2,0,MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,MOTOR3_ID,0);
+	RoboModule_Add_Callback(databack,RoboModule_Feedback_Callback,MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,0);
+	RoboModule_SETUP(2,0,MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,0);
 	delay_ms(500);
-	RoboModule_SET_speed(0 ,5000 , 0);
+	RoboModule_SET_speed(MOTOR0_ID ,5000 , 0);
+	RoboModule_SET_speed(MOTOR1_ID ,5000 , 0);
+	RoboModule_SET_speed(MOTOR2_ID ,5000 , 0);
 	
 
 #if CHASSIS_FIRST_RUN == 1
@@ -143,21 +145,21 @@ void chassis_handle(float directoion, int speed)
 	Chassis_motor0 = (speed*cos((CH_angle_M0 + chassis.angle) - directoion));
 	Chassis_motor1 = (speed*cos((CH_angle_M1 + chassis.angle) - directoion));
 	Chassis_motor2 = (speed*cos((CH_angle_M2 + chassis.angle) - directoion));
-	Chassis_motor3 = (speed*cos((CH_angle_M3 + chassis.angle) - directoion));
 	
 	if(fabs(Chassis_motor0)<1e-6 && fabs(Chassis_motor1)<1e-6 && fabs(Chassis_motor2)<1e-6)
 	{
 		 if(!stop)
 		 {
 			stop = true;
-			RoboModule_SET_speed(0 ,5000, 0);
+			RoboModule_SET_speed(MOTOR0_ID ,5000, 0);
+			RoboModule_SET_speed(MOTOR1_ID ,5000, 0);
+			RoboModule_SET_speed(MOTOR2_ID ,5000, 0);
 		 }
 	}else{
 		stop = false;
 		RoboModule_SET_speed(MOTOR0_ID ,5000 , Chassis_motor0);
-		RoboModule_SET_speed(MOTOR2_ID ,5000 , Chassis_motor2);
 		RoboModule_SET_speed(MOTOR1_ID ,5000 , Chassis_motor1);
-		RoboModule_SET_speed(MOTOR3_ID ,5000 , Chassis_motor3);
+		RoboModule_SET_speed(MOTOR2_ID ,5000 , Chassis_motor2);
 	}
 }
 
@@ -256,14 +258,7 @@ void chassis_auto()
 		{//已经到达
 			i = 1;
 			ChassisSpeed = 0;
-		}else {
-			if(ChassisSpeed < chassis.Speed_min && ChassisSpeed > 0)
-			{
-				ChassisSpeed = chassis.Speed_min;
-			}else if(ChassisSpeed > -chassis.Speed_min && ChassisSpeed < 0)
-			{
-				ChassisSpeed = -chassis.Speed_min;
-			}
+		}else{
 			if(distance<=1 || powf(error_X,2)+powf(error_Y,2) <= 0.5 || Sroute >= distance)
 			{	
 				direction_angle = atan2(error_Y,error_X);
@@ -275,24 +270,30 @@ void chassis_auto()
 		Chassis_motor0 = (ChassisSpeed * cos((CH_angle_M0 - chassis.angle) - direction_angle) - TURN_speed);//Y轴方向，这里direction_angle代表小车相对于场地坐标系的方向
 		Chassis_motor1 = (ChassisSpeed * cos((CH_angle_M1 - chassis.angle) - direction_angle) - TURN_speed);
 		Chassis_motor2 = (ChassisSpeed * cos((CH_angle_M2 - chassis.angle) - direction_angle) - TURN_speed);
-		Chassis_motor3 = (ChassisSpeed * cos((CH_angle_M3 - chassis.angle) - direction_angle) - TURN_speed);
 		
-		//USART_SendString(bluetooth,"%d,%d,%d,%d,%f",Chassis_motor0,Chassis_motor1,Chassis_motor2, Chassis_motor3,direction_angle);
-		//USART_SendString(bluetooth,",%d,%d,%d,%d,%f\n",ReturnData(MOTOR0_ID)->Speed,ReturnData(MOTOR1_ID)->Speed,ReturnData(MOTOR2_ID)->Speed,ReturnData(MOTOR3_ID)->Speed,Sroute);
+		USART_SendString(bluetooth,"%d,%d,%d,%f",Chassis_motor0,Chassis_motor1,Chassis_motor2,direction_angle);
+		USART_SendString(bluetooth,",%d,%d,%d,%f\n",ReturnData(MOTOR0_ID)->Speed,ReturnData(MOTOR1_ID)->Speed,ReturnData(MOTOR2_ID)->Speed,Sroute);
 		
 		//USART_SendString(bluetooth,"dot x:%f,y:%f\n",dir_dot_X,dir_dot_Y);
 		
-		if(fabs(Chassis_motor2) < 2 && fabs(Chassis_motor1) < 2 && fabs(Chassis_motor0) < 2 && fabs(Chassis_motor3) < 2)
+		if(fabs(Chassis_motor2) < 2 && fabs(Chassis_motor1) < 2 && fabs(Chassis_motor0) < 2)
 		{
-			RoboModule_SET_speed(0 ,5000 , 0);
+			RoboModule_SET_speed(MOTOR0_ID ,5000 , 0);
+			RoboModule_SET_speed(MOTOR1_ID ,5000 , 0);
+			RoboModule_SET_speed(MOTOR2_ID ,5000 , 0);
 			chassis.car_state = car_stop;
 		}
-		else
+		else if(fabs(Chassis_motor2) < chassis.Speed_min && fabs(Chassis_motor1) < chassis.Speed_min && fabs(Chassis_motor0) < chassis.Speed_min)
 		{
-			RoboModule_SET_speed(MOTOR1_ID ,5000 , Chassis_motor1);
+			RoboModule_SET_speed(MOTOR0_ID ,5000 , chassis.Speed_min);
+			RoboModule_SET_speed(MOTOR1_ID ,5000 , chassis.Speed_min);
+			RoboModule_SET_speed(MOTOR2_ID ,5000 , chassis.Speed_min);
+			chassis.car_state = car_stop;
+		}else
+		{
 			RoboModule_SET_speed(MOTOR0_ID ,5000 , Chassis_motor0);
+			RoboModule_SET_speed(MOTOR1_ID ,5000 , Chassis_motor1);
 			RoboModule_SET_speed(MOTOR2_ID ,5000 , Chassis_motor2);
-			RoboModule_SET_speed(MOTOR3_ID ,5000 , Chassis_motor3);
 		}
 	}
 	else if(chassis.car_state == car_stop)
@@ -311,7 +312,11 @@ void chassis_auto()
 //stop
 void chassis_stop()
 {
-	RoboModule_SET_speed(0 ,5000 , 0);
+	RoboModule_SET_speed(MOTOR0_ID ,5000 , 0);
+	RoboModule_SET_speed(MOTOR1_ID ,5000 , 0);
+	RoboModule_SET_speed(MOTOR2_ID ,5000 , 0);
 	delay_ms(5);
-	RoboModule_SET_speed(0 ,5000 , 0);
+	RoboModule_SET_speed(MOTOR0_ID ,5000 , 0);
+	RoboModule_SET_speed(MOTOR1_ID ,5000 , 0);
+	RoboModule_SET_speed(MOTOR2_ID ,5000 , 0);
 }

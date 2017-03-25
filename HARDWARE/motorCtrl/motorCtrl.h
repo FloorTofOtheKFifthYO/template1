@@ -1,3 +1,6 @@
+#ifndef _MOTORCTRL_H_
+#define _MOTORCTRL_H_
+
 
 #include "sys.h"
 
@@ -38,9 +41,11 @@ void RoboModule_RESET(char Number , ...);
 void RoboModule_CHOICE_mode(u8 Mode , char Number , ...);
 void RoboModule_SETUP(u8 Time ,u8 CTL1 , char Number , ...);
 void RoboModule_SET_speed(u8 Number ,u16 PWM , int speed);;
-void RoboModule_SET_Position(u8 Number ,u16 PWM , s32 Position);
+void RoboModule_SET_Position(u8 Number ,u16 PWM , s32 Position,int speed);
 void RoboModule_Check(char Number , ...);
 void RoboModule_Add_Callback(u8 BackMode ,void *msg_rcv_callback_func,char Number, ...);
 void RoboModule_Feedback_Callback(CanRxMsg *can_rx_msg);
 BackDATA* ReturnData(u8 Number);
 u16 CheckMOTOR();
+
+#endif

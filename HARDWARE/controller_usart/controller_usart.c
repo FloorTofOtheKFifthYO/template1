@@ -128,51 +128,42 @@ void control_usart_main()
 {
 	int Xianding = 0;
 	int ChassisSpeed;
-	
+	float direction_angle;
 	
 	Xianding = 0;
 	if (RU.ispressed)
-	{ PGout(11) = !GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_11);
-		USART_SendString(bluetooth,"msg: RU is pressed\n");
+	{ 
+		
 	}
 	if (RR.ispressed) {
-		PGout(12) = !GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_12);
-		USART_SendString(bluetooth,"msg: RR is pressed\n");
+		
 	}
 	if (RD.ispressed) {
-		PGout(13) = !GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_13);
-		USART_SendString(bluetooth,"msg: RD is pressed\n");
 	}
 	if (RL.ispressed) {
-		if (TIM9->CCR2<1500) TIM_SetCompare2(TIM9,1800);
-		else TIM_SetCompare2(TIM9,1060);
-		USART_SendString(bluetooth,"msg: RL is pressed\n");
+		
 	}
 	if (L2.ispressed) {
 		if (LU.ispressed){
-			TIM14->CCER |= TIM_CCER_CC1E;
-			PFout(5) = 0;
+			
 		}else				
 		if (LD.ispressed){
-			PFout(5) = 1;
-			TIM14->CCER |= TIM_CCER_CC1E;
+			
 		}else{ 
 		//USART_SendString(bluetooth,"msg: 000!\n");
-			TIM14->CCER &= ~TIM_CCER_CC1E;
+			
 		}Xianding=0;
 		if (LR.ispressed) Xianding -=2000;					
 		if (LL.ispressed) Xianding +=2000;
 		if (Xianding !=0){
-			//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-			USART_SendString(UART4,"5V%d\r",Xianding);
+			
 		}else{
 			//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-			USART_SendString(UART4,"5V0\r");
+			
 		}
 	}else{ 
 		//USART_SendString(bluetooth,"msg: 000!\n");
-			TIM14->CCER &= ~TIM_CCER_CC1E;
-			USART_SendString(UART4,"5V0\r");
+			
 	}
 	if (R2.ispressed){
 		Xianding=0;
@@ -180,37 +171,36 @@ void control_usart_main()
 		if (LD.ispressed) Xianding -=200;
 		if (Xianding !=0){
 			//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-			USART_SendString(UART4,"3V%d\r",Xianding);
 		}else{
-			USART_SendString(UART4,"3V0\r");
+			
 		}
 		Xianding=0;
 		if (LL.ispressed) Xianding +=200;					
 		if (LR.ispressed) Xianding -=200;
 		if (Xianding !=0){
 			//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-			USART_SendString(UART4,"4V%d\r",Xianding);
+			
 		}else{
-			USART_SendString(UART4,"4V0\r");
+			
 		}
 	}else{
-		USART_SendString(UART4,"3V0\r4v0\r");
+		
 	}
 	Xianding=0;
 	if (L1.ispressed) Xianding +=200;					
 	if (R1.ispressed) Xianding -=200;
 	if (Xianding !=0){
 		//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-		USART_SendString(UART4,"6V%d\r",Xianding);
+		
 	}else{
-		USART_SendString(UART4,"6V0\r");
+		
 	}
 	ChassisSpeed = 1000;
 	if (!L2.ispressed&&!R2.ispressed){
-	if (LU.ispressed) direction_angle = -PI/2;
-	else if (LD.ispressed) direction_angle = PI/2;
-	else if (LL.ispressed) direction_angle = PI;
-	else if (LR.ispressed) direction_angle = 0;
+	if (LU.ispressed) direction_angle = 3*PI/4;
+	else if (LD.ispressed) direction_angle = -PI/4;
+	else if (LL.ispressed) direction_angle = PI/4;
+	else if (LR.ispressed) direction_angle = -3*PI/4;
 	else ChassisSpeed = 0;}else
 	ChassisSpeed = 0;
 	chassis_handle(direction_angle, ChassisSpeed);
