@@ -41,9 +41,9 @@ void Client_SET(Client client){
 	motor_message[2] = (unsigned char)((client.pwm2>>8)&0xff);
 	motor_message[3] = (unsigned char)((client.pwm2)&0xff);
 	motor_message[4] = (unsigned char)(client.relay[0]);
-	motor_message[5] = (unsigned char)(client.relay[0]);
-	motor_message[6] = (unsigned char)(client.relay[0]);
-	motor_message[7] = (unsigned char)(client.relay[0]);
+	motor_message[5] = (unsigned char)(client.relay[1]);
+	motor_message[6] = (unsigned char)(client.relay[2]);
+	motor_message[7] = (unsigned char)(client.relay[3]);
 
 	count = COUNT_NUM;
 	while(count-->0);

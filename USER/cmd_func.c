@@ -35,7 +35,7 @@ void cmd_reboot_func(int argc,char *argv[]){
 
 void cmd_stop_func(int argc,char *argv[]){
     if(argc == 1){
-        g_stop_flag = !g_stop_flag;
+        g_stop_flag = true;
     }else if(argc == 2){
         g_stop_flag = atoi(argv[1]);
     }

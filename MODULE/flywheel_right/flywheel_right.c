@@ -92,14 +92,14 @@ void flywheel_right_fly()
   */
 void flywheel_right_setBrushless(float duty)
 {
-	flywheel_right.right.pwm1 = duty*100;
+	flywheel_right.right.pwm1 = (u16)duty*100;
 	Client_SET(flywheel_right.right);
 }
 
 
 void flywheel_right_setJmp(float duty)
 {
-	flywheel_right.right.pwm2 = duty*100;
+	flywheel_right.right.pwm2 = (u16)duty*100;
 	Client_SET(flywheel_right.right);
 }
 
@@ -161,7 +161,7 @@ void flywheel_right_flyn(int n, float duty, float turn, float pitch, float yaw, 
 */
 bool flywheel_right_check()
 {
-	if(fabs(ReturnData(PITCH_ID_RIGHT)->Position -flywheel_right.pur_pitch*100)<=50 && 
+	if(fabs(ReturnData(PITCH_ID_RIGHT)->Position -flywheel_right.pur_pitch*100)<=10 && 
 		fabs(ReturnData(YAW_ID_RIGHT)->Position -flywheel_right.pur_yaw*10000)<=50 && 
 		fabs(ReturnData(TURN_ID_RIGHT)->Position -flywheel_right.pur_turn*10000)<=50)
 		return true;

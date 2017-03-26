@@ -26,7 +26,7 @@
 //extern u16 USART1_RX_STA;
 
 #define FLYWHEEL_RIGHT
-#define CLIENT_ID_RIGHT 	0x32
+#define CLIENT_ID_RIGHT 	0x30
 #define TURN_ID_RIGHT		0x08
 #define PITCH_ID_RIGHT		0x04
 #define YAW_ID_RIGHT		0x06
