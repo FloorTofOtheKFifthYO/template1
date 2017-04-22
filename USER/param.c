@@ -28,6 +28,7 @@ int param_init(void)
 		list_init(&params[n]->pos_ptr);
 	#if FIRST_RUN
 		params[n]->pos_num = 0;
+		
 	#else 
 		params[n]->pos_num = STMFLASH_ReadWord_Inc(&addr);
 		for (i = 0; i < params[n]->pos_num; ++i)
@@ -81,7 +82,13 @@ int param_init(void)
 		}
 	#endif
 	}
-	
+	#if FIRST_RUN
+	if(!param_save())
+	{
+		USART_SendString(bluetooth,"param save error\n");
+		while(1);
+	}
+	#endif
 	param = params[LEFT_RIGHT];
 	
 	return 1;
@@ -113,7 +120,7 @@ int param_save(void)
         return -1;   //擦写失败，，退出
     }
 	
-	for(i = 0; i<2;i++)
+	for(n = 0; n<2;n++)
 	{
 		params[n]->pos_num = list_get_length(&(params[n]->pos_ptr));
 		FLASH_ProgramWord(addr,params[n]->pos_num);

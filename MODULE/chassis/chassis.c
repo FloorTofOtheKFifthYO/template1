@@ -26,9 +26,9 @@ void chassis_init(void)
 	delay_ms(500);
 	RoboModule_CHOICE_mode(SpeedMode ,MOTOR0_ID ,MOTOR1_ID,MOTOR2_ID,MOTOR3_ID,0);
 	delay_ms(500);
-	RoboModule_Add_Callback(databack,RoboModule_Feedback_Callback,MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,MOTOR3_ID,0);
-	RoboModule_SETUP(2,0,MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,MOTOR3_ID,0);
-	delay_ms(500);
+	//RoboModule_Add_Callback(databack,RoboModule_Feedback_Callback,MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,MOTOR3_ID,0);
+	//RoboModule_SETUP(2,0,MOTOR0_ID,MOTOR1_ID,MOTOR2_ID,MOTOR3_ID,0);
+	//delay_ms(500);
 	RoboModule_SET_speed(0 ,5000 , 0);
 	
 
@@ -150,7 +150,10 @@ void chassis_handle(float directoion, int speed)
 		 if(!stop)
 		 {
 			stop = true;
-			RoboModule_SET_speed(0 ,5000, 0);
+			RoboModule_SET_speed(MOTOR0_ID ,5000 , 0);
+			RoboModule_SET_speed(MOTOR2_ID ,5000 , 0);
+			RoboModule_SET_speed(MOTOR1_ID ,5000 , 0);
+			RoboModule_SET_speed(MOTOR3_ID ,5000 , 0);
 		 }
 	}else{
 		stop = false;
@@ -284,7 +287,10 @@ void chassis_auto()
 		
 		if(fabs(Chassis_motor2) < 2 && fabs(Chassis_motor1) < 2 && fabs(Chassis_motor0) < 2 && fabs(Chassis_motor3) < 2)
 		{
-			RoboModule_SET_speed(0 ,5000 , 0);
+			RoboModule_SET_speed(MOTOR1_ID ,5000 , 0);
+			RoboModule_SET_speed(MOTOR0_ID ,5000 , 0);
+			RoboModule_SET_speed(MOTOR2_ID ,5000 , 0);
+			RoboModule_SET_speed(MOTOR3_ID ,5000 , 0);
 			chassis.car_state = car_stop;
 		}
 		else
@@ -298,7 +304,7 @@ void chassis_auto()
 	else if(chassis.car_state == car_stop)
 	{
 		if(ms>200)
-			USART_SendString(CMD_USARTx,"msg: %fs\n",ms*5.0/10000);
+			USART_SendString(CMD_USARTx,"msg: %fs\n",ms/1000.f);
 		ms = 0;
 		/*pos_x = temp_x* 0.0001 * 0.81;
 		pos_y = temp_y* 0.0001 * 0.81;

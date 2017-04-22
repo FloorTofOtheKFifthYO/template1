@@ -3,9 +3,7 @@
 #include "sys.h"
 #include <stdbool.h>
 
-
-void pitch_move(float v);
-void roll_move(float v);
+extern bool home_flag;
 
 #endif
 

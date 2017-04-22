@@ -9,10 +9,11 @@
 /*
 配置左飞轮发射机构需要定义如下
 #define FLYWHEEL_LEFT
-#define CLIENT_ID_LEFT 	0x31
-#define PITCH_ID_LEFT	0x07
-#define YAW_ID_LEFT		0x08
-#define FLY_LEFT		2
+#define FLYWHEEL_ID_LEFT 	0x20
+#define CLIENT_ID_LEFT 		0x30
+#define PITCH_ID_LEFT		0x04
+#define YAW_ID_LEFT			0x06
+#define FLY_LEFT			2
 */
 
 #ifndef FLYWHEEL_LEFT
@@ -25,7 +26,7 @@ typedef struct
 	Client	left;
 	
 	//状态
-	enum {fly_ready, fly_adj, fly} state;
+	enum {fly_ready, fly_adj, fly,fly_l_finish} state;
 	
 	//控制
 	bool fly_flag;	//允许调整
@@ -132,5 +133,11 @@ bool flywheel_left_check();
 
 /*紧急停*/
 void flywheel_left_stop();
+
+void flywheel_left_home();
+
+void flywheel_left_pitchZero();
+
+void flywheel_left_yawZero();
 
 #endif

@@ -225,6 +225,35 @@ void RoboModule_SET_speed(u8 Number ,u16 PWM , int speed){
 *	   Position设置位置，范围0 ~ 2^31
 *
 */
+void RoboModule_SET_Positiono(u8 Number ,u16 PWM , s32 Position){
+	int count = COUNT_NUM;
+	u8 CANID = CANID_OFFSET_MOTORPLACE;
+	if(Number > 15){
+		return ;
+	}
+	
+	CANID |= Number<<4;
+	
+	motor_message[0] = (unsigned char)((PWM>>8)&0xff);
+	motor_message[1] = (unsigned char)((PWM)&0xff);
+	motor_message[2] = 0x55;
+	motor_message[3] = 0x55;
+	motor_message[4] = (unsigned char)((Position>>24)&0xff);
+	motor_message[5] = (unsigned char)((Position>>16)&0xff);
+	motor_message[6] = (unsigned char)((Position>>8)&0xff);
+	motor_message[7] = (unsigned char)(Position&0xff);
+	count = COUNT_NUM;
+	while(count-->0);
+	can_send_msg(CANID , motor_message , 8);
+}
+
+/*
+*功能：设置位置
+*参数： Number为电机编号
+*	   PWM为P波限定，范围0~5000
+*	   Position设置位置，范围0 ~ 2^31
+*
+*/
 void RoboModule_SET_Position(u8 Number ,u16 PWM , s32 Position, int speed){
 	int count = COUNT_NUM;
 	u8 CANID = CANID_OFFSET_MOTORPLACE;
@@ -242,6 +271,25 @@ void RoboModule_SET_Position(u8 Number ,u16 PWM , s32 Position, int speed){
 	motor_message[5] = (unsigned char)((Position>>16)&0xff);
 	motor_message[6] = (unsigned char)((Position>>8)&0xff);
 	motor_message[7] = (unsigned char)(Position&0xff);
+	count = COUNT_NUM;
+	while(count-->0);
+	can_send_msg(CANID , motor_message , 8);
+}
+
+/*
+*功能：设置位置0
+*参数： Number为电机编号
+*
+*/
+void RoboModule_SET_Zero(u8 Number){
+	int count = COUNT_NUM;
+	u8 CANID = CANID_OFFSET_MOTORSETZERO;
+	if(Number > 15){
+		return ;
+	}
+	
+	CANID |= Number<<4;
+	
 	count = COUNT_NUM;
 	while(count-->0);
 	can_send_msg(CANID , motor_message , 8);

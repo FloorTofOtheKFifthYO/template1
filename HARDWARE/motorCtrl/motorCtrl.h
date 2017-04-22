@@ -19,6 +19,7 @@
 #define CANID_OFFSET_MOTORSPEED 0x004//速度模式
 #define CANID_OFFSET_MOTORPLACE 0x005//位置模式
 #define CANID_OFFSET_MOTORSETUP 0X00A//配置模式
+#define CANID_OFFSET_MOTORSETZERO 0X00E//零点
 #define CANID_OFFSET_MOTORSCHECK 0x00F//在线监测
 
 #define CANID_OFFSET_FEEDBACK 0x00B //获取反馈数据
@@ -47,5 +48,7 @@ void RoboModule_Add_Callback(u8 BackMode ,void *msg_rcv_callback_func,char Numbe
 void RoboModule_Feedback_Callback(CanRxMsg *can_rx_msg);
 BackDATA* ReturnData(u8 Number);
 u16 CheckMOTOR();
+void RoboModule_SET_Positiono(u8 Number ,u16 PWM , s32 Position);
+void RoboModule_SET_Zero(u8 Number);
 
 #endif

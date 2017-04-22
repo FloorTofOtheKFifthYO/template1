@@ -2,6 +2,7 @@
 
 void cmd_help_func(int argc,char *argv[]);
 void cmd_hello_func(int argc,char *argv[]);
+void cmd_auto_func(int argc, char*argv[]);
 void cmd_reboot_func(int argc,char *argv[]);
 void cmd_stop_func(int argc,char *argv[]);
 void cmd_pos_func(int argc,char *argv[]);

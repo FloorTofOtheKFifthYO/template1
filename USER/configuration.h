@@ -28,15 +28,17 @@
 #define FLYWHEEL_RIGHT
 #define CLIENT_ID_RIGHT 	0x30
 #define TURN_ID_RIGHT		0x08
-#define PITCH_ID_RIGHT		0x04
-#define YAW_ID_RIGHT		0x06
-#define FLY_RIGHT		2
+#define PITCH_ID_RIGHT		0x09
+#define YAW_ID_RIGHT		0x07
+#define FLY_RIGHT			2
+#define UP_RIGHT			3
 
 #define FLYWHEEL_LEFT
-#define CLIENT_ID_LEFT 	0x31
-#define PITCH_ID_LEFT	0x09
-#define YAW_ID_LEFT		0x05
-#define FLY_LEFT		2
+#define FLYWHEEL_ID_LEFT 	0x20
+#define CLIENT_ID_LEFT 		0x31
+#define PITCH_ID_LEFT		0x06
+#define YAW_ID_LEFT			0x05
+#define FLY_LEFT			2
 
 
 //╣вел
@@ -66,5 +68,4 @@ void EXTI_Configuration(uint32_t EXTI_Line,
 
 
 #endif
-
 

@@ -48,19 +48,19 @@ void TIM_PWM_Init(TIM_TypeDef *TIMx, float duty, int OC)
 	{
 		case 1:
 			TIM_OC1Init(TIMx, &TIM_OCInitStructure);  //根据T指定的参数初始化外设OC1
-			TIM_OC1PreloadConfig(TIM9, TIM_OCPreload_Enable);  //使能TIMx在CCR1上的预装载寄存器
+			TIM_OC1PreloadConfig(TIMx, TIM_OCPreload_Enable);  //使能TIMx在CCR1上的预装载寄存器
 			break;
 		case 2:
 			TIM_OC2Init(TIMx, &TIM_OCInitStructure);  //根据T指定的参数初始化外设OC2
-			TIM_OC2PreloadConfig(TIM9, TIM_OCPreload_Enable);  //使能TIMx在CCR2上的预装载寄存器
+			TIM_OC2PreloadConfig(TIMx, TIM_OCPreload_Enable);  //使能TIMx在CCR2上的预装载寄存器
 			break;
 		case 3:
 			TIM_OC3Init(TIMx, &TIM_OCInitStructure);  //根据T指定的参数初始化外设OC3
-			TIM_OC3PreloadConfig(TIM9, TIM_OCPreload_Enable);  //使能TIMx在CCR3上的预装载寄存器
+			TIM_OC3PreloadConfig(TIMx, TIM_OCPreload_Enable);  //使能TIMx在CCR3上的预装载寄存器
 			break;
 		case 4:
 			TIM_OC4Init(TIMx, &TIM_OCInitStructure);  //根据T指定的参数初始化外设OC4
-			TIM_OC4PreloadConfig(TIM9, TIM_OCPreload_Enable);  //使能TIMx在CCR4上的预装载寄存器
+			TIM_OC4PreloadConfig(TIMx, TIM_OCPreload_Enable);  //使能TIMx在CCR4上的预装载寄存器
 			break;
 		default:
 			break;
@@ -113,8 +113,11 @@ void TIM9_Init()  //无刷舵机PWM输出
 
 void TIM13_Init(void)
 {
-	TIM_Init(TIM13,84-1,1000-1,true);
+	TIM_Init(TIM13,84-1,500-1,true);
 	TIM_PWM_Init(TIM13,0.5,1);
+	TIM_ClearFlag(TIM13, TIM_FLAG_Update);
+	TIM_ITConfig(TIM13, TIM_IT_Update, ENABLE);
+	TIM_Cmd(TIM13, ENABLE);	
 	TIM13->CCER &= ~TIM_CCER_CC1E;
 }
 

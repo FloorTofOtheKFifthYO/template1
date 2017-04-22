@@ -83,3 +83,15 @@ void SetTime(u8 T){
 	can_send_msg(SETTIME_CANID,&T,1);
 }
 
+
+/*
+*功能：重启
+*参数：
+*注意：必须设置，否则会启动失败
+*/
+void encoder_reset()
+{
+	u8 a[1];
+	a[0] = 1;
+	can_send_msg(RESET_CANID,a,1);
+}

@@ -11,11 +11,12 @@ static int step2_count;
 void Step1_Init(void)
 {
 	GPIO_Configuration(GPIO_Pin_4,GPIO_Mode_OUT,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_NOPULL,GPIOF);
-	GPIO_Configuration(GPIO_Pin_2,GPIO_Mode_OUT,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_NOPULL,GPIOF);
+	//GPIO_Configuration(GPIO_Pin_2,GPIO_Mode_OUT,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_NOPULL,GPIOF);
+	TIM13_Init();
 	step1_count = 0;
 	step1_want = 0;
 	PFout(4) = 1;
-	PFout(2) = 0;
+	//PFout(2) = 0;
 }
 
 void TIM8_UP_TIM13_IRQHandler(void){
@@ -81,7 +82,7 @@ void Step_check(void)
 			}
 	}
 	
-	if(PFout(3) == 0){
+	/*if(PFout(3) == 0){
 		if(step2_want>step2_count)
 		{
 			if(state2 == 0){
@@ -105,7 +106,7 @@ void Step_check(void)
 				TIM14->CCER &= ~TIM_CCER_CC1E;
 				state2 = 0;
 			}
-	}
+	}*/
 }
 
 void Step1_stop(){

@@ -7,13 +7,14 @@
 #include "client.h"
 
 /*
-配置左飞轮发射机构需要定义如下
+配置左飞轮发射机构需要定义如下,实际配置看configuration.h
 #define FLYWHEEL_RIGHT
-#define CLIENT_ID_RIGHT 	0x32
-#define TURN_ID_RIGHT	0x04
-#define PITCH_ID_RIGHT	0x07
-#define YAW_ID_RIGHT		0x08
-#define FLY_RIGHT		2
+#define CLIENT_ID_RIGHT 	0x31
+#define TURN_ID_RIGHT		0x08
+#define PITCH_ID_RIGHT		0x09
+#define YAW_ID_RIGHT		0x05
+#define FLY_RIGHT			2
+#define UP_RIGHT			3
 */
 
 #ifndef FLYWHEEL_RIGHT
@@ -26,7 +27,7 @@ typedef struct
 	Client	right;
 	
 	//状态
-	enum {fly_r_ready, fly_r_adj, r_fly} state;
+	enum {fly_r_ready, fly_r_adj, r_fly, fly_r_finish} state;
 	
 	//控制
 	bool fly_flag;	//允许调整
@@ -75,6 +76,7 @@ void flywheel_right_setPitch(float pitch);
   */
 void flywheel_right_setBrushless(float duty);
 
+void flywheel_right_up();
 
 void flywheel_right_setJmp(float duty);
 	
@@ -134,5 +136,8 @@ void flywheel_right_main();
 bool flywheel_right_check();
 
 void flywheel_right_stop();
+
+
+void flywheel_right_home();
 
 #endif

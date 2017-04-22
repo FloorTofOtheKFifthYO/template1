@@ -1,10 +1,88 @@
 #include "controller_usart.h"
 #include "configuration.h"
 #include "usart.h"
+#include "flywheel_left.h"
 #include "chassis.h"
 #include <math.h>
+#include "auto.h"
 
 extern int wait_cnt;
+
+#define BT_UP 0
+#define BT_RIGHT 1
+#define BT_DOWN 2
+#define BT_LEFT 3
+
+#define DELT_YAW_LEFT -0.005
+#define DELT_SPEED_LEFT 0.001
+#define FACTOR_SPEED_LEFT 1
+
+//иосробвС
+const float convert[7][4][2] ={
+								{{
+									0.5548444274479993 , 0.8319541221304826
+									},{
+									0.8319541221304826 , -0.5548444274479993
+									},{
+									-0.5548444274479993 , -0.8319541221304826
+									},{
+									-0.8319541221304826 , 0.5548444274479993
+								}},
+								{{
+									0.3156490369471024 , 0.9488760116444965
+									},{
+									0.9488760116444965 , -0.3156490369471024
+									},{
+									-0.3156490369471024 , -0.9488760116444965
+									},{
+									-0.9488760116444965 , 0.3156490369471024
+								}},
+								{{
+									0.0 , 1.0
+									},{
+									1.0 , -0.0
+									},{
+									-0.0 , -1.0
+									},{
+									-1.0 , 0.0
+								}},
+								{{
+									0.0 , 1.0
+									},{
+									1.0 , -0.0
+									},{
+									-0.0 , -1.0
+									},{
+									-1.0 , 0.0
+								}},
+								{{
+									0.0 , 1.0
+									},{
+									1.0 , -0.0
+									},{
+									-0.0 , -1.0
+									},{
+									-1.0 , 0.0
+								}},
+								{{
+									-0.3156490369471024 , 0.9488760116444965
+									},{
+									0.9488760116444965 , 0.3156490369471024
+									},{
+									0.3156490369471024 , -0.9488760116444965
+									},{
+									-0.9488760116444965 , -0.3156490369471024
+								}},
+								{{
+									-0.5548444274479993 , 0.8319541221304826
+									},{
+									0.8319541221304826 , 0.5548444274479993
+									},{
+									0.5548444274479993 , -0.8319541221304826
+									},{
+									-0.8319541221304826 , -0.5548444274479993
+								}}
+							};
 
 bottons LU,LR,LD,LL,RU,RR,RD,RL,L1,L2,R1,R2;
 bottons* b[12]={&LU,&LR,&LD,&LL,&RU,&RR,&RD,&RL,&L1,&L2,&R1,&R2};
@@ -108,7 +186,7 @@ void bottons_check(){
 	if (ptrB>-1){
 		if (ptrB>=4&ptrB<=7)
 			b[ptrB]->cnt=2;
-		else b[ptrB]->cnt=55;
+		else b[ptrB]->cnt=200;
 		b[ptrB]->ispressed=true;
 		ptrB=-1;
 	}
@@ -143,24 +221,36 @@ void control_usart_main()
 	if (RL.ispressed) {
 		
 	}
+	ChassisSpeed = 1000;
+	if (!L2.ispressed&&!R2.ispressed){
+	if (LU.ispressed) direction_angle = 3*PI/4;
+	else if (LD.ispressed) direction_angle = -PI/4;
+	else if (LL.ispressed) direction_angle = PI/4;
+	else if (LR.ispressed) direction_angle = -3*PI/4;
+	else ChassisSpeed = 0;}else
+	ChassisSpeed = 0;
+	chassis_handle(direction_angle, ChassisSpeed);
 	if (L2.ispressed) {
+		USART_SendString(bluetooth,"msg: L2\n");
 		if (LU.ispressed){
-			
-		}else				
-		if (LD.ispressed){
-			
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.target_l][0][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.target_l][0][1]*DELT_SPEED_LEFT);
+		}else if (LR.ispressed){
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.target_l][1][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.target_l][1][1]*DELT_SPEED_LEFT);
+		
+		}else if (LD.ispressed){
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.target_l][2][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.target_l][2][1]*DELT_SPEED_LEFT);
+		
+		}else if (LL.ispressed){
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.target_l][3][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.target_l][3][1]*DELT_SPEED_LEFT);
+		
 		}else{ 
-		//USART_SendString(bluetooth,"msg: 000!\n");
+		
 			
-		}Xianding=0;
-		if (LR.ispressed) Xianding -=2000;					
-		if (LL.ispressed) Xianding +=2000;
-		if (Xianding !=0){
-			
-		}else{
-			//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-			
-		}
+		};
 	}else{ 
 		//USART_SendString(bluetooth,"msg: 000!\n");
 			
@@ -195,15 +285,7 @@ void control_usart_main()
 	}else{
 		
 	}
-	ChassisSpeed = 1000;
-	if (!L2.ispressed&&!R2.ispressed){
-	if (LU.ispressed) direction_angle = 3*PI/4;
-	else if (LD.ispressed) direction_angle = -PI/4;
-	else if (LL.ispressed) direction_angle = PI/4;
-	else if (LR.ispressed) direction_angle = -3*PI/4;
-	else ChassisSpeed = 0;}else
-	ChassisSpeed = 0;
-	chassis_handle(direction_angle, ChassisSpeed);
+	
 	if(OPEN_Hander == 1){
 		chassis.END.X=chassis.pos_x;
 		chassis.END.Y=chassis.pos_y;

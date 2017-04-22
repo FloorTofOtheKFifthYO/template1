@@ -13,7 +13,7 @@
 #include "link_list.h"
 #include "param.h"
 
-#define AUTO_FIRST_RUN 1
+#define AUTO_FIRST_RUN 0
 #define AUTO_FLASH_SETOR FLASH_Sector_7 //  扇区7
 #define AUTO_FLASH_ADDR_START ((uint32_t)0x08060000)
 #define AUTO_FLASH_ADDR_END ((uint32_t)0x0807FFFF)
@@ -28,6 +28,11 @@ typedef struct {
 	bool load_run_flag;
 	bool pos_run_flag;
 	bool start_run_flag;
+	bool launch_l_continute;
+	bool launch_r_continute;
+	
+	int target_l;
+	int target_r;
 
 } AutoStrategy;
 
@@ -65,4 +70,9 @@ void auto_main();
   * @retval 成功返回1，出错返回-1或-2
   */
 int auto_save();
+
+void auto_select_l(int target);
+
+void auto_select_r(int target);
+
 #endif

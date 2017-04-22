@@ -4,8 +4,8 @@
 #include "flywheel_left.h"
 #include "flywheel_right.h"
 #include "auto.h"
+#include "step.h"
 
-SwitchTIM encoder;
 bool g_stop_flag = false;
 
 bool switch_side = false;
@@ -33,7 +33,6 @@ int main(void)
 	rcc_config();
 	gpio_config();
 	delay_init(168);  //初始化延时函数
-//	EXTI_config();
 	nvic_config();
 	
 reboot:	
@@ -43,15 +42,18 @@ reboot:
 	
 	cmd_init();
 	can_init();
+	
 	chassis_init();
+	TIM2_Init();
 	
 	flywheel_left_init();
 	flywheel_right_init();
 	
-	TIM2_Init();
+	EXTI_config();
 	
-	//auto_init();
-	autorun.state = pos_arrived;
+	
+	auto_init();
+//	autorun.state = load_arrived;
 	
 	USART_SendString(UART5,"msg: Let's go!\n");
 	
@@ -69,8 +71,6 @@ reboot:
 			flywheel_left_stop();
 			flywheel_right_stop();
 		}else{
-			//if((encoder.GetTim5-temp_speed)!=0)
-			//	USART_SendString(UART5,"msg: %d\n",encoder.GetTim5);
 			bottons_check();
 			//sticks_check(Hx,Hy);
 			chassis_update();
@@ -88,6 +88,6 @@ reboot:
 				control_usart_main();
 			}
 		}
-		delay_ms(2);
+		delay_ms(6);
 	}
 }

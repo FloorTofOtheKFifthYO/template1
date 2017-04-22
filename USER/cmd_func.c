@@ -5,8 +5,10 @@
 #include "flywheel_left.h"
 #include "flywheel_right.h"
 #include "encoder.h"
+#include "global.h"
 #include "configuration.h"
 #include "string.h"
+#include "auto.h"
 #include "delay.h"
 #include "math.h"
 #include "param.h"
@@ -26,7 +28,6 @@ extern float pur_pitch;
 extern float pur_roll;
 extern int pur_step;
 extern float pur_pull;
-extern SwitchTIM encoder;
 extern bool pitch_flag,roll_flag;
 
 void cmd_reboot_func(int argc,char *argv[]){
@@ -41,12 +42,66 @@ void cmd_stop_func(int argc,char *argv[]){
     }
 }
 
+void cmd_auto_func(int argc, char*argv[])
+{
+	if (strcmp(argv[1],"load") == 0)
+	{
+		autorun.load_run_flag = true;
+	}else if (strcmp(argv[1],"select") == 0)
+	{
+		if(strcmp(argv[2],"l") == 0)
+		{
+			auto_select_l(atoi(argv[3]));
+		}else if(strcmp(argv[2],"r") == 0)
+		{
+			auto_select_r(atoi(argv[3]));
+		}
+	}else if (strcmp(argv[1],"pos") == 0)
+	{
+		autorun.pos_run_flag = true;
+	}else if (strcmp(argv[1],"start") == 0)
+	{
+		autorun.start_run_flag = true;
+	}else if (strcmp(argv[1],"loadarea") == 0)
+	{
+		autorun.load_area.X = atof(argv[2]);
+		autorun.load_area.Y = atof(argv[3]);
+		autorun.load_area.ANG = atof(argv[4]);
+	}else if (strcmp(argv[1],"save") == 0)
+	{
+		auto_save();
+	}else if (strcmp(argv[1],"print") == 0)
+	{
+//		USART_SendString(bluetooth,"startx:%f ",autorun.start_area.X);
+//		USART_SendString(bluetooth,"starty:%f ",autorun.start_area.Y);
+//		USART_SendString(bluetooth,"startang:%f ",autorun.start_area.ANG);
+		USART_SendString(bluetooth,"loadx:%f ",autorun.load_area.X);
+		USART_SendString(bluetooth,"loady:%f ",autorun.load_area.Y);
+		USART_SendString(bluetooth,"loadang:%f ",autorun.load_area.ANG);
+		if(autorun.now_pos_ptr == NULL || autorun.now_pos_ptr->data == NULL)
+		{
+			USART_SendString(bluetooth,"msg:没有接下来的点了 ");
+			USART_SendString(bluetooth,"nowx:%f ",0);
+			USART_SendString(bluetooth,"nowy:%f ",0);
+			USART_SendString(bluetooth,"nowang:%f ",0);
+		}else{
+			USART_SendString(bluetooth,"nowx:%f ",((Pos_data *)(autorun.now_pos_ptr->data))->x);
+			USART_SendString(bluetooth,"nowy:%f ",((Pos_data *)(autorun.now_pos_ptr->data))->y);
+			USART_SendString(bluetooth,"nowang:%f ",((Pos_data *)(autorun.now_pos_ptr->data))->ang);
+		}
+		USART_SendString(bluetooth,"state:%d\n ",autorun.state);
+	}
+}
+
 void cmd_hello_func(int argc,char *argv[]){
     USART_SendString(CMD_USARTx, "msg: Hello World\n");
 }
 
 void cmd_test_func(int argc,char *argv[]){
-	if(strcmp(argv[1],"left") == 0)
+	if(strcmp(argv[1],"home")==0)
+	{
+		home_flag = true;
+	}else if(strcmp(argv[1],"left") == 0)
 	{
 		flywheel_left.fly_flag = true;
 		if(argc == 3)
@@ -70,7 +125,7 @@ void cmd_pos_func(int argc,char *argv[])
     int erro_no;
     if (strcmp(argv[1], "now") == 0)
     {
-        USART_SendString(CMD_USARTx, "x:%f y:%f yaw:%f\n", chassis.pos_x,chassis.pos_y,chassis.angle);
+        USART_SendString(CMD_USARTx, "x:%f y:%f yaw:%f speed:%d\n", chassis.pos_x,chassis.pos_y,chassis.angle,0);
     }else if(strcmp(argv[1],"select") == 0){
 		if(argc < 2){
             USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
@@ -279,9 +334,14 @@ void cmd_param_func(int argc,char *argv[]){
 
 void cmd_switch_func(int argc,char *argv[])
 {
+	USART_SendString(bluetooth,"msg:left(0) or right(1):%d\n",LEFT_RIGHT);
 	if(strcmp(argv[1],"left") == 0)
 	{
 		LEFT_RIGHT = 0;
+		switch_side = true;
+	}else if(strcmp(argv[1],"right") == 0)
+	{
+		LEFT_RIGHT = 1;
 		switch_side = true;
 	}
 }
@@ -304,13 +364,62 @@ void cmd_launch_func(int argc,char *argv[])
 		{
 			flywheel_left_fly();
 		}else{
+			if(flywheel_right.right.relay[FLY_RIGHT] == 1)
+			{
+				flywheel_right_fly();
+				delay_ms(300);
+			}
+			if(flywheel_right.right.relay[UP_RIGHT] == 0)
+			{
+				flywheel_right_up();
+				delay_ms(300);
+			}
 			flywheel_right_fly();
+			delay_ms(300);
+			flywheel_right_fly();
+			flywheel_right_up();
+			delay_ms(300);
+			flywheel_right_up();
+		}			
+		//USART_SendString(bluetooth,"msg: fly\r");
+	}else if(strcmp(argv[1],"continute")==0)
+    {
+		if(argc < 3){
+            USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
+            USART_SendString(CMD_USARTx,"msg:    launch continute <l or r> \n");
+			return;
+        }
+		if(strcmp(argv[2],"l")==0)
+		{
+			autorun.launch_l_continute = true;
+		}else{
+			autorun.launch_r_continute = true;
+		}			
+		//USART_SendString(bluetooth,"msg: fly\r");
+	}else if(strcmp(argv[1],"flyn")==0)
+    {
+		if(argc < 3){
+            USART_SendString(CMD_USARTx,"msg: Error!please enter:\n");
+            USART_SendString(CMD_USARTx,"msg:    launch flyn <l or r> <n> <speed> <turn> <pitch> <yaw> <jmp>\n");
+			return;
+        }
+		no = atoi(argv[3]);
+		speed = atof(argv[4]);
+		turn = atof(argv[5]);
+		pitch = atof(argv[6]);
+		yaw = atof(argv[7]);
+		jmp = atof(argv[8]);
+		if(strcmp(argv[2],"l")==0)
+		{
+			flywheel_left_flyn(no,speed,pitch,yaw,jmp);
+		}else{
+			flywheel_right_flyn(no,speed,turn,pitch,yaw,jmp);
 		}			
 		//USART_SendString(bluetooth,"msg: fly\r");
 	}else if (strcmp(argv[1],"stop")==0)
     {
-		flywheel_left_setBrushless(7.7);
-        flywheel_right_setBrushless(7.7);
+		flywheel_left_stop();
+        flywheel_right_stop();
     }else if (strcmp(argv[1],"load")==0)
     {
 		if(argc < 3){
@@ -350,7 +459,11 @@ void cmd_launch_func(int argc,char *argv[])
 		OPEN_Hander = 0;
     }else if (strcmp(argv[1], "set")==0)
     {
-		if(strcmp(argv[3], "pitch")==0)
+		if(strcmp(argv[2],"home") == 0)
+		{
+			flywheel_left_home();
+			flywheel_right_home();
+		}else if(strcmp(argv[3], "pitch")==0)
 		{
 			OPEN_Hander = 0;
 			pitch = atof(argv[4]);//0-100
