@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\HARDWARE\encoder;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM;..\HARDWARE\motor_usart;..\MODULE\flywheel_left;..\MODULE\hit;..\MODULE\chassis;..\HARDWARE\motor_brushless;..\HARDWARE\controller_usart;..\HARDWARE\putter;..\HARDWARE\motorCtrl;..\HARDWARE\relay;..\MODULE\flywheel_right;..\MODULE\client;..\HARDWARE\step;..\HARDWARE\flywheel_close;..\HARDWARE\maxon</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\HARDWARE\encoder;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM;..\HARDWARE\motor_usart;..\MODULE\flywheel_left;..\MODULE\hit;..\HARDWARE\motor_brushless;..\HARDWARE\controller_usart;..\HARDWARE\putter;..\HARDWARE\motorCtrl;..\HARDWARE\relay;..\MODULE\flywheel_right;..\MODULE\client;..\HARDWARE\step;..\HARDWARE\flywheel_close;..\HARDWARE\maxon;..\MODULE\chassis_maxon</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -464,11 +464,6 @@
           <GroupName>MODULE</GroupName>
           <Files>
             <File>
-              <FileName>chassis.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\MODULE\chassis\chassis.c</FilePath>
-            </File>
-            <File>
               <FileName>flywheel_left.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MODULE\flywheel_left\flywheel_left.c</FilePath>
@@ -482,6 +477,11 @@
               <FileName>client.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MODULE\client\client.c</FilePath>
+            </File>
+            <File>
+              <FileName>chassis.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MODULE\chassis_maxon\chassis.c</FilePath>
             </File>
           </Files>
         </Group>

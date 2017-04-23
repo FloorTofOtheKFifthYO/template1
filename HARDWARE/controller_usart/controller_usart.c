@@ -96,7 +96,7 @@ extern u8 OPEN_Hander;
 
 extern Chassis chassis;
 
-void USART1_IRQHandler(void)                	
+/*void USART1_IRQHandler(void)                	
 {
 	u8 Res;	u8 tmp;
 	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) 
@@ -172,7 +172,7 @@ void USART1_IRQHandler(void)
 		}}
 		//USART_SendString(UART5,"D=%f \n",direction_angle);
      }		
-} 
+} */
 
 void controller_usart_init(int *Hx,int *Hy)
 {

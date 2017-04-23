@@ -16,7 +16,7 @@ void TIM2_IRQHandler(void){
 	if( TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET ) 
 	{
 		ms++;
-		control_usart_TIM();
+		//control_usart_TIM();
 		flywheel_left_TIM();
 		flywheel_right_TIM();
 		TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);//必须清除中断标志位否则一直中断
@@ -38,7 +38,7 @@ int main(void)
 reboot:	
 	
 	usart_init(bluetooth,115200);
-	controller_usart_init(&Hx, &Hy);
+	//controller_usart_init(&Hx, &Hy);
 	
 	cmd_init();
 	can_init();

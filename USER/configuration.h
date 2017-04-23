@@ -43,10 +43,10 @@
 
 //╣вел
 #define CHASSIS
-#define MOTOR0_ID 0x0A
-#define MOTOR1_ID 0x0B
-#define MOTOR2_ID 0x0C
-#define MOTOR3_ID 0x0D
+#define MOTOR0_ID USART1
+#define MOTOR1_ID USART2
+#define MOTOR2_ID USART3
+#define MOTOR3_ID UART4
 
 
 

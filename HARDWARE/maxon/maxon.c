@@ -5,7 +5,7 @@
 u8 sendToSetSpeed[10] = {0x55,0xAA,0x01,0x00,0x04,0x00,0x00,0x00,0x00,0x00};
 u8 sendToSetSpeedPI[10] = {0x55,0xAA,0x01,0x00,0x84,0x00,0x00,0x00,0x00,0x00};
 
-void setspeed(USART_TypeDef* USARTx, int speed){
+void maxon_setSpeed(USART_TypeDef* USARTx, int speed){
 	int i,j;
 	u8 temp = 0;
 	int check = 0;
@@ -29,7 +29,7 @@ void setspeed(USART_TypeDef* USARTx, int speed){
 	}
 }
 
-void setspeed_p(u8 number , int p){
+void maxon_setSpeed_p(u8 number , int p){
 	int i,j;
 	u8 temp = 0;
 	int check = 0;
@@ -51,7 +51,7 @@ void setspeed_p(u8 number , int p){
 	}
 }
 
-void setspeed_i(u8 number , int si){
+void maxon_setSpeed_i(u8 number , int si){
 	u8 temp = 0;
 	int i;
 	int j;
@@ -76,7 +76,7 @@ void setspeed_i(u8 number , int si){
 }
 
 
-void save(){
+void maxon_save(){
 	int j;
 	u8 saveinfo[8] = {0x55 , 0xAA , 0x01 , 0x00 , 0x03 , 0x01 ,0x00 , 0x04};
 	
