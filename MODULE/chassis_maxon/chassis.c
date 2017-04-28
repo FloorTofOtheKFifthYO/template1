@@ -22,14 +22,14 @@ void chassis_init(void)
 	vega_init(&(chassis.g_vega_pos_x),&(chassis.g_vega_pos_y),&(chassis.g_vega_angle));
     vega_reset();
 	delay_ms(2000);
-	usart_init(MOTOR0_ID,115200);
-	usart_init(MOTOR1_ID,115200);
-	usart_init(MOTOR2_ID,115200);
-	usart_init(MOTOR3_ID,115200);
+	usart_init(MOTOR0_ID,115200,false);
+	usart_init(MOTOR1_ID,115200,false);
+	usart_init(MOTOR2_ID,115200,false);
+	usart_init(MOTOR3_ID,115200,false);
 	maxon_setSpeed(MOTOR0_ID,0);
+	maxon_setSpeed(MOTOR3_ID,0);
 	maxon_setSpeed(MOTOR1_ID,0);
 	maxon_setSpeed(MOTOR2_ID,0);
-	maxon_setSpeed(MOTOR3_ID,0);
 
 #if CHASSIS_FIRST_RUN == 1
 

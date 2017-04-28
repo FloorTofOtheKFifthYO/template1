@@ -176,7 +176,7 @@ extern Chassis chassis;
 
 void controller_usart_init(int *Hx,int *Hy)
 {
-	usart_init(USART1,115200);
+	usart_init(USART6,115200,true);
 	x=Hx;y=Hy;
 	ptrB=-1;
 	ptrS=0;

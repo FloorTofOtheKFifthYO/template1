@@ -11,8 +11,7 @@ u8  USART3_RX_BUF[USART_REC_LEN];
 u16 USART3_RX_STA;
 
 
-
-void usart_init(USART_TypeDef *USARTx, uint32_t USART_BaudRate)
+void usart_init(USART_TypeDef *USARTx, uint32_t USART_BaudRate,bool RX)
 {
 	USART_InitTypeDef USART_InitStructure;
 	USART_InitStructure.USART_BaudRate = USART_BaudRate;//波特率设置
@@ -20,11 +19,19 @@ void usart_init(USART_TypeDef *USARTx, uint32_t USART_BaudRate)
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;//一个停止位
 	USART_InitStructure.USART_Parity = USART_Parity_No;//无奇偶校验位
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//无硬件数据流控制
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//收发模式
-   
-	USART_Init(USARTx, &USART_InitStructure); //初始化串口x
-    USART_Cmd(USARTx, ENABLE);  //使能串口x
-	USART_ITConfig(USARTx, USART_IT_RXNE, ENABLE);//开启相关中断
+	if(RX){
+		USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//收发模式
+		USART_Init(USARTx, &USART_InitStructure); //初始化串口x
+		USART_Cmd(USARTx, ENABLE);  //使能串口x
+		USART_ITConfig(USARTx, USART_IT_RXNE, ENABLE);//开启相关中断
+	}
+	else{
+		USART_InitStructure.USART_Mode = USART_Mode_Tx;
+		USART_Init(USARTx, &USART_InitStructure); //初始化串口x
+		USART_Cmd(USARTx, ENABLE);  //使能串口x
+	}
+	
+	
 }
 
 //初始化IO 串口1 
@@ -94,12 +101,7 @@ _ttywrch(int ch)
 ch = ch;
 }
 //重定义fputc函数 
-int fputc(int ch, FILE *f)
-{ 	
-	while((USART_printf->SR&0X40)==0);//循环发送,直到发送完毕  
-	USART_printf->DR = (u8) ch;      
-	return ch;
-}
+
 #endif
 
 

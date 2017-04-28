@@ -3,22 +3,14 @@
 
 #include "sys.h"
 
-typedef struct
-{
-	u8 can_id;
-	u16 pwm1;
-	u16 pwm2;
-	u8 relay[4];
-}Client;
 
-void Client_RESET(Client client);
+void init_subsector(u8 ID , u8 EN_unbrush,u8 channel ,u16 frep, u8 feedback_tim);
 
-/*
 
-*功能：设置从板的pwm和继电器
-*参数：Client client 从机的结构体
-*		
-*/
-void Client_SET(Client client);
+void setUnbrushSpeed_1(u8 ID,u8 channel , int speed);
+
+
+//继电器控制
+void set_IO(u8 ID, u8 io[]);
 
 #endif

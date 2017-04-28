@@ -24,7 +24,6 @@
 typedef struct
 {
 	//成员
-	Client	right;
 	
 	//状态
 	enum {fly_r_ready, fly_r_adj, r_fly, fly_r_finish} state;
@@ -36,6 +35,7 @@ typedef struct
 	float pur_pitch;
 	float pur_yaw;
 	float pur_jmp;
+	u8 io[3];
 }Flywheel_right;
 
 extern Flywheel_right flywheel_right;
@@ -50,8 +50,6 @@ extern Flywheel_right flywheel_right;
   * @retval 
   */
 void flywheel_right_init();
-
-void flywheel_right_setTurn(float turn);
 
 /**
   * @brief  改俯仰角
@@ -76,10 +74,10 @@ void flywheel_right_setPitch(float pitch);
   */
 void flywheel_right_setBrushless(float duty);
 
-void flywheel_right_up();
-
-void flywheel_right_setJmp(float duty);
 	
+
+void flywheel_right_setJmp(float duty);	
+
 /**
   * @brief  改旋转平台
   *     
@@ -116,8 +114,7 @@ void flywheel_right_TIM();
   *          
   * @retval 
   */
-void flywheel_right_flyn(int n, float duty, float turn, float pitch, float yaw, float jmp);
-
+void flywheel_right_flyn(int n, float duty, float pitch, float yaw);
 /**
   * @brief main大循环中检查
   *     
@@ -135,9 +132,18 @@ void flywheel_right_main();
 */
 bool flywheel_right_check();
 
+/*紧急停*/
 void flywheel_right_stop();
 
-
 void flywheel_right_home();
+
+void flywheel_right_pitchZero();
+
+void flywheel_right_yawZero();
+
+//发射一个飞盘
+void flywheel_right_fly1();
+
+void flywheel_right_up(int i);
 
 #endif

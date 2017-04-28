@@ -33,18 +33,14 @@ void flywheel_left_init()
 	RoboModule_Add_Callback(databack,RoboModule_Feedback_Callback,PITCH_ID_LEFT,YAW_ID_LEFT,0);
 	RoboModule_SETUP(9,0,PITCH_ID_LEFT,YAW_ID_LEFT,0);
 	
-	unbrush_init(FLYWHEEL_ID_LEFT);
+
+	flywheel_left.io[0] = 0;
+	flywheel_left.io[1] = 0;
+	flywheel_left.io[2] = 0;
 	
-	//¥”∞Â…Ë÷√
-	flywheel_left.left.can_id = CLIENT_ID_LEFT;
-	Client_RESET(flywheel_left.left);
-	delay_ms(5);
-	flywheel_left.left.pwm1 = 770;
-	flywheel_left.left.pwm2 = 600;
-	for(i = 0;i<4;i++)
-		flywheel_left.left.relay[i] = 0;
-	Client_SET(flywheel_left.left);
-	
+	init_subsector(CLIENT_ID_LEFT,1,FLYWHEEL_CHANNEL_LEFT,50,31);
+	setUnbrushSpeed_1(CLIENT_ID_LEFT,FLYWHEEL_CHANNEL_LEFT,0);
+	set_IO(CLIENT_ID_LEFT,flywheel_left.io);
 	flywheel_left.pur_duty = 7.7;
 	flywheel_left.pur_jmp = 6;
 	flywheel_left.pur_pitch = 0;
@@ -66,13 +62,12 @@ void flywheel_left_setPitch(float pitch)
 {
 	flywheel_left.pur_pitch = pitch;
 	RoboModule_SET_Position(PITCH_ID_LEFT,5000,pitch*100,PITCH_MAXSPEED);
-	//Step1_moveto(pitch*100);
 }
 
 void flywheel_left_fly()
 {
-	flywheel_left.left.relay[FLY_LEFT] = 1 - flywheel_left.left.relay[FLY_LEFT];
-	Client_SET(flywheel_left.left);
+	flywheel_left.io[FLY_LEFT] = 1 - flywheel_left.io[FLY_LEFT];
+	set_IO(CLIENT_ID_LEFT,flywheel_left.io);
 }
 
 /**
@@ -87,15 +82,16 @@ void flywheel_left_fly()
 void flywheel_left_setBrushless(float duty)
 {
 	flywheel_left.pur_duty = duty;
-	setUnbrushSpeed(FLYWHEEL_ID_LEFT,(duty-7.7)/(10-7.7)*8*100);
+	//setUnbrushSpeed(FLYWHEEL_ID_LEFT,(duty-7.7)/(10-7.7)*8*100);
+	setUnbrushSpeed_1(CLIENT_ID_LEFT,FLYWHEEL_CHANNEL_LEFT,(duty-7.7)/(10-7.7)*8*100);
 }
 
 
 void flywheel_left_setJmp(float duty)
 {
-	flywheel_left.pur_jmp = duty;
+/*	flywheel_left.pur_jmp = duty;
 	flywheel_left.left.pwm2 = duty*100;
-	Client_SET(flywheel_left.left);
+	Client_SET(flywheel_left.left);*/
 }
 
 /**
@@ -140,13 +136,12 @@ void flywheel_left_TIM()
   *          
   * @retval 
   */
-void flywheel_left_flyn(int n, float duty, float pitch, float yaw, float jmp)
+void flywheel_left_flyn(int n, float duty, float pitch, float yaw)
 {
 	fly_n = n*2;
 	
 	flywheel_left.pur_duty = duty;
 	flywheel_left.pur_pitch = pitch;
-	flywheel_left.pur_jmp = jmp;
 	flywheel_left.pur_yaw = yaw;
 	flywheel_left.fly_flag = true;
 }
@@ -158,8 +153,6 @@ void flywheel_left_flyn(int n, float duty, float pitch, float yaw, float jmp)
 bool flywheel_left_check()
 {
 	static int flag = 1;
-//	if(fabs(ReturnData(PITCH_ID_LEFT)->Position -flywheel_left.pur_pitch*100)<=10 && 
-//		fabs(ReturnData(YAW_ID_LEFT)->Position -flywheel_left.pur_yaw*10000)<=50)
 	if( fabs(ReturnData(PITCH_ID_LEFT)->Position -flywheel_left.pur_pitch*100)<=30 && 
 		fabs(ReturnData(YAW_ID_LEFT)->Position -flywheel_left.pur_yaw*100)<=30)
 		{
@@ -176,6 +169,24 @@ bool flywheel_left_check()
 	}
 }
 
+void flywheel_left_fly1(){
+	fly_n = 2;
+	flywheel_left_fly();
+	fly_count = 300;
+	fly_n--;
+	flywheel_left.state = fly;
+}
+
+//Ãß∑…≈Ã
+void flywheel_left_up(int i)
+{
+	if(i == -1)
+		flywheel_left.io[UP_LEFT] = 1 - flywheel_left.io[UP_LEFT];
+	else 
+		flywheel_left.io[UP_LEFT] = i;
+	set_IO(CLIENT_ID_LEFT,flywheel_left.io);
+}
+
 void flywheel_left_stop()
 {
 	flywheel_left.pur_duty = 7.7;
@@ -185,7 +196,7 @@ void flywheel_left_stop()
 	flywheel_left_setBrushless(7.7);
 	flywheel_left_setPitch(ReturnData(PITCH_ID_LEFT)->Position/100.f);
 	flywheel_left_setYaw(ReturnData(YAW_ID_LEFT)->Position/100.f);
-	flywheel_left_setJmp(6);
+	//flywheel_left_setJmp(6);
 }
 
 
@@ -216,7 +227,8 @@ void flywheel_left_home()
 	flywheel_left_setBrushless(7.7);
 	flywheel_left_setPitch(0);
 	flywheel_left_setYaw(0);
-	flywheel_left_setJmp(6);
+	//flywheel_left_setJmp(6);
+	flywheel_left_up(0);
 }
 
 /**
@@ -237,10 +249,10 @@ void flywheel_left_main()
 				flywheel_left_setYaw(flywheel_left.pur_yaw);
 				flywheel_left_setBrushless(flywheel_left.pur_duty);
 				flywheel_left.state = fly_adj;
-				flywheel_left.left.pwm1 = flywheel_left.pur_duty*100;
-				flywheel_left.left.pwm2 = flywheel_left.pur_jmp*100;
-				flywheel_left.left.relay[FLY_LEFT] = 0;
-				Client_SET(flywheel_left.left);
+				flywheel_left_setBrushless(flywheel_left.pur_duty);
+				flywheel_left.io[FLY_LEFT] = 0;
+				flywheel_left.io[UP_LEFT] = 1;
+				set_IO(CLIENT_ID_LEFT,flywheel_left.io);
 			case fly_adj:
 				if(flywheel_left_check() && fly_count == 0 && autorun.state == pos_arrived)
 				{
@@ -259,6 +271,13 @@ void flywheel_left_main()
 				}
 				break;
 			case fly:
+					
+					if(fly_n%2 == 0)
+					{
+						if(fly_count == 700)
+							flywheel_left_up(1);
+					}
+					
 					if(fly_count == 0)
 					{
 						if(fly_n == 0)
@@ -268,9 +287,10 @@ void flywheel_left_main()
 							flywheel_left.fly_flag = false;
 						}else{
 							flywheel_left_fly();
-							if(fly_n%2 == 1)
+							if(fly_n%2 == 1){
+								flywheel_left_up(0);
 								fly_count = 1000;
-							else
+							}else
 								fly_count = 300;
 							fly_n--;
 						}
