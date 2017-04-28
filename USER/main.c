@@ -37,13 +37,14 @@ int main(void)
 	
 reboot:	
 	
-	usart_init(bluetooth,115200);
+	usart_init(bluetooth,115200,true);
 	//controller_usart_init(&Hx, &Hy);
 	
 	cmd_init();
 	can_init();
 	
 	chassis_init();
+	
 	TIM2_Init();
 	
 	flywheel_left_init();
@@ -74,11 +75,11 @@ reboot:
 			bottons_check();
 			//sticks_check(Hx,Hy);
 			chassis_update();
+			flywheel_left_main();
+			flywheel_right_main();
 			if(OPEN_Hander ==0){
 				/**-------------------------自动部分--------------------------------**/
 				auto_main();
-				flywheel_left_main();
-				flywheel_right_main();
 				chassis_auto();
 			}
 			else if(OPEN_Hander ==1)

@@ -11,7 +11,6 @@
 #include "vega.h"
 #include "math.h"
 #include "global.h"
-#include "encoder.h"
 #include "controller_usart.h"
 
 float pur_pitch,pur_roll,pur_pull;

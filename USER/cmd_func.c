@@ -4,7 +4,6 @@
 #include "chassis.h"
 #include "flywheel_left.h"
 #include "flywheel_right.h"
-#include "encoder.h"
 #include "global.h"
 #include "configuration.h"
 #include "string.h"
@@ -101,16 +100,6 @@ void cmd_test_func(int argc,char *argv[]){
 	if(strcmp(argv[1],"home")==0)
 	{
 		home_flag = true;
-	}else if(strcmp(argv[1],"left") == 0)
-	{
-		flywheel_left.fly_flag = true;
-		if(argc == 3)
-			flywheel_left_flyn(atoi(argv[2]),7.7,0,0,6);
-	}else if(strcmp(argv[1],"right") == 0)
-	{	
-		flywheel_right.fly_flag = true;
-		if(argc == 3)
-			flywheel_right_flyn(atoi(argv[2]),7.7,0,0,0,6);
 	}
 }
 
@@ -362,24 +351,9 @@ void cmd_launch_func(int argc,char *argv[])
         }
 		if(strcmp(argv[2],"l")==0)
 		{
-			flywheel_left_fly();
+			flywheel_left_fly1();
 		}else{
-			if(flywheel_right.right.relay[FLY_RIGHT] == 1)
-			{
-				flywheel_right_fly();
-				delay_ms(300);
-			}
-			if(flywheel_right.right.relay[UP_RIGHT] == 0)
-			{
-				flywheel_right_up();
-				delay_ms(300);
-			}
-			flywheel_right_fly();
-			delay_ms(300);
-			flywheel_right_fly();
-			flywheel_right_up();
-			delay_ms(300);
-			flywheel_right_up();
+			flywheel_right_fly1();
 		}			
 		//USART_SendString(bluetooth,"msg: fly\r");
 	}else if(strcmp(argv[1],"continute")==0)
@@ -411,9 +385,9 @@ void cmd_launch_func(int argc,char *argv[])
 		jmp = atof(argv[8]);
 		if(strcmp(argv[2],"l")==0)
 		{
-			flywheel_left_flyn(no,speed,pitch,yaw,jmp);
+			flywheel_left_flyn(no,speed,pitch,yaw);
 		}else{
-			flywheel_right_flyn(no,speed,turn,pitch,yaw,jmp);
+			flywheel_right_flyn(no,speed,pitch,yaw);
 		}			
 		//USART_SendString(bluetooth,"msg: fly\r");
 	}else if (strcmp(argv[1],"stop")==0)
@@ -448,13 +422,13 @@ void cmd_launch_func(int argc,char *argv[])
 		{	flywheel_left_setBrushless(speed);//左边调整
 			flywheel_left_setPitch(pitch);
 			flywheel_left_setYaw(yaw);
-			flywheel_left_setJmp(jmp);
+			//flywheel_left_setJmp(jmp);
 		}else{
 			flywheel_right_setBrushless(speed);//左边调整
 			flywheel_right_setPitch(pitch);
 			flywheel_right_setYaw(yaw);
-			flywheel_right_setTurn(turn);
-			flywheel_right_setJmp(jmp);
+			//flywheel_right_setTurn(turn);
+			//flywheel_right_setJmp(jmp);
 		}
 		OPEN_Hander = 0;
     }else if (strcmp(argv[1], "set")==0)
@@ -471,16 +445,7 @@ void cmd_launch_func(int argc,char *argv[])
 				flywheel_left_setPitch(pitch);//左边调整
 			else
 				flywheel_right_setPitch(pitch);//右边调整
-		}else if(strcmp(argv[3], "turn")==0)
-		{
-			OPEN_Hander = 0;
-			turn = atof(argv[4]);
-			//上面的转角调整
-			if(strcmp(argv[2], "l") == 0)
-				;//左边调整
-			else
-				flywheel_right_setTurn(turn);//右边调整
-        }else if(strcmp(argv[3], "speed")==0)
+		}else if(strcmp(argv[3], "speed")==0)
 		{
 			speed = atof(argv[4]);
 			if(strcmp(argv[2], "l") == 0)
@@ -494,7 +459,7 @@ void cmd_launch_func(int argc,char *argv[])
 				flywheel_left_setYaw(yaw);//左边调整
 			else
 				flywheel_right_setYaw(yaw);//右边调整
-        }else if(strcmp(argv[3], "jmp")==0)
+        }/*else if(strcmp(argv[3], "jmp")==0)
 		{
 			jmp = atof(argv[4]);
 			//跳台调整
@@ -502,7 +467,7 @@ void cmd_launch_func(int argc,char *argv[])
 				flywheel_left_setJmp(jmp);//左边调整
 			else
 				flywheel_right_setJmp(jmp);//右边调整
-        }
+        }*/
 		else if(argc == 8) {
 		//直接调整
 			pitch = atof(argv[3]);
@@ -516,13 +481,13 @@ void cmd_launch_func(int argc,char *argv[])
 				flywheel_left_setBrushless(speed);//左边调整
 				flywheel_left_setPitch(pitch);
 				flywheel_left_setYaw(yaw);
-				flywheel_left_setJmp(jmp);
+				//flywheel_left_setJmp(jmp);
 			}else{
 				flywheel_right_setBrushless(speed);//左边调整
 				flywheel_right_setPitch(pitch);
 				flywheel_right_setYaw(yaw);
-				flywheel_right_setTurn(turn);
-				flywheel_right_setJmp(jmp);
+				//flywheel_right_setTurn(turn);
+				//flywheel_right_setJmp(jmp);
 			}
 		}
 		
@@ -716,9 +681,9 @@ void cmd_launch_func(int argc,char *argv[])
 		//调整姿态
 		if(strcmp(argv[1], "l") == 0)
 		{
-			flywheel_left_flyn(atoi(argv[8]),speed,pitch,yaw,jmp);
+			flywheel_left_flyn(atoi(argv[8]),speed,pitch,yaw);
 		}else{
-			flywheel_right_flyn(atoi(argv[8]),speed,turn,pitch,yaw,jmp);
+			flywheel_right_flyn(atoi(argv[8]),speed,pitch,yaw);
 		}
 	}
 }

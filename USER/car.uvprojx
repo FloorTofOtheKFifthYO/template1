@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\HARDWARE\encoder;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM;..\HARDWARE\motor_usart;..\MODULE\flywheel_left;..\MODULE\hit;..\HARDWARE\motor_brushless;..\HARDWARE\controller_usart;..\HARDWARE\putter;..\HARDWARE\motorCtrl;..\HARDWARE\relay;..\MODULE\flywheel_right;..\MODULE\client;..\HARDWARE\step;..\HARDWARE\flywheel_close;..\HARDWARE\maxon;..\MODULE\chassis_maxon</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM;..\HARDWARE\motor_usart;..\MODULE\flywheel_left;..\MODULE\hit;..\HARDWARE\motor_brushless;..\HARDWARE\controller_usart;..\HARDWARE\putter;..\HARDWARE\motorCtrl;..\HARDWARE\relay;..\MODULE\flywheel_right;..\MODULE\client;..\HARDWARE\step;..\HARDWARE\flywheel_close;..\HARDWARE\maxon;..\MODULE\chassis_maxon</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -434,6 +434,11 @@
               <FilePath>.\cmd.c</FilePath>
             </File>
             <File>
+              <FileName>configuration.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\configuration.c</FilePath>
+            </File>
+            <File>
               <FileName>link_list.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\link_list.c</FilePath>
@@ -442,11 +447,6 @@
               <FileName>cmd_func.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\cmd_func.c</FilePath>
-            </File>
-            <File>
-              <FileName>configuration.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\configuration.c</FilePath>
             </File>
             <File>
               <FileName>global.c</FileName>
@@ -499,19 +499,9 @@
               <FilePath>..\HARDWARE\motor_usart\motor_usart.c</FilePath>
             </File>
             <File>
-              <FileName>motor_brushless.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\motor_brushless\motor_brushless.c</FilePath>
-            </File>
-            <File>
               <FileName>controller_usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\controller_usart\controller_usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>putter.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\putter\putter.c</FilePath>
             </File>
             <File>
               <FileName>motorCtrl.c</FileName>
@@ -538,11 +528,6 @@
         <Group>
           <GroupName>SENSOR</GroupName>
           <Files>
-            <File>
-              <FileName>encoder.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\encoder\encoder.c</FilePath>
-            </File>
             <File>
               <FileName>vega.c</FileName>
               <FileType>1</FileType>
