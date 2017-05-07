@@ -37,6 +37,9 @@ typedef struct
 	int g_vega_pos_y;   
 	float g_vega_angle;
 	
+	float radar_theta;
+	float radar_distance;
+	
 	float pos_x,pos_y;
 	float angle;
 	

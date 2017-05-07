@@ -23,28 +23,30 @@
 //extern u8  USART1_RX_BUF[USART_REC_LEN];    
 //extern u16 USART1_RX_STA;
 
-#define FLYWHEEL_RIGHT
-#define CLIENT_ID_RIGHT 	0x26
-#define PITCH_ID_RIGHT		0x07
-#define FLYWHEEL_CHANNEL_RIGHT 6
-#define YAW_ID_RIGHT		0x08
-#define FLY_RIGHT			0
-#define UP_RIGHT			1
-
 #define FLYWHEEL_LEFT
 #define CLIENT_ID_LEFT 		0x25
 #define PITCH_ID_LEFT		0x06
 #define FLYWHEEL_CHANNEL_LEFT	6
+#define FLYWHEEL_FEEDBACK_LEFT 3
 #define YAW_ID_LEFT			0x05
 #define FLY_LEFT			0
 #define UP_LEFT             1
 
+#define FLYWHEEL_RIGHT
+#define CLIENT_ID_RIGHT 	0x26
+#define PITCH_ID_RIGHT		0x07
+#define FLYWHEEL_CHANNEL_RIGHT 6
+#define FLYWHEEL_FEEDBACK_RIGHT 3
+#define YAW_ID_RIGHT		0x08
+#define FLY_RIGHT			0
+#define UP_RIGHT			1
+
 
 //╣вел
 #define CHASSIS
-#define MOTOR0_ID UART4
+#define MOTOR0_ID USART2
 #define MOTOR1_ID USART3
-#define MOTOR2_ID USART2
+#define MOTOR2_ID UART4
 #define MOTOR3_ID USART1
 
 

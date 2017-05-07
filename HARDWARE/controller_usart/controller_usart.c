@@ -2,20 +2,30 @@
 #include "configuration.h"
 #include "usart.h"
 #include "flywheel_left.h"
+#include "flywheel_right.h"
 #include "chassis.h"
 #include <math.h>
 #include "auto.h"
 
+extern bool g_stop_flag;
 extern int wait_cnt;
+extern struct {
+	int left[7];
+	int right[7];
+}strategy;
 
 #define BT_UP 0
 #define BT_RIGHT 1
 #define BT_DOWN 2
 #define BT_LEFT 3
 
-#define DELT_YAW_LEFT -0.005
-#define DELT_SPEED_LEFT 0.001
+#define DELT_YAW_LEFT -0.0005
+#define DELT_SPEED_LEFT 0.0001
 #define FACTOR_SPEED_LEFT 1
+
+#define DELT_YAW_RIGHT -0.0005
+#define DELT_SPEED_RIGHT 0.0001
+#define FACTOR_SPEED_RIGHT 1
 
 //上右下左
 const float convert[7][4][2] ={
@@ -96,13 +106,13 @@ extern u8 OPEN_Hander;
 
 extern Chassis chassis;
 
-/*void USART1_IRQHandler(void)                	
+void USART6_IRQHandler(void)                	
 {
 	u8 Res;	u8 tmp;
-	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) 
+	if(USART_GetITStatus(USART6, USART_IT_RXNE) != RESET) 
 	{
 		OPEN_Hander = 1;
-		Res =USART_ReceiveData(USART1);
+		Res =USART_ReceiveData(USART6);
 		if (Res==0x0d&&ptrS<0) {
 			ptrS=-ptrS;
 			return;
@@ -172,7 +182,7 @@ extern Chassis chassis;
 		}}
 		//USART_SendString(UART5,"D=%f \n",direction_angle);
      }		
-} */
+}
 
 void controller_usart_init(int *Hx,int *Hy)
 {
@@ -186,7 +196,7 @@ void bottons_check(){
 	if (ptrB>-1){
 		if (ptrB>=4&ptrB<=7)
 			b[ptrB]->cnt=2;
-		else b[ptrB]->cnt=200;
+		else b[ptrB]->cnt=100;
 		b[ptrB]->ispressed=true;
 		ptrB=-1;
 	}
@@ -209,82 +219,222 @@ void control_usart_main()
 	float direction_angle;
 	
 	Xianding = 0;
-	if (RU.ispressed)
-	{ 
-		
-	}
-	if (RR.ispressed) {
-		
-	}
-	if (RD.ispressed) {
-	}
-	if (RL.ispressed) {
-		
-	}
 	ChassisSpeed = 1000;
 	if (!L2.ispressed&&!R2.ispressed){
-	if (LU.ispressed) direction_angle = 3*PI/4;
-	else if (LD.ispressed) direction_angle = -PI/4;
-	else if (LL.ispressed) direction_angle = PI/4;
-	else if (LR.ispressed) direction_angle = -3*PI/4;
-	else ChassisSpeed = 0;}else
-	ChassisSpeed = 0;
-	chassis_handle(direction_angle, ChassisSpeed);
-	if (L2.ispressed) {
-		USART_SendString(bluetooth,"msg: L2\n");
+		
+		if (LU.ispressed) direction_angle = 3*PI/4;
+		else if (LD.ispressed) direction_angle = -PI/4;
+		else if (LL.ispressed) direction_angle = PI/4;
+		else if (LR.ispressed) direction_angle = -3*PI/4;
+		else ChassisSpeed = 0;
+		if(!g_stop_flag)
+			chassis_handle(direction_angle, ChassisSpeed);
+		
+		if (RU.ispressed)
+		{ 
+			if(autorun.state == start)
+			{
+				autorun.pos_run_flag = true;
+			}
+		}
+		
+		if (RL.ispressed) {
+			if(LEFT_RIGHT==0)//红场
+			{
+				switch(autorun.state)//start,load_running,load_arrived,pos_running,pos_arrived,handle_control,start_running
+				{
+					case start:
+						autorun.load_run_flag = true;
+						break;
+					case load_running:
+					case load_arrived:
+						break;
+					case pos_running:
+					case pos_arrived:
+					case handle_control:
+						autorun.load_run_flag = true;
+						break;
+					case start_running:
+						break;
+				}
+			}else if(LEFT_RIGHT==1)//蓝场
+			{
+				switch(autorun.state)//start,load_running,load_arrived,pos_running,pos_arrived,handle_control,start_running
+				{
+					case start:
+						break;
+					case load_running:
+						autorun.start_run_flag = true;
+						break;
+					case load_arrived:
+						autorun.pos_run_flag = true;
+						break;
+					case pos_running:
+						break;
+					case pos_arrived:
+					case handle_control:
+						autorun.start_run_flag = true;
+						break;
+					case start_running:
+						break;
+				}
+			}
+		}
+		
+		if (RR.ispressed) {
+			RR.ispressed = false;
+			if(LEFT_RIGHT==0)//红场
+			{
+				switch(autorun.state)//start,load_running,load_arrived,pos_running,pos_arrived,handle_control,start_running
+				{
+					case start:
+						break;
+					case load_running:
+						autorun.start_run_flag = true;
+						break;
+					case load_arrived:
+						autorun.pos_run_flag = true;
+						break;
+					case pos_running:
+						break;
+					case pos_arrived:
+					case handle_control:
+						autorun.start_run_flag = true;
+						break;
+					case start_running:
+						break;
+				}
+			}else if(LEFT_RIGHT==1)//蓝场
+			{
+				switch(autorun.state)//start,load_running,load_arrived,pos_running,pos_arrived,handle_control,start_running
+				{
+					case start:
+						autorun.load_run_flag = true;
+						break;
+					case load_running:
+					case load_arrived:
+						break;
+					case pos_running:
+					case pos_arrived:
+					case handle_control:
+						autorun.load_run_flag = true;
+						break;
+					case start_running:
+						break;
+				}
+			}
+		}
+		if (RD.ispressed) {
+			RD.ispressed = false;
+			g_stop_flag = !g_stop_flag;
+		}
+		
+	}else{
+	//ChassisSpeed = 0;
+	//chassis_handle(direction_angle, ChassisSpeed);
+		
+	}
+	if (L2.ispressed && !R2.ispressed) {
+		//USART_SendString(bluetooth,"msg: L2\n");
 		if (LU.ispressed){
-			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.target_l][0][0]*DELT_YAW_LEFT);
-			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.target_l][0][1]*DELT_SPEED_LEFT);
-		}else if (LR.ispressed){
-			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.target_l][1][0]*DELT_YAW_LEFT);
-			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.target_l][1][1]*DELT_SPEED_LEFT);
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[strategy.left[autorun.target_l]][0][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[strategy.left[autorun.target_l]][0][1]*DELT_SPEED_LEFT);
+		}
+		if (LR.ispressed){
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[strategy.left[autorun.target_l]][1][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[strategy.left[autorun.target_l]][1][1]*DELT_SPEED_LEFT);
 		
-		}else if (LD.ispressed){
-			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.target_l][2][0]*DELT_YAW_LEFT);
-			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.target_l][2][1]*DELT_SPEED_LEFT);
+		}
+		if (LD.ispressed){
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[strategy.left[autorun.target_l]][2][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[strategy.left[autorun.target_l]][2][1]*DELT_SPEED_LEFT);
 		
-		}else if (LL.ispressed){
-			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.target_l][3][0]*DELT_YAW_LEFT);
-			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.target_l][3][1]*DELT_SPEED_LEFT);
+		}
+		if (LL.ispressed){
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[strategy.left[autorun.target_l]][3][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[strategy.left[autorun.target_l]][3][1]*DELT_SPEED_LEFT);
 		
-		}else{ 
-		
-			
+		}
+		if(RD.ispressed){ 
+			RD.ispressed = false;
+			flywheel_left_fly1();
 		};
+		
+		if (RU.ispressed)
+		{ 
+			RU.ispressed = false;
+			if(autorun.state == pos_arrived)
+			{
+				autorun.launch_l_continute = true;
+			}else if(autorun.state == handle_control)
+			{
+				auto_select_l((autorun.target_l + 1) % 4);
+			}
+		}
+		if (RR.ispressed) {
+			RR.ispressed = false;
+		}
+		if (RL.ispressed) {
+			RL.ispressed = false;
+		}
+		
 	}else{ 
 		//USART_SendString(bluetooth,"msg: 000!\n");
 			
 	}
-	if (R2.ispressed){
-		Xianding=0;
-		if (LU.ispressed) Xianding +=200;					
-		if (LD.ispressed) Xianding -=200;
-		if (Xianding !=0){
-			//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-		}else{
-			
+	if (R2.ispressed && !L2.ispressed){
+		if (LU.ispressed){
+			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[strategy.right[autorun.target_r]][0][0]*DELT_YAW_RIGHT);
+			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[strategy.right[autorun.target_r]][0][1]*DELT_SPEED_RIGHT);
 		}
-		Xianding=0;
-		if (LL.ispressed) Xianding +=200;					
-		if (LR.ispressed) Xianding -=200;
-		if (Xianding !=0){
-			//USART_SendString(bluetooth,"msg: %d\n",Xianding);
-			
-		}else{
-			
+		if (LR.ispressed){
+			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[strategy.right[autorun.target_r]][1][0]*DELT_YAW_RIGHT);
+			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[strategy.right[autorun.target_r]][1][1]*DELT_SPEED_RIGHT);
+		
+		}
+		if (LD.ispressed){
+			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[strategy.right[autorun.target_r]][2][0]*DELT_YAW_RIGHT);
+			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[strategy.right[autorun.target_r]][2][1]*DELT_SPEED_RIGHT);
+		
+		}
+		if (LL.ispressed){
+			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[strategy.right[autorun.target_r]][3][0]*DELT_YAW_RIGHT);
+			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[strategy.right[autorun.target_r]][3][1]*DELT_SPEED_RIGHT);
+		
+		}
+		if(RD.ispressed){ 
+			RD.ispressed = false;
+			flywheel_right_fly1();
+		}
+		if (RU.ispressed)
+		{
+			RU.ispressed = false;
+			if(autorun.state == pos_arrived)
+			{
+				autorun.launch_r_continute = true;
+			}else if(autorun.state == handle_control)
+			{
+				auto_select_r((autorun.target_r + 1) % 3);
+			}
+		}
+		if (RR.ispressed) {
+			RR.ispressed = false;
+		}
+		if (RL.ispressed) {
+			RL.ispressed = false;
 		}
 	}else{
 		
 	}
-	Xianding=0;
-	if (L1.ispressed) Xianding +=200;					
-	if (R1.ispressed) Xianding -=200;
-	if (Xianding !=0){
-		//USART_SendString(bluetooth,"msg: %d\n",Xianding);
+	
+	if (L1.ispressed) 
+	{
 		
-	}else{
+	}		
+	if (R1.ispressed) {
 		
-	}
+	}	
+	
 	
 	if(OPEN_Hander == 1){
 		chassis.END.X=chassis.pos_x;

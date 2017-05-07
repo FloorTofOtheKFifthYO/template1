@@ -41,7 +41,7 @@ void init_subsector(u8 ID , u8 EN_unbrush,u8 channel ,u16 frep, u8 feedback_tim)
 	count = COUNT_NUM;
 	while(count-->0);
 	can_send_msg(ID,init_buf,7);
-	delay_ms(500);
+	delay_ms(200);
 	init_buf[0] |= EN_unbrush;//使能闭环
 	init_buf[1] = channel;
 	init_buf[2] =(u8)(frep>>8);
@@ -53,6 +53,7 @@ void init_subsector(u8 ID , u8 EN_unbrush,u8 channel ,u16 frep, u8 feedback_tim)
 	count = COUNT_NUM;
 	while(count-->0);
 	can_send_msg(ID,init_buf,7);
+	delay_ms(200);
 }
 //设置速度
 void setUnbrushSpeed_1(u8 ID,u8 channel , int speed){

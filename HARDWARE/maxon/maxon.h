@@ -11,8 +11,8 @@
 
 
 
-void maxon_setSpeed_i(u8 number , int si);
-void maxon_setSpeed_p(u8 number , int p);
+void maxon_setSpeed_i(USART_TypeDef* USARTx , int si);
+void maxon_setSpeed_p(USART_TypeDef* USARTx , int p);
 void maxon_setSpeed(USART_TypeDef* USARTx, int speed);
-void maxon_save();
+void maxon_save(USART_TypeDef* USARTx);
 

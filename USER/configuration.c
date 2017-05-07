@@ -4,7 +4,7 @@ GPIO_InitTypeDef GPIO_InitStructure;
 NVIC_InitTypeDef NVIC_InitStructure;
 EXTI_InitTypeDef exti_init_structure;
 
-u8 LEFT_RIGHT = 0;
+u8 LEFT_RIGHT = 0;//红场为0，蓝场为1
 u8 OPEN_Hander = 0;
 
 /*
@@ -159,8 +159,6 @@ void gpio_config(void)
 	GPIO_Configuration(GPIO_Pin_2,GPIO_Mode_AF,
 					   GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOD);
 	
-
-	
 	GPIO_Configuration(GPIO_Pin_6 | GPIO_Pin_7,GPIO_Mode_AF,
 	                   GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOC);
 	GPIO_PinAFConfig(GPIOC,GPIO_PinSource6,GPIO_AF_USART6); //GPIOC6复用为USART6
@@ -183,16 +181,17 @@ void gpio_config(void)
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource0, GPIO_AF_TIM5); 	
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource1, GPIO_AF_TIM5); */
 //----------------------------增量码盘---------------------------------------------------------------------------------------------
-	
-	GPIO_Configuration(GPIO_Pin_11,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOF);
-	GPIO_Configuration(GPIO_Pin_8,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOE);
+	GPIO_Configuration(GPIO_Pin_0,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
+	GPIO_Configuration(GPIO_Pin_1,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
+	GPIO_Configuration(GPIO_Pin_12,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOD);
+	GPIO_Configuration(GPIO_Pin_13,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOD);
 //----------------------------触碰开关---------------------------------------------------------------------------------------------
 	
 //	GPIO_Configuration(GPIO_Pin_5, GPIO_Mode_AF,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOE);
 //	GPIO_PinAFConfig(GPIOE, GPIO_PinSource5, GPIO_AF_TIM9);
-	GPIO_Configuration(GPIO_Pin_8|GPIO_Pin_9, GPIO_Mode_AF,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOF);
-	GPIO_PinAFConfig(GPIOF, GPIO_PinSource8, GPIO_AF_TIM13);
-	GPIO_PinAFConfig(GPIOF, GPIO_PinSource9, GPIO_AF_TIM14);
+//	GPIO_Configuration(GPIO_Pin_1|GPIO_Pin_0, GPIO_Mode_AF,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOF);
+//	GPIO_PinAFConfig(GPIOF, GPIO_PinSource8, GPIO_AF_TIM13);
+//	GPIO_PinAFConfig(GPIOF, GPIO_PinSource9, GPIO_AF_TIM14);
 //----------------------------PWM---------------------------------------------------------------------------------------------
 
 //	GPIO_Configuration(GPIO_Pin_11|GPIO_Pin_12|GPIO_Pin_13,GPIO_Mode_OUT,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_DOWN,GPIOG);
@@ -228,12 +227,18 @@ void EXTI_Configuration(uint32_t EXTI_Line,
 
 void EXTI_config()
 {
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource11);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource8);
-	EXTI_Configuration(EXTI_Line11,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
-	EXTI_Configuration(EXTI_Line8,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
-	EXTI_ClearITPendingBit(EXTI_Line11); 
-	EXTI_ClearITPendingBit(EXTI_Line8); 
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource1);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource0);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource13);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource12);
+	EXTI_Configuration(EXTI_Line1,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
+	EXTI_Configuration(EXTI_Line0,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
+	EXTI_Configuration(EXTI_Line13,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
+	EXTI_Configuration(EXTI_Line12,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
+	EXTI_ClearITPendingBit(EXTI_Line0); 
+	EXTI_ClearITPendingBit(EXTI_Line1); 
+	EXTI_ClearITPendingBit(EXTI_Line12); 
+	EXTI_ClearITPendingBit(EXTI_Line13); 
 }
 
 void nvic_config()
@@ -250,8 +255,8 @@ void nvic_config()
 //	NVIC_Configuration(TIM8_TRG_COM_TIM14_IRQn,1,1,ENABLE);
 //	NVIC_Configuration(TIM5_IRQn,1,1,ENABLE);
 	NVIC_Configuration(EXTI15_10_IRQn, 0, 0, ENABLE);
-	NVIC_Configuration(EXTI9_5_IRQn, 0, 0, ENABLE);
-
+	NVIC_Configuration(EXTI0_IRQn, 0, 0, ENABLE);
+	NVIC_Configuration(EXTI1_IRQn, 0, 0, ENABLE);
 	
 }
 

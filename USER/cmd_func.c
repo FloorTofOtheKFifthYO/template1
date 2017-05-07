@@ -10,12 +10,17 @@
 #include "auto.h"
 #include "delay.h"
 #include "math.h"
+#include "maxon.h"
 #include "param.h"
 
 extern s8 ptrS,ptrB;
 extern Param * param;
 extern bool g_stop_flag;
 extern bool switch_side;
+extern struct {
+	int left[7];
+	int right[7];
+}strategy;
 
 u8 target=0;       				//Ä¿±ê0-6
 
@@ -43,9 +48,39 @@ void cmd_stop_func(int argc,char *argv[]){
 
 void cmd_auto_func(int argc, char*argv[])
 {
+	int n1,n2;
 	if (strcmp(argv[1],"load") == 0)
 	{
 		autorun.load_run_flag = true;
+	}else if (strcmp(argv[1],"target") == 0)
+	{
+		if(argc != 5){
+			USART_SendString(bluetooth,"msg: Error!please enter:\n");
+            USART_SendString(bluetooth,"msg:    auto target <l or r> <n1> <n2>\n");
+			USART_SendString(bluetooth,"left: ");
+			for(n1 = 0;n1 < 7;n1++)
+				USART_SendString(bluetooth,"%d ",strategy.left[n1]);
+			USART_SendString(bluetooth,"\nright: ");
+			for(n1 = 0;n1 < 7;n1++)
+				USART_SendString(bluetooth,"%d ",strategy.right[n1]);
+			USART_SendString(bluetooth,"\n");
+			return;
+		}
+		n1 = atoi(argv[3]);
+		n2 = atoi(argv[4]);
+		if(strcmp(argv[2],"l") == 0)
+		{
+			strategy.left[n1] = n2;
+		}else{
+			strategy.right[n1] = n2;
+		}
+		USART_SendString(bluetooth,"left: ");
+		for(n1 = 0;n1 < 7;n1++)
+			USART_SendString(bluetooth,"%d ",strategy.left[n1]);
+		USART_SendString(bluetooth,"\nright: ");
+		for(n1 = 0;n1 < 7;n1++)
+			USART_SendString(bluetooth,"%d ",strategy.right[n1]);
+		USART_SendString(bluetooth,"\n");
 	}else if (strcmp(argv[1],"select") == 0)
 	{
 		if(strcmp(argv[2],"l") == 0)
@@ -100,7 +135,12 @@ void cmd_test_func(int argc,char *argv[]){
 	if(strcmp(argv[1],"home")==0)
 	{
 		home_flag = true;
-	}
+	}else if(strcmp(argv[1],"chassis")==0){
+		maxon_setSpeed(MOTOR0_ID,atoi(argv[2]));
+		maxon_setSpeed(MOTOR1_ID,atoi(argv[2]));
+		maxon_setSpeed(MOTOR2_ID,atoi(argv[2]));
+		maxon_setSpeed(MOTOR3_ID,atoi(argv[2]));
+	}	
 }
 
 void cmd_pos_func(int argc,char *argv[])

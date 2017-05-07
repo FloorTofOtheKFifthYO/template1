@@ -31,14 +31,14 @@ void flywheel_right_init()
 	delay_ms(5);
 	RoboModule_CHOICE_mode(PositionMode ,PITCH_ID_RIGHT,YAW_ID_RIGHT ,0);
 	RoboModule_Add_Callback(databack,RoboModule_Feedback_Callback,PITCH_ID_RIGHT,YAW_ID_RIGHT,0);
-	RoboModule_SETUP(9,0,PITCH_ID_RIGHT,YAW_ID_RIGHT,0);
+	RoboModule_SETUP(19,0,PITCH_ID_RIGHT,YAW_ID_RIGHT,0);
 	
 
 	flywheel_right.io[0] = 0;
 	flywheel_right.io[1] = 0;
 	flywheel_right.io[2] = 0;
 	
-	init_subsector(CLIENT_ID_RIGHT,1,FLYWHEEL_CHANNEL_RIGHT,50,31);
+	init_subsector(CLIENT_ID_RIGHT,1,FLYWHEEL_CHANNEL_RIGHT,50,FLYWHEEL_FEEDBACK_RIGHT);
 	setUnbrushSpeed_1(CLIENT_ID_RIGHT,FLYWHEEL_CHANNEL_RIGHT,0);
 	set_IO(CLIENT_ID_RIGHT,flywheel_right.io);
 	flywheel_right.pur_duty = 7.7;
@@ -154,7 +154,7 @@ bool flywheel_right_check()
 {
 	static int flag = 1;
 	if( fabs(ReturnData(PITCH_ID_RIGHT)->Position -flywheel_right.pur_pitch*100)<=30 && 
-		fabs(ReturnData(YAW_ID_RIGHT)->Position -flywheel_right.pur_yaw*100)<=30)
+		fabs(ReturnData(YAW_ID_RIGHT)->Position -flywheel_right.pur_yaw*100)<=40)
 		{
 			if(flag == 1)
 			{
@@ -172,6 +172,7 @@ bool flywheel_right_check()
 void flywheel_right_fly1(){
 	fly_n = 2;
 	flywheel_right_fly();
+	flywheel_right_up(1);
 	fly_count = 300;
 	fly_n--;
 	flywheel_right.state = r_fly;
@@ -182,17 +183,14 @@ void flywheel_right_up(int i)
 {
 	if(i == -1)
 		flywheel_right.io[UP_RIGHT] = 1 - flywheel_right.io[UP_RIGHT];
-	else 
+	else if(flywheel_right.io[UP_RIGHT] != i){
 		flywheel_right.io[UP_RIGHT] = i;
-	set_IO(CLIENT_ID_RIGHT,flywheel_right.io);
+		set_IO(CLIENT_ID_RIGHT,flywheel_right.io);
+	}
 }
 
 void flywheel_right_stop()
 {
-	flywheel_right.pur_duty = 7.7;
-	flywheel_right.pur_jmp = 6;
-	flywheel_right.pur_pitch = 0;
-	flywheel_right.pur_yaw = 0;
 	flywheel_right_setBrushless(7.7);
 	flywheel_right_setPitch(ReturnData(PITCH_ID_RIGHT)->Position/100.f);
 	flywheel_right_setYaw(ReturnData(YAW_ID_RIGHT)->Position/100.f);
@@ -274,7 +272,7 @@ void flywheel_right_main()
 					
 					if(fly_n%2 == 0)
 					{
-						if(fly_count == 700)
+						if(fly_count <= 300)
 							flywheel_right_up(1);
 					}
 					
@@ -289,7 +287,7 @@ void flywheel_right_main()
 							flywheel_right_fly();
 							if(fly_n%2 == 1){
 								flywheel_right_up(0);
-								fly_count = 1000;
+								fly_count = 700;
 							}else
 								fly_count = 300;
 							fly_n--;

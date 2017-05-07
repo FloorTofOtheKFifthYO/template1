@@ -13,7 +13,7 @@
 #include "link_list.h"
 #include "param.h"
 
-#define AUTO_FIRST_RUN 1
+#define AUTO_FIRST_RUN 0
 #define AUTO_FLASH_SETOR FLASH_Sector_7 //  ÉÈÇø7
 #define AUTO_FLASH_ADDR_START ((uint32_t)0x08060000)
 #define AUTO_FLASH_ADDR_END ((uint32_t)0x0807FFFF)

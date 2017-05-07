@@ -4,7 +4,6 @@
 #include "flywheel_left.h"
 #include "flywheel_right.h"
 #include "auto.h"
-#include "step.h"
 
 bool g_stop_flag = false;
 
@@ -13,10 +12,17 @@ bool switch_side = false;
 int ms = 0;
 
 void TIM2_IRQHandler(void){
+	static int tmpcount = 1000;
 	if( TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET ) 
 	{
 		ms++;
-		//control_usart_TIM();
+		tmpcount--;
+		if(tmpcount==0){
+			tmpcount = 1000;
+			USART_SendString(bluetooth,"msg: left pitch:%d yaw:%d\n",ReturnData(PITCH_ID_LEFT)->Position,ReturnData(YAW_ID_LEFT)->Position);
+			USART_SendString(bluetooth,"msg: right pitch:%d yaw:%d\n",ReturnData(PITCH_ID_RIGHT)->Position,ReturnData(YAW_ID_RIGHT)->Position);
+		}
+		control_usart_TIM();
 		flywheel_left_TIM();
 		flywheel_right_TIM();
 		TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);//必须清除中断标志位否则一直中断
@@ -38,7 +44,7 @@ int main(void)
 reboot:	
 	
 	usart_init(bluetooth,115200,true);
-	//controller_usart_init(&Hx, &Hy);
+	controller_usart_init(&Hx, &Hy);
 	
 	cmd_init();
 	can_init();
@@ -52,7 +58,6 @@ reboot:
 	
 	EXTI_config();
 	
-	
 	auto_init();
 //	autorun.state = load_arrived;
 	
@@ -62,6 +67,11 @@ reboot:
 	
     while(1) 
 	{
+		bottons_check();
+		//sticks_check(Hx,Hy);
+		/********手柄部分***********/
+		//USART_SendString(CMD_USARTx,"Ohi\n");
+		control_usart_main();
 		if(switch_side)
 		{
 			switch_side = false;
@@ -72,23 +82,22 @@ reboot:
 			flywheel_left_stop();
 			flywheel_right_stop();
 		}else{
-			bottons_check();
-			//sticks_check(Hx,Hy);
+			
 			chassis_update();
 			flywheel_left_main();
 			flywheel_right_main();
+			auto_main();
 			if(OPEN_Hander ==0){
 				/**-------------------------自动部分--------------------------------**/
-				auto_main();
 				chassis_auto();
 			}
 			else if(OPEN_Hander ==1)
 			{
 				/********手柄部分***********/
 				//USART_SendString(CMD_USARTx,"Ohi\n");
-				control_usart_main();
+				//control_usart_main();
 			}
 		}
-		delay_ms(6);
+		//delay_ms(2);
 	}
 }

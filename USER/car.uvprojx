@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM;..\HARDWARE\motor_usart;..\MODULE\flywheel_left;..\MODULE\hit;..\HARDWARE\motor_brushless;..\HARDWARE\controller_usart;..\HARDWARE\putter;..\HARDWARE\motorCtrl;..\HARDWARE\relay;..\MODULE\flywheel_right;..\MODULE\client;..\HARDWARE\step;..\HARDWARE\flywheel_close;..\HARDWARE\maxon;..\MODULE\chassis_maxon</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM;..\HARDWARE\motor_usart;..\MODULE\flywheel_left;..\HARDWARE\motor_brushless;..\HARDWARE\controller_usart;..\HARDWARE\motorCtrl;..\HARDWARE\relay;..\MODULE\flywheel_right;..\MODULE\client;..\HARDWARE\flywheel_close;..\HARDWARE\maxon;..\MODULE\chassis_maxon;..\HARDWARE\radar</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -494,11 +494,6 @@
               <FilePath>..\HARDWARE\controller\controller.c</FilePath>
             </File>
             <File>
-              <FileName>motor_usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\motor_usart\motor_usart.c</FilePath>
-            </File>
-            <File>
               <FileName>controller_usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\controller_usart\controller_usart.c</FilePath>
@@ -507,16 +502,6 @@
               <FileName>motorCtrl.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\motorCtrl\motorCtrl.c</FilePath>
-            </File>
-            <File>
-              <FileName>step.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\step\step.c</FilePath>
-            </File>
-            <File>
-              <FileName>flywheel_close.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\flywheel_close\flywheel_close.c</FilePath>
             </File>
             <File>
               <FileName>maxon.c</FileName>
@@ -532,6 +517,11 @@
               <FileName>vega.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\vega\vega.c</FilePath>
+            </File>
+            <File>
+              <FileName>radar.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\radar\radar.c</FilePath>
             </File>
           </Files>
         </Group>

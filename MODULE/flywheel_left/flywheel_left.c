@@ -31,14 +31,14 @@ void flywheel_left_init()
 	delay_ms(5);
 	RoboModule_CHOICE_mode(PositionMode ,PITCH_ID_LEFT,YAW_ID_LEFT ,0);
 	RoboModule_Add_Callback(databack,RoboModule_Feedback_Callback,PITCH_ID_LEFT,YAW_ID_LEFT,0);
-	RoboModule_SETUP(9,0,PITCH_ID_LEFT,YAW_ID_LEFT,0);
+	RoboModule_SETUP(23,0,PITCH_ID_LEFT,YAW_ID_LEFT,0);
 	
 
 	flywheel_left.io[0] = 0;
 	flywheel_left.io[1] = 0;
 	flywheel_left.io[2] = 0;
 	
-	init_subsector(CLIENT_ID_LEFT,1,FLYWHEEL_CHANNEL_LEFT,50,31);
+	init_subsector(CLIENT_ID_LEFT,1,FLYWHEEL_CHANNEL_LEFT,50,FLYWHEEL_FEEDBACK_LEFT);
 	setUnbrushSpeed_1(CLIENT_ID_LEFT,FLYWHEEL_CHANNEL_LEFT,0);
 	set_IO(CLIENT_ID_LEFT,flywheel_left.io);
 	flywheel_left.pur_duty = 7.7;
@@ -143,6 +143,7 @@ void flywheel_left_flyn(int n, float duty, float pitch, float yaw)
 	flywheel_left.pur_duty = duty;
 	flywheel_left.pur_pitch = pitch;
 	flywheel_left.pur_yaw = yaw;
+	flywheel_left.state = fly_l_finish;
 	flywheel_left.fly_flag = true;
 }
 
@@ -172,6 +173,7 @@ bool flywheel_left_check()
 void flywheel_left_fly1(){
 	fly_n = 2;
 	flywheel_left_fly();
+	flywheel_left_up(1);
 	fly_count = 300;
 	fly_n--;
 	flywheel_left.state = fly;
@@ -182,17 +184,14 @@ void flywheel_left_up(int i)
 {
 	if(i == -1)
 		flywheel_left.io[UP_LEFT] = 1 - flywheel_left.io[UP_LEFT];
-	else 
+	else if(flywheel_left.io[UP_LEFT] != i){
 		flywheel_left.io[UP_LEFT] = i;
-	set_IO(CLIENT_ID_LEFT,flywheel_left.io);
+		set_IO(CLIENT_ID_LEFT,flywheel_left.io);
+	}
 }
 
 void flywheel_left_stop()
 {
-	flywheel_left.pur_duty = 7.7;
-	flywheel_left.pur_jmp = 6;
-	flywheel_left.pur_pitch = 0;
-	flywheel_left.pur_yaw = 0;
 	flywheel_left_setBrushless(7.7);
 	flywheel_left_setPitch(ReturnData(PITCH_ID_LEFT)->Position/100.f);
 	flywheel_left_setYaw(ReturnData(YAW_ID_LEFT)->Position/100.f);
@@ -234,7 +233,7 @@ void flywheel_left_home()
 /**
   * @brief main大循环中检查
   *     
-  * @note
+  * @note 状态转移
   *
   * @param
   *          
@@ -252,6 +251,7 @@ void flywheel_left_main()
 				flywheel_left_setBrushless(flywheel_left.pur_duty);
 				flywheel_left.io[FLY_LEFT] = 0;
 				flywheel_left.io[UP_LEFT] = 1;
+				fly_count = 0;
 				set_IO(CLIENT_ID_LEFT,flywheel_left.io);
 			case fly_adj:
 				if(flywheel_left_check() && fly_count == 0 && autorun.state == pos_arrived)
@@ -274,7 +274,7 @@ void flywheel_left_main()
 					
 					if(fly_n%2 == 0)
 					{
-						if(fly_count == 700)
+						if(fly_count <= 300)
 							flywheel_left_up(1);
 					}
 					
@@ -289,7 +289,7 @@ void flywheel_left_main()
 							flywheel_left_fly();
 							if(fly_n%2 == 1){
 								flywheel_left_up(0);
-								fly_count = 1000;
+								fly_count = 700;
 							}else
 								fly_count = 300;
 							fly_n--;

@@ -4,6 +4,7 @@
 #include <math.h>
 #include "flash.h"
 #include "maxon.h"
+#include "radar.h"
 #include "cmd.h"
 
 Chassis chassis;
@@ -19,6 +20,7 @@ void chassis_init(void)
 {
 	u32 addr = CHASSIS_FLASH_ADDR_START;
 	
+	radar_init(&(chassis.radar_theta),&(chassis.radar_distance));
 	vega_init(&(chassis.g_vega_pos_x),&(chassis.g_vega_pos_y),&(chassis.g_vega_angle));
     vega_reset();
 	delay_ms(2000);
@@ -26,6 +28,22 @@ void chassis_init(void)
 	usart_init(MOTOR1_ID,115200,false);
 	usart_init(MOTOR2_ID,115200,false);
 	usart_init(MOTOR3_ID,115200,false);
+	
+	/*maxon_setSpeed_p(MOTOR0_ID,4000);
+	maxon_setSpeed_p(MOTOR1_ID,4000);
+	maxon_setSpeed_p(MOTOR2_ID,4000);
+	maxon_setSpeed_p(MOTOR3_ID,4000);
+	
+	maxon_setSpeed_i(MOTOR0_ID,2000);
+	maxon_setSpeed_i(MOTOR1_ID,2000);
+	maxon_setSpeed_i(MOTOR2_ID,2000);
+	maxon_setSpeed_i(MOTOR3_ID,2000);
+	
+	maxon_save(MOTOR0_ID);
+	maxon_save(MOTOR1_ID);
+	maxon_save(MOTOR2_ID);
+	maxon_save(MOTOR3_ID);*/
+	
 	maxon_setSpeed(MOTOR0_ID,0);
 	maxon_setSpeed(MOTOR3_ID,0);
 	maxon_setSpeed(MOTOR1_ID,0);
@@ -139,16 +157,20 @@ void chassis_handle(float directoion, int speed)
 {
 	static bool stop = false;
 	
-	Chassis_motor0 = (speed*cos((CH_angle_M0 + chassis.angle) - directoion));
-	Chassis_motor1 = (speed*cos((CH_angle_M1 + chassis.angle) - directoion));
-	Chassis_motor2 = (speed*cos((CH_angle_M2 + chassis.angle) - directoion));
-	Chassis_motor3 = (speed*cos((CH_angle_M3 + chassis.angle) - directoion));
+	Chassis_motor0 = -(speed*cos((CH_angle_M0 + chassis.angle) - directoion));
+	Chassis_motor1 = -(speed*cos((CH_angle_M1 + chassis.angle) - directoion));
+	Chassis_motor2 = -(speed*cos((CH_angle_M2 + chassis.angle) - directoion));
+	Chassis_motor3 = -(speed*cos((CH_angle_M3 + chassis.angle) - directoion));
 	
 	if(fabs(Chassis_motor0)<1e-6 && fabs(Chassis_motor1)<1e-6 && fabs(Chassis_motor2)<1e-6)
 	{
 		 if(!stop)
 		 {
 			stop = true;
+			maxon_setSpeed(MOTOR0_ID,0);
+			maxon_setSpeed(MOTOR1_ID,0);
+			maxon_setSpeed(MOTOR2_ID,0);
+			maxon_setSpeed(MOTOR3_ID,0);
 			maxon_setSpeed(MOTOR0_ID,0);
 			maxon_setSpeed(MOTOR1_ID,0);
 			maxon_setSpeed(MOTOR2_ID,0);
@@ -178,6 +200,7 @@ void chassis_auto()
 	static float distance;
 	float direction_angle;
 	
+	int arrived_flag = 0;
 	float i;
 	
 	if(chassis.car_state == car_ready){
@@ -232,6 +255,10 @@ void chassis_auto()
 		*/
 		if(ChassisSpeed>chassis.Speed_max)
 			ChassisSpeed = chassis.Speed_max;
+		else if(ChassisSpeed < chassis.Speed_min)
+		{
+			ChassisSpeed = chassis.Speed_min;
+		}
 		
 		if(errorAngle >= chassis.Angle_radium && errorAngle < 2)
 		{          //角度调整
@@ -251,21 +278,25 @@ void chassis_auto()
 		}
 		else
 		{
+			arrived_flag += 1;
 			TURN_speed= 0;
+		}
+		
+		if(TURN_speed>0 && TURN_speed<chassis.Speed_min)
+		{
+			TURN_speed = chassis.Speed_min;
+		}else if (TURN_speed<0 && TURN_speed>-chassis.Speed_min)
+		{
+			TURN_speed = -chassis.Speed_min;
 		}
 		
 		if(powf(error_X,2)+powf(error_Y,2) <= chassis.Move_radium)
 		{//已经到达
 			i = 1;
+			arrived_flag += 1;
 			ChassisSpeed = 0;
 		}else {
-			if(ChassisSpeed < chassis.Speed_min && ChassisSpeed > 0)
-			{
-				ChassisSpeed = chassis.Speed_min;
-			}else if(ChassisSpeed > -chassis.Speed_min && ChassisSpeed < 0)
-			{
-				ChassisSpeed = -chassis.Speed_min;
-			}
+			
 			if(distance<=1 || powf(error_X,2)+powf(error_Y,2) <= 0.5 || Sroute >= distance)
 			{	
 				direction_angle = atan2(error_Y,error_X);
@@ -274,18 +305,22 @@ void chassis_auto()
 				direction_angle = atan2(direrror_Y,direrror_X);
 		}
 
-		Chassis_motor0 = (ChassisSpeed * cos((CH_angle_M0 - chassis.angle) - direction_angle) - TURN_speed);//Y轴方向，这里direction_angle代表小车相对于场地坐标系的方向
-		Chassis_motor1 = (ChassisSpeed * cos((CH_angle_M1 - chassis.angle) - direction_angle) - TURN_speed);
-		Chassis_motor2 = (ChassisSpeed * cos((CH_angle_M2 - chassis.angle) - direction_angle) - TURN_speed);
-		Chassis_motor3 = (ChassisSpeed * cos((CH_angle_M3 - chassis.angle) - direction_angle) - TURN_speed);
+		Chassis_motor0 = -(ChassisSpeed * cos((CH_angle_M0 - chassis.angle) - direction_angle) - TURN_speed);//Y轴方向，这里direction_angle代表小车相对于场地坐标系的方向
+		Chassis_motor1 = -(ChassisSpeed * cos((CH_angle_M1 - chassis.angle) - direction_angle) - TURN_speed);
+		Chassis_motor2 = -(ChassisSpeed * cos((CH_angle_M2 - chassis.angle) - direction_angle) - TURN_speed);
+		Chassis_motor3 = -(ChassisSpeed * cos((CH_angle_M3 - chassis.angle) - direction_angle) - TURN_speed);
 		
 		//USART_SendString(bluetooth,"%d,%d,%d,%d,%f",Chassis_motor0,Chassis_motor1,Chassis_motor2, Chassis_motor3,direction_angle);
 		//USART_SendString(bluetooth,",%d,%d,%d,%d,%f\n",ReturnData(MOTOR0_ID)->Speed,ReturnData(MOTOR1_ID)->Speed,ReturnData(MOTOR2_ID)->Speed,ReturnData(MOTOR3_ID)->Speed,Sroute);
 		
 		//USART_SendString(bluetooth,"dot x:%f,y:%f\n",dir_dot_X,dir_dot_Y);
 		
-		if(fabs(Chassis_motor2) < 2 && fabs(Chassis_motor1) < 2 && fabs(Chassis_motor0) < 2 && fabs(Chassis_motor3) < 2)
+		if(arrived_flag == 2)
 		{
+			maxon_setSpeed(MOTOR0_ID,0);
+			maxon_setSpeed(MOTOR1_ID,0);
+			maxon_setSpeed(MOTOR2_ID,0);
+			maxon_setSpeed(MOTOR3_ID,0);
 			maxon_setSpeed(MOTOR0_ID,0);
 			maxon_setSpeed(MOTOR1_ID,0);
 			maxon_setSpeed(MOTOR2_ID,0);
