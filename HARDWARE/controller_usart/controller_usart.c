@@ -219,7 +219,7 @@ void control_usart_main()
 	float direction_angle;
 	
 	Xianding = 0;
-	ChassisSpeed = 1000;
+	ChassisSpeed = 500;
 	if (!L2.ispressed&&!R2.ispressed){
 		
 		if (LU.ispressed) direction_angle = 3*PI/4;

@@ -1,6 +1,7 @@
 #include "radar.h"
 #include "usart.h"
-#include <memory.h>
+#include "vega.h"
+#include <string.h>
 
 bool data_recv = true;
 static float *theta;
@@ -20,6 +21,9 @@ void can_test_func(CanRxMsg* can_rx_msg)
 		converter.u8_form[2] = can_rx_msg->Data[6];
 		converter.u8_form[3] = can_rx_msg->Data[7];
 		memcpy((void*)distance,&converter.float_form,4);
+		
+		USART_SendString(bluetooth,"theta:%f distance:%f",*theta,*distance);
+		USART_SendString(bluetooth,"\n");
 	}
 	else{
 		memcpy((void*)recv,can_rx_msg->Data,can_rx_msg->DLC);

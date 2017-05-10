@@ -16,12 +16,12 @@ void TIM2_IRQHandler(void){
 	if( TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET ) 
 	{
 		ms++;
-		tmpcount--;
+		/*tmpcount--;
 		if(tmpcount==0){
 			tmpcount = 1000;
 			USART_SendString(bluetooth,"msg: left pitch:%d yaw:%d\n",ReturnData(PITCH_ID_LEFT)->Position,ReturnData(YAW_ID_LEFT)->Position);
 			USART_SendString(bluetooth,"msg: right pitch:%d yaw:%d\n",ReturnData(PITCH_ID_RIGHT)->Position,ReturnData(YAW_ID_RIGHT)->Position);
-		}
+		}*/
 		control_usart_TIM();
 		flywheel_left_TIM();
 		flywheel_right_TIM();
@@ -35,18 +35,18 @@ void TIM2_IRQHandler(void){
 int main(void)
 {   
 	int Hx, Hy;
-	
+
 	rcc_config();
 	gpio_config();
 	delay_init(168);  //初始化延时函数
 	nvic_config();
+	usart_init(bluetooth,115200,true);
+	cmd_init();
+	EXTI_config();
 	
 reboot:	
-	
-	usart_init(bluetooth,115200,true);
 	controller_usart_init(&Hx, &Hy);
 	
-	cmd_init();
 	can_init();
 	
 	chassis_init();
@@ -56,10 +56,8 @@ reboot:
 	flywheel_left_init();
 	flywheel_right_init();
 	
-	EXTI_config();
-	
 	auto_init();
-//	autorun.state = load_arrived;
+//	autorun.state = pos_arrived;
 	
 	USART_SendString(UART5,"msg: Let's go!\n");
 	

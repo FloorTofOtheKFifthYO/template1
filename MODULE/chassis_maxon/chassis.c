@@ -282,13 +282,13 @@ void chassis_auto()
 			TURN_speed= 0;
 		}
 		
-		if(TURN_speed>0 && TURN_speed<chassis.Speed_min)
+		/*if(TURN_speed>0 && TURN_speed<chassis.Speed_min)
 		{
 			TURN_speed = chassis.Speed_min;
 		}else if (TURN_speed<0 && TURN_speed>-chassis.Speed_min)
 		{
 			TURN_speed = -chassis.Speed_min;
-		}
+		}*/
 		
 		if(powf(error_X,2)+powf(error_Y,2) <= chassis.Move_radium)
 		{//已经到达

@@ -2,7 +2,6 @@
 #include <string.h>
 #include "auto.h"
 #include <math.h>
-#include "step.h"
 #include "usart.h"
 #include "flywheel_close.h"
 
@@ -265,36 +264,34 @@ void flywheel_left_main()
 					}else{
 						USART_SendString(bluetooth,"msg:high fly!!\n");
 						flywheel_left_fly();
-						fly_count = 300;
+						fly_count = 150;
 						fly_n--;
 					}
 				}
 				break;
 			case fly:
-					
-					if(fly_n%2 == 0)
+				if(fly_count == 0)
+				{
+					if(fly_n == 0)
 					{
-						if(fly_count <= 300)
-							flywheel_left_up(1);
-					}
-					
-					if(fly_count == 0)
-					{
-						if(fly_n == 0)
-						{
-							fly_count = 0;
-							flywheel_left.state = fly_l_finish;
-							flywheel_left.fly_flag = false;
-						}else{
-							flywheel_left_fly();
-							if(fly_n%2 == 1){
+						fly_count = 0;
+						flywheel_left_up(1);
+						flywheel_left.state = fly_l_finish;
+						flywheel_left.fly_flag = false;
+					}else{
+						flywheel_left_fly();
+						if(fly_n % 2 == 1){
+							if(fly_n % 6 == 1)
 								flywheel_left_up(0);
-								fly_count = 700;
-							}else
-								fly_count = 300;
-							fly_n--;
+							fly_count = 150;
+						}else{
+							if(fly_n % 6 == 0)
+								flywheel_left_up(1);
+							fly_count = 150;
 						}
+						fly_n--;
 					}
+				}
 				break;
 			case fly_l_finish:
 				if(flywheel_left.fly_flag)
