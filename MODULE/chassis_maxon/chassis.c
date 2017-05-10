@@ -235,7 +235,7 @@ void chassis_auto()
 		direrror_X = dir_dot_X - chassis.pos_x;
 		direrror_Y = dir_dot_Y - chassis.pos_y;
 		
-		if(chassis.factor * Sroute < Eroute * Eroute) {//加速
+		if(chassis.factor * Sroute < Eroute) {//加速
 			//if(Sroute*chassis.factor<1)
 				ChassisSpeed = sqrtf(Sroute)*chassis.Move_speed * sqrtf(chassis.factor);
 			//else
@@ -282,13 +282,13 @@ void chassis_auto()
 			TURN_speed= 0;
 		}
 		
-		/*if(TURN_speed>0 && TURN_speed<chassis.Speed_min)
+		if(TURN_speed>0 && TURN_speed<20)
 		{
-			TURN_speed = chassis.Speed_min;
-		}else if (TURN_speed<0 && TURN_speed>-chassis.Speed_min)
+			TURN_speed = 20;
+		}else if (TURN_speed<0 && TURN_speed>-20)
 		{
-			TURN_speed = -chassis.Speed_min;
-		}*/
+			TURN_speed = -20;
+		}
 		
 		if(powf(error_X,2)+powf(error_Y,2) <= chassis.Move_radium)
 		{//已经到达
