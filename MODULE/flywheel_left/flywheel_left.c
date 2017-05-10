@@ -2,7 +2,6 @@
 #include <string.h>
 #include "auto.h"
 #include <math.h>
-#include "step.h"
 #include "usart.h"
 #include "flywheel_close.h"
 

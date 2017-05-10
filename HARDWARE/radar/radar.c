@@ -1,6 +1,7 @@
 #include "radar.h"
 #include "usart.h"
-#include <memory.h>
+#include "vega.h"
+#include <string.h>
 
 bool data_recv = true;
 static float *theta;

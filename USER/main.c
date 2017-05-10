@@ -16,12 +16,12 @@ void TIM2_IRQHandler(void){
 	if( TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET ) 
 	{
 		ms++;
-		tmpcount--;
+		/*tmpcount--;
 		if(tmpcount==0){
 			tmpcount = 1000;
 			USART_SendString(bluetooth,"msg: left pitch:%d yaw:%d\n",ReturnData(PITCH_ID_LEFT)->Position,ReturnData(YAW_ID_LEFT)->Position);
 			USART_SendString(bluetooth,"msg: right pitch:%d yaw:%d\n",ReturnData(PITCH_ID_RIGHT)->Position,ReturnData(YAW_ID_RIGHT)->Position);
-		}
+		}*/
 		control_usart_TIM();
 		flywheel_left_TIM();
 		flywheel_right_TIM();
