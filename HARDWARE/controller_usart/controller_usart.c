@@ -19,12 +19,12 @@ extern struct {
 #define BT_DOWN 2
 #define BT_LEFT 3
 
-#define DELT_YAW_LEFT -0.0005
-#define DELT_SPEED_LEFT 0.0001
+#define DELT_YAW_LEFT -0.01
+#define DELT_SPEED_LEFT 0.00001
 #define FACTOR_SPEED_LEFT 1
 
-#define DELT_YAW_RIGHT -0.0005
-#define DELT_SPEED_RIGHT 0.0001
+#define DELT_YAW_RIGHT -0.0002
+#define DELT_SPEED_RIGHT 0.00005
 #define FACTOR_SPEED_RIGHT 1
 
 //иосробвС

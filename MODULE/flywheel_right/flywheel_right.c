@@ -61,6 +61,7 @@ void flywheel_right_setPitch(float pitch)
 {
 	flywheel_right.pur_pitch = pitch;
 	RoboModule_SET_Position(PITCH_ID_RIGHT,5000,pitch*100,PITCH_MAXSPEED);
+	//RoboModule_SET_Position(PITCH_ID_RIGHT,5000,pitch*100,PITCH_MAXSPEED);
 }
 
 void flywheel_right_fly()
@@ -83,6 +84,7 @@ void flywheel_right_setBrushless(float duty)
 	flywheel_right.pur_duty = duty;
 	//setUnbrushSpeed(FLYWHEEL_ID_RIGHT,(duty-7.7)/(10-7.7)*8*100);
 	setUnbrushSpeed_1(CLIENT_ID_RIGHT,FLYWHEEL_CHANNEL_RIGHT,(duty-7.7)/(10-7.7)*8*100);
+	//setUnbrushSpeed_1(CLIENT_ID_RIGHT,FLYWHEEL_CHANNEL_RIGHT,(duty-7.7)/(10-7.7)*8*100);
 }
 
 
@@ -106,6 +108,7 @@ void flywheel_right_setYaw(float yaw)
 {
 	flywheel_right.pur_yaw = yaw;
 	RoboModule_SET_Position(YAW_ID_RIGHT,5000,yaw*100,YAW_MAXSPEED);
+	//RoboModule_SET_Position(YAW_ID_RIGHT,5000,yaw*100,YAW_MAXSPEED);
 }
 
 /**
@@ -260,9 +263,9 @@ void flywheel_right_main()
 						flywheel_right.state = fly_r_ready;
 						flywheel_right.fly_flag = false;
 					}else{
-						USART_SendString(bluetooth,"msg:high fly!!\n");
+						USART_SendString(bluetooth,"msg:right fly!!\n");
 						flywheel_right_fly();
-						fly_count = 200;
+						fly_count = 300;
 						fly_n--;
 					}
 				}
@@ -281,11 +284,11 @@ void flywheel_right_main()
 						if(fly_n % 2 == 1){
 							if(fly_n % 6 == 1)
 								flywheel_right_up(0);
-							fly_count = 200;
+							fly_count = 700;
 						}else{
 							if(fly_n % 6 == 0)
 								flywheel_right_up(1);
-							fly_count = 200;
+							fly_count = 300;
 						}
 						fly_n--;
 					}

@@ -731,6 +731,7 @@ void cmd_launch_func(int argc,char *argv[])
 		else{
 			no = atoi(argv[2]);
 			target = no;
+			autorun.target_l = target;
 			USART_SendString(CMD_USARTx,"target:%d\n",target);
 		}
 	}else if(argc == 8) {
