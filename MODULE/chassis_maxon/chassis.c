@@ -235,7 +235,7 @@ void chassis_auto()
 		direrror_X = dir_dot_X - chassis.pos_x;
 		direrror_Y = dir_dot_Y - chassis.pos_y;
 		
-		if(chassis.factor * Sroute < Eroute) {//加速
+		if(sqrtf(chassis.factor) * sqrtf(Sroute) < Eroute + sqrtf(Eroute)) {//加速
 			//if(Sroute*chassis.factor<1)
 				ChassisSpeed = sqrtf(Sroute)*chassis.Move_speed * sqrtf(chassis.factor);
 			//else
@@ -245,10 +245,13 @@ void chassis_auto()
 				ChassisSpeed = sqrtf(Eroute) * chassis.Move_speed;
 			else
 				ChassisSpeed = 1.414 * Eroute * chassis.Move_speed;*/
-			if(Eroute > 1)
+			/*if(Eroute > 1)
 				ChassisSpeed = sqrtf(Eroute) * chassis.Move_speed;
 			else
-				ChassisSpeed = Eroute * chassis.Move_speed;
+				ChassisSpeed = Eroute * chassis.Move_speed;*/
+			
+			ChassisSpeed = (sqrtf(Eroute)+ 1*Eroute) * chassis.Move_speed;
+			
 		}
 		/*if((powf(error_X,2)+powf(error_Y,2)) > 1)
 			ChassisSpeed = sqrt(powf(error_X,2)+powf(error_Y,2))*Move_speed;
