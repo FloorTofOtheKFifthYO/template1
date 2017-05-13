@@ -145,6 +145,7 @@ void flywheel_right_flyn(int n, float duty, float pitch, float yaw)
 	flywheel_right.pur_duty = duty;
 	flywheel_right.pur_pitch = pitch;
 	flywheel_right.pur_yaw = yaw;
+	flywheel_right.state = fly_r_finish;
 	flywheel_right.fly_flag = true;
 }
 

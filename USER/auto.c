@@ -327,7 +327,9 @@ void auto_main()
 		case pos_running:
 			if(chassis.car_state == car_stop)
 			{
+				
 				radar_start();
+				radar_shoot();
 				autorun.state = pos_arrived;
 			}else if(autorun.load_run_flag)//跑的过程中突然改变方向
 			{

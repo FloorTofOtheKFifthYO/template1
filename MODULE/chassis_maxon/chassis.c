@@ -235,7 +235,7 @@ void chassis_auto()
 		direrror_X = dir_dot_X - chassis.pos_x;
 		direrror_Y = dir_dot_Y - chassis.pos_y;
 		
-		if(sqrtf(chassis.factor) * sqrtf(Sroute) < Eroute + sqrtf(Eroute)) {//加速
+		if(sqrtf(chassis.factor) * sqrtf(Sroute) < 0.25*Eroute + sqrtf(Eroute)) {//加速
 			//if(Sroute*chassis.factor<1)
 				ChassisSpeed = sqrtf(Sroute)*chassis.Move_speed * sqrtf(chassis.factor);
 			//else
@@ -250,7 +250,7 @@ void chassis_auto()
 			else
 				ChassisSpeed = Eroute * chassis.Move_speed;*/
 			
-			ChassisSpeed = (sqrtf(Eroute)+ 1*Eroute) * chassis.Move_speed;
+			ChassisSpeed = (sqrtf(Eroute)+ 0.25*Eroute) * chassis.Move_speed;
 			
 		}
 		/*if((powf(error_X,2)+powf(error_Y,2)) > 1)
@@ -338,6 +338,10 @@ void chassis_auto()
 		{
 			maxon_setSpeed(MOTOR0_ID,Chassis_motor0);
 			maxon_setSpeed(MOTOR1_ID,Chassis_motor1);
+			maxon_setSpeed(MOTOR0_ID,Chassis_motor0);
+			maxon_setSpeed(MOTOR1_ID,Chassis_motor1);
+			maxon_setSpeed(MOTOR2_ID,Chassis_motor2);
+			maxon_setSpeed(MOTOR3_ID,Chassis_motor3);
 			maxon_setSpeed(MOTOR2_ID,Chassis_motor2);
 			maxon_setSpeed(MOTOR3_ID,Chassis_motor3);
 		}

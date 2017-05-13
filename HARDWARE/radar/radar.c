@@ -45,6 +45,12 @@ void radar_start()
 	can_send_msg(RADAR_TX_ID,can_tx_msg,5);
 }
 
+void radar_shoot()
+{
+	u8 can_tx_msg[5]={'s','h','o','o','t'};
+	can_send_msg(RADAR_TX_ID,can_tx_msg,5);
+}
+
 void radar_stop()
 {
 	u8 can_tx_msg[4]={'s','t','o','p'};
