@@ -4,6 +4,7 @@
 #include "flywheel_left.h"
 #include "flywheel_right.h"
 #include "auto.h"
+#include "usart.h"
 
 bool g_stop_flag = false;
 
