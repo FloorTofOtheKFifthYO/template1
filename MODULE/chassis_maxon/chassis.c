@@ -245,7 +245,7 @@ void chassis_auto()
 		if(sqrtf(chassis.factor) * sqrtf(Sroute) < chassis.xfactor*Eroute + sqrtf(Eroute)) {//¼ÓËÙ
 			//if(Sroute*chassis.factor<1)
 
-				ChassisSpeed = sqrtf(Sroute)*chassis.Move_speed * sqrtf(chassis.factor);
+				ChassisSpeed = sqrtf(sqrtf(Sroute))*chassis.Move_speed * sqrtf(sqrtf(chassis.factor));
 		}else {
 			/*if(Eroute > 0.5)
 				ChassisSpeed = sqrtf(Eroute) * chassis.Move_speed;
@@ -295,12 +295,12 @@ void chassis_auto()
 			TURN_speed= 0;
 		}
 		
-		if(TURN_speed>0 && TURN_speed<20)
+		if(TURN_speed>0 && TURN_speed<10)
 		{
-			TURN_speed = 20;
-		}else if (TURN_speed<0 && TURN_speed>-20)
+			TURN_speed = 10;
+		}else if (TURN_speed<0 && TURN_speed>-10)
 		{
-			TURN_speed = -20;
+			TURN_speed = -10;
 		}
 		
 		if(powf(error_X,2)+powf(error_Y,2) <= chassis.Move_radium)
