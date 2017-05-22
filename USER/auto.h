@@ -22,7 +22,7 @@ typedef struct {
 	POSITION start_area;
 	POSITION load_area;
 	list_node * now_pos_ptr;
-	enum {start,load_running,load_arrived,pos_running,pos_arrived,handle_control,start_running} state;
+	enum {start,load_running,load_arrived,pos_running,pos_arrived,/*handle_control,*/start_running} state;
 	
 	//¿ØÖÆ×Ö
 	bool load_run_flag;

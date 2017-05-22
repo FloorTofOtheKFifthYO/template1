@@ -91,6 +91,8 @@ void flywheel_left_setYaw(float yaw);
 
 void flywheel_left_fly();
 
+void flywheel_left_Set();
+
 /**
   * @brief  tim2中调用，进行延时等操作
   *     

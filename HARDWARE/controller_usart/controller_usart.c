@@ -13,18 +13,21 @@ extern struct {
 	int left[7];
 	int right[7];
 }strategy;
+extern Pos_data * now_pos;     //当前点的数据指针
+extern bool handle_l;
+extern bool handle_r;
 
 #define BT_UP 0
 #define BT_RIGHT 1
 #define BT_DOWN 2
 #define BT_LEFT 3
 
-#define DELT_YAW_LEFT -0.0005
-#define DELT_SPEED_LEFT 0.0001
+#define DELT_YAW_LEFT -0.01
+#define DELT_SPEED_LEFT 0.00001
 #define FACTOR_SPEED_LEFT 1
 
-#define DELT_YAW_RIGHT -0.0005
-#define DELT_SPEED_RIGHT 0.0001
+#define DELT_YAW_RIGHT -0.005
+#define DELT_SPEED_RIGHT 0.00005
 #define FACTOR_SPEED_RIGHT 1
 
 //上右下左
@@ -200,6 +203,10 @@ void bottons_check(){
 		b[ptrB]->ispressed=true;
 		ptrB=-1;
 	}
+	if (ptrS>0){
+		g_stop_flag = true;
+		ptrS=0;
+	}
 }
 
 void sticks_check(int Hx,int Hy){
@@ -217,9 +224,11 @@ void control_usart_main()
 	int Xianding = 0;
 	int ChassisSpeed;
 	float direction_angle;
+	Launch_data * data;
+    list_node * ptr;
 	
 	Xianding = 0;
-	ChassisSpeed = 1000;
+	ChassisSpeed = 500;
 	if (!L2.ispressed&&!R2.ispressed){
 		
 		if (LU.ispressed) direction_angle = 3*PI/4;
@@ -251,7 +260,7 @@ void control_usart_main()
 						break;
 					case pos_running:
 					case pos_arrived:
-					case handle_control:
+					//case handle_control:
 						autorun.load_run_flag = true;
 						break;
 					case start_running:
@@ -272,7 +281,7 @@ void control_usart_main()
 					case pos_running:
 						break;
 					case pos_arrived:
-					case handle_control:
+					//case handle_control:
 						autorun.start_run_flag = true;
 						break;
 					case start_running:
@@ -298,7 +307,7 @@ void control_usart_main()
 					case pos_running:
 						break;
 					case pos_arrived:
-					case handle_control:
+					//case handle_control:
 						autorun.start_run_flag = true;
 						break;
 					case start_running:
@@ -316,7 +325,7 @@ void control_usart_main()
 						break;
 					case pos_running:
 					case pos_arrived:
-					case handle_control:
+					//case handle_control:
 						autorun.load_run_flag = true;
 						break;
 					case start_running:
@@ -326,7 +335,7 @@ void control_usart_main()
 		}
 		if (RD.ispressed) {
 			RD.ispressed = false;
-			g_stop_flag = !g_stop_flag;
+			//g_stop_flag = !g_stop_flag;
 		}
 		
 	}else{
@@ -363,16 +372,30 @@ void control_usart_main()
 		if (RU.ispressed)
 		{ 
 			RU.ispressed = false;
-			if(autorun.state == pos_arrived)
+			if(autorun.state == pos_arrived && handle_l==false)
 			{
 				autorun.launch_l_continute = true;
-			}else if(autorun.state == handle_control)
+			}else if(autorun.state == pos_arrived && handle_l == true)
 			{
-				auto_select_l((autorun.target_l + 1) % 4);
+				auto_select_l((autorun.target_l) % 3);
 			}
 		}
 		if (RR.ispressed) {
 			RR.ispressed = false;
+			USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",flywheel_left.pur_pitch,flywheel_left.pur_yaw,flywheel_left.pur_duty);
+			ptr = list_locate(&now_pos->d[strategy.left[autorun.target_l]].launch_ptr, 1);
+			
+			if (ptr == NULL)
+			{
+				USART_SendString(bluetooth, "msg: Error\n");
+				return;
+			}
+			data = ptr->data;
+			data->pitch = flywheel_left.pur_pitch;
+			data->turn = 0;
+			data->speed = flywheel_left.pur_duty;
+			data->yaw = flywheel_left.pur_yaw;
+			data->jmp = 0;
 		}
 		if (RL.ispressed) {
 			RL.ispressed = false;
@@ -409,16 +432,32 @@ void control_usart_main()
 		if (RU.ispressed)
 		{
 			RU.ispressed = false;
-			if(autorun.state == pos_arrived)
+			if(autorun.state == pos_arrived&&handle_r==false)
 			{
 				autorun.launch_r_continute = true;
-			}else if(autorun.state == handle_control)
+			}else if(autorun.state == pos_arrived&&handle_r==true)
 			{
-				auto_select_r((autorun.target_r + 1) % 3);
+				auto_select_r((autorun.target_r + 1) % 4);
 			}
 		}
 		if (RR.ispressed) {
 			RR.ispressed = false;
+			USART_SendString(bluetooth,"right:x pitch:%f yaw:%f speed:%f\n",flywheel_right.pur_pitch,flywheel_right.pur_yaw,flywheel_right.pur_duty);
+			
+			ptr = list_locate(&now_pos->r[strategy.right[autorun.target_r]].launch_ptr, 1);
+			
+			if (ptr == NULL)
+			{
+				USART_SendString(bluetooth, "msg: Error\n");
+			}else{
+			data = ptr->data;
+			data->pitch = flywheel_right.pur_pitch;
+			data->turn = 0;
+			data->speed = flywheel_right.pur_duty;
+			data->yaw = flywheel_right.pur_yaw;
+			data->jmp = 0;
+			}
+			
 		}
 		if (RL.ispressed) {
 			RL.ispressed = false;
@@ -436,11 +475,11 @@ void control_usart_main()
 	}	
 	
 	
-	if(OPEN_Hander == 1){
+	/*if(OPEN_Hander == 1){
 		chassis.END.X=chassis.pos_x;
 		chassis.END.Y=chassis.pos_y;
 		chassis.END.ANG=chassis.angle;
-	}
+	}*/
 }
 
 void control_usart_TIM()

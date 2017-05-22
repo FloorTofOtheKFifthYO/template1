@@ -58,6 +58,7 @@ typedef struct
 	int Speed_max;
 	int Speed_min;
 	float Start_distance;
+	float xfactor;
 } Chassis;
 
 extern Chassis chassis;

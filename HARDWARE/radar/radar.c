@@ -4,6 +4,7 @@
 #include <string.h>
 
 bool data_recv = true;
+extern bool debug_print;
 static float *theta;
 static float *distance;
 char recv[8];
@@ -21,6 +22,10 @@ void can_test_func(CanRxMsg* can_rx_msg)
 		converter.u8_form[2] = can_rx_msg->Data[6];
 		converter.u8_form[3] = can_rx_msg->Data[7];
 		memcpy((void*)distance,&converter.float_form,4);
+		if(debug_print){
+			USART_SendString(bluetooth,"theta:%f distance:%f",(*theta)/180.f*3.1415926,*distance);
+			USART_SendString(bluetooth,"\n");
+		}
 	}
 	else{
 		memcpy((void*)recv,can_rx_msg->Data,can_rx_msg->DLC);
@@ -39,6 +44,12 @@ void radar_init(float *_theta,float *_distance)
 void radar_start()
 {
 	u8 can_tx_msg[5]={'s','t','a','r','t'};
+	can_send_msg(RADAR_TX_ID,can_tx_msg,5);
+}
+
+void radar_shoot()
+{
+	u8 can_tx_msg[5]={'s','h','o','o','t'};
 	can_send_msg(RADAR_TX_ID,can_tx_msg,5);
 }
 

@@ -59,6 +59,7 @@ void chassis_init(void)
 	chassis.Speed_min = 30;
 	chassis.Start_distance = 0.001;
 	chassis.factor = 2.7;
+	chassis.xfactor = 0.25;
 	
 	if(chassis_save()<0)
 	{
@@ -76,6 +77,7 @@ void chassis_init(void)
 	chassis.Speed_max = STMFLASH_ReadWord_Inc(&addr);
 	chassis.Speed_min = STMFLASH_ReadWord_Inc(&addr);
 	chassis.Start_distance = STMFLASH_ReadFloat_Inc(&addr);
+	chassis.xfactor = STMFLASH_ReadFloat_Inc(&addr);
 
 #endif
 
@@ -96,7 +98,8 @@ void chassis_param_print()
 	USART_SendString(bluetooth,"angleradium:%f ",chassis.Angle_radium);
 	USART_SendString(bluetooth,"anglespeed:%d ",chassis.Angle_speed);
 	USART_SendString(bluetooth,"start:%f ",chassis.Start_distance);
-	USART_SendString(bluetooth,"factor:%f\n",chassis.factor);
+	USART_SendString(bluetooth,"factor:%f ",chassis.factor);
+	USART_SendString(bluetooth,"xfactor:%f\n",chassis.xfactor);
 }
 
 int chassis_save()
@@ -127,6 +130,8 @@ int chassis_save()
 	FLASH_ProgramWord(addr,chassis.Speed_min);
 	addr+=4;
 	FLASH_ProgramFloat(addr,chassis.Start_distance);
+	addr+=4;
+	FLASH_ProgramFloat(addr,chassis.xfactor);
 	addr+=4;
 	
 	FLASH_DataCacheCmd(ENABLE);
@@ -200,8 +205,9 @@ void chassis_auto()
 	static float distance;
 	float direction_angle;
 	
-	int arrived_flag = 0;
+	int arrived_flag;
 	float i;
+	
 	
 	if(chassis.car_state == car_ready){
 		chassis.START.X = chassis.g_vega_pos_x* 0.0001 * 0.81;
@@ -217,6 +223,7 @@ void chassis_auto()
 		Oerror_Y = Oerror_Y/distance;
 	}
 	if(chassis.car_state == car_running){
+		arrived_flag = 0;
 		errorAngle = chassis.angle - chassis.END.ANG;
 		error_X = chassis.END.X - chassis.pos_x;
 		error_Y = chassis.END.Y - chassis.pos_y;
@@ -234,17 +241,23 @@ void chassis_auto()
 		
 		direrror_X = dir_dot_X - chassis.pos_x;
 		direrror_Y = dir_dot_Y - chassis.pos_y;
-		
-		if(chassis.factor * Sroute < Eroute) {//加速
-			if(Sroute*chassis.factor < 1)
-				ChassisSpeed = sqrtf(sqrtf(Sroute))*chassis.Move_speed * sqrtf(sqrtf(chassis.factor));
-			else
+
+		if(sqrtf(chassis.factor) * sqrtf(Sroute) < chassis.xfactor*Eroute + sqrtf(Eroute)) {//加速
+			//if(Sroute*chassis.factor<1)
+
 				ChassisSpeed = sqrtf(Sroute)*chassis.Move_speed * sqrtf(chassis.factor);
 		}else {
-			if(Eroute > 0.5)
+			/*if(Eroute > 0.5)
 				ChassisSpeed = sqrtf(Eroute) * chassis.Move_speed;
 			else
-				ChassisSpeed = 1.414 * Eroute * chassis.Move_speed;
+				ChassisSpeed = 1.414 * Eroute * chassis.Move_speed;*/
+			/*if(Eroute > 1)
+				ChassisSpeed = sqrtf(Eroute) * chassis.Move_speed;
+			else
+				ChassisSpeed = Eroute * chassis.Move_speed;*/
+			
+			ChassisSpeed = (sqrtf(Eroute)+ chassis.xfactor*Eroute) * chassis.Move_speed;
+			
 		}
 		/*if((powf(error_X,2)+powf(error_Y,2)) > 1)
 			ChassisSpeed = sqrt(powf(error_X,2)+powf(error_Y,2))*Move_speed;
@@ -331,6 +344,10 @@ void chassis_auto()
 		{
 			maxon_setSpeed(MOTOR0_ID,Chassis_motor0);
 			maxon_setSpeed(MOTOR1_ID,Chassis_motor1);
+			maxon_setSpeed(MOTOR0_ID,Chassis_motor0);
+			maxon_setSpeed(MOTOR1_ID,Chassis_motor1);
+			maxon_setSpeed(MOTOR2_ID,Chassis_motor2);
+			maxon_setSpeed(MOTOR3_ID,Chassis_motor3);
 			maxon_setSpeed(MOTOR2_ID,Chassis_motor2);
 			maxon_setSpeed(MOTOR3_ID,Chassis_motor3);
 		}

@@ -10,6 +10,17 @@
 
 Flywheel_right flywheel_right;
 
+extern struct {
+	int left[7];
+	int right[7];
+}strategy;
+
+extern bool debug_print;
+
+extern bool handle_r;
+
+static int right_ms = 0;
+
 static int fly_count = 0;
 static int fly_n = 0;//记录打出的个数
 
@@ -61,6 +72,7 @@ void flywheel_right_setPitch(float pitch)
 {
 	flywheel_right.pur_pitch = pitch;
 	RoboModule_SET_Position(PITCH_ID_RIGHT,5000,pitch*100,PITCH_MAXSPEED);
+	//RoboModule_SET_Position(PITCH_ID_RIGHT,5000,pitch*100,PITCH_MAXSPEED);
 }
 
 void flywheel_right_fly()
@@ -83,6 +95,7 @@ void flywheel_right_setBrushless(float duty)
 	flywheel_right.pur_duty = duty;
 	//setUnbrushSpeed(FLYWHEEL_ID_RIGHT,(duty-7.7)/(10-7.7)*8*100);
 	setUnbrushSpeed_1(CLIENT_ID_RIGHT,FLYWHEEL_CHANNEL_RIGHT,(duty-7.7)/(10-7.7)*8*100);
+	//setUnbrushSpeed_1(CLIENT_ID_RIGHT,FLYWHEEL_CHANNEL_RIGHT,(duty-7.7)/(10-7.7)*8*100);
 }
 
 
@@ -106,6 +119,7 @@ void flywheel_right_setYaw(float yaw)
 {
 	flywheel_right.pur_yaw = yaw;
 	RoboModule_SET_Position(YAW_ID_RIGHT,5000,yaw*100,YAW_MAXSPEED);
+	//RoboModule_SET_Position(YAW_ID_RIGHT,5000,yaw*100,YAW_MAXSPEED);
 }
 
 /**
@@ -119,6 +133,7 @@ void flywheel_right_setYaw(float yaw)
   */
 void flywheel_right_TIM()
 {
+	right_ms++;
 	if(fly_count != 0)
 		fly_count--;
 }
@@ -142,7 +157,9 @@ void flywheel_right_flyn(int n, float duty, float pitch, float yaw)
 	flywheel_right.pur_duty = duty;
 	flywheel_right.pur_pitch = pitch;
 	flywheel_right.pur_yaw = yaw;
+	flywheel_right.state = fly_r_finish;
 	flywheel_right.fly_flag = true;
+	right_ms = 0;
 }
 
 /*
@@ -159,6 +176,8 @@ bool flywheel_right_check()
 			{
 				flag = 0;
 				fly_count = 700;
+				if(strategy.right[autorun.target_r] == 3)
+					fly_count = 2000;
 			}
 			return true;
 		}
@@ -169,12 +188,14 @@ bool flywheel_right_check()
 }
 
 void flywheel_right_fly1(){
-	fly_n = 2;
-	flywheel_right_fly();
-	flywheel_right_up(1);
-	fly_count = 300;
-	fly_n--;
-	flywheel_right.state = r_fly;
+	if(flywheel_right.state != r_fly ){
+		fly_n = 2;
+		flywheel_right_fly();
+		flywheel_right_up(1);
+		fly_count = 300;
+		fly_n--;
+		flywheel_right.state = r_fly;
+	}
 }
 
 //抬飞盘
@@ -228,6 +249,13 @@ void flywheel_right_home()
 	flywheel_right_up(0);
 }
 
+void flywheel_right_Set(){
+	if(flywheel_right.state == fly_r_adj){
+	flywheel_right_setPitch(flywheel_right.pur_pitch);
+	flywheel_right_setYaw(flywheel_right.pur_yaw);
+	flywheel_right_setBrushless(flywheel_right.pur_duty);}
+}
+
 /**
   * @brief main大循环中检查
   *     
@@ -239,65 +267,80 @@ void flywheel_right_home()
   */
 void flywheel_right_main()
 {
-		switch(flywheel_right.state)
-		{
-			case fly_r_ready:
-				flywheel_right_setPitch(flywheel_right.pur_pitch);
-				flywheel_right_setYaw(flywheel_right.pur_yaw);
-				flywheel_right_setBrushless(flywheel_right.pur_duty);
-				flywheel_right.state = fly_r_adj;
-				flywheel_right_setBrushless(flywheel_right.pur_duty);
-				flywheel_right.io[FLY_RIGHT] = 0;
-				flywheel_right.io[UP_RIGHT] = 1;
-				set_IO(CLIENT_ID_RIGHT,flywheel_right.io);
-			case fly_r_adj:
-				if(flywheel_right_check() && fly_count == 0 && autorun.state == pos_arrived)
+	static int flag = 0;
+	switch(flywheel_right.state)
+	{
+		case fly_r_ready:
+			flywheel_right_setPitch(flywheel_right.pur_pitch);
+			flywheel_right_setYaw(flywheel_right.pur_yaw);
+			flywheel_right_setBrushless(flywheel_right.pur_duty);
+			flywheel_right.state = fly_r_adj;
+			flywheel_right.io[FLY_RIGHT] = 0;
+			fly_count = 0;
+			flywheel_right.io[UP_RIGHT] = 1;
+			set_IO(CLIENT_ID_RIGHT,flywheel_right.io);
+		case fly_r_adj:
+			if(flywheel_right_check() && fly_count == 0 && autorun.state == pos_arrived)
+			{
+				if(handle_r == false && autorun.target_r == 0 && flag == 0)
 				{
+					fly_count = 300;
+					flag = 1;
+				}
+				if(fly_count == 0)
+				{
+					if(debug_print)
+					{
+						USART_SendString(bluetooth,"msg: right switch:%d\n",right_ms);
+						right_ms = 0;
+					}
 					flywheel_right.state = r_fly;
+					flag = 0;
 					if(fly_n == 0)
 					{
 						fly_count = 0;
-						flywheel_right.state = fly_r_ready;
+						flywheel_right.state = fly_r_finish;
 						flywheel_right.fly_flag = false;
+						flag = 0;
 					}else{
-						USART_SendString(bluetooth,"msg:high fly!!\n");
+						USART_SendString(bluetooth,"msg:right fly!!\n");
 						flywheel_right_fly();
 						fly_count = 300;
 						fly_n--;
 					}
 				}
-				break;
-			case r_fly:
-					
-					if(fly_n%2 == 0)
-					{
-						if(fly_count <= 300)
-							flywheel_right_up(1);
-					}
-					
-					if(fly_count == 0)
-					{
-						if(fly_n == 0)
-						{
-							fly_count = 0;
-							flywheel_right.state = fly_r_finish;
-							flywheel_right.fly_flag = false;
-						}else{
-							flywheel_right_fly();
-							if(fly_n%2 == 1){
-								flywheel_right_up(0);
-								fly_count = 700;
-							}else
-								fly_count = 300;
-							fly_n--;
-						}
-					}
-				break;
-			case fly_r_finish:
-				if(flywheel_right.fly_flag)
+			}
+			break;
+		case r_fly:
+			if(fly_n%2 == 0)
+			{
+				if(fly_count <= 300)
+					flywheel_right_up(1);
+			}
+			
+			if(fly_count == 0)
+			{
+				if(fly_n == 0)
 				{
-					flywheel_right.state = fly_r_ready;
+					fly_count = 0;
+					flywheel_right.state = fly_r_finish;
+					flywheel_right.fly_flag = false;
+				}else{
+					flywheel_right_fly();
+					if(fly_n%2 == 1){
+						flywheel_right_up(0);
+						fly_count = 700;
+					}else
+						fly_count = 300;
+					fly_n--;
 				}
-				break;
-		}
+			}
+			break;
+		case fly_r_finish:
+			if(flywheel_right.fly_flag)
+			{
+				flywheel_right.state = fly_r_ready;
+			}
+			break;
+	}
 }

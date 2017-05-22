@@ -28,7 +28,7 @@
 #include "can.h"
 #include "delay.h"
 
-#define COUNT_NUM 0
+#define COUNT_NUM 5000
 
 #include "can.h"
 u8 setSpeed_1[3] = {0};

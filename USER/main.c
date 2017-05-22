@@ -7,6 +7,10 @@
 
 bool g_stop_flag = false;
 
+bool debug_print = false;
+
+bool debug = false;
+
 bool switch_side = false;
 
 int ms = 0;
@@ -16,12 +20,18 @@ void TIM2_IRQHandler(void){
 	if( TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET ) 
 	{
 		ms++;
-		/*tmpcount--;
+		tmpcount--;
 		if(tmpcount==0){
 			tmpcount = 1000;
-			USART_SendString(bluetooth,"msg: left pitch:%d yaw:%d\n",ReturnData(PITCH_ID_LEFT)->Position,ReturnData(YAW_ID_LEFT)->Position);
-			USART_SendString(bluetooth,"msg: right pitch:%d yaw:%d\n",ReturnData(PITCH_ID_RIGHT)->Position,ReturnData(YAW_ID_RIGHT)->Position);
-		}*/
+			if(debug_print){
+				USART_SendString(bluetooth,"msg: left pitch:%d yaw:%d\n",ReturnData(PITCH_ID_LEFT)->Position,ReturnData(YAW_ID_LEFT)->Position);
+				USART_SendString(bluetooth,"msg: right pitch:%d yaw:%d\n",ReturnData(PITCH_ID_RIGHT)->Position,ReturnData(YAW_ID_RIGHT)->Position);
+			}
+		}
+		if(tmpcount==250||tmpcount==750)
+			flywheel_left_Set();
+		else if(tmpcount==500||tmpcount==0)
+			flywheel_right_Set();
 		control_usart_TIM();
 		flywheel_left_TIM();
 		flywheel_right_TIM();
@@ -35,31 +45,30 @@ void TIM2_IRQHandler(void){
 int main(void)
 {   
 	int Hx, Hy;
-	
+
 	rcc_config();
 	gpio_config();
 	delay_init(168);  //初始化延时函数
 	nvic_config();
+	usart_init(bluetooth,115200,true);
+	cmd_init();
+	EXTI_config();
 	
 reboot:	
-	
-	usart_init(bluetooth,115200,true);
+	g_stop_flag = false;
 	controller_usart_init(&Hx, &Hy);
 	
-	cmd_init();
 	can_init();
 	
 	chassis_init();
 	
-	TIM2_Init();
-	
 	flywheel_left_init();
 	flywheel_right_init();
 	
-	EXTI_config();
-	
 	auto_init();
-//	autorun.state = load_arrived;
+//	autorun.state = pos_arrived;
+
+	TIM2_Init();
 	
 	USART_SendString(UART5,"msg: Let's go!\n");
 	
@@ -87,16 +96,16 @@ reboot:
 			flywheel_left_main();
 			flywheel_right_main();
 			auto_main();
-			if(OPEN_Hander ==0){
+			//if(OPEN_Hander ==0){
 				/**-------------------------自动部分--------------------------------**/
 				chassis_auto();
-			}
+			/*}
 			else if(OPEN_Hander ==1)
-			{
+			{*/
 				/********手柄部分***********/
 				//USART_SendString(CMD_USARTx,"Ohi\n");
 				//control_usart_main();
-			}
+			//}
 		}
 		//delay_ms(2);
 	}

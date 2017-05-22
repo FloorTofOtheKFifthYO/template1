@@ -9,6 +9,7 @@
 #include "string.h"
 #include "auto.h"
 #include "delay.h"
+#include "radar.h"
 #include "math.h"
 #include "maxon.h"
 #include "param.h"
@@ -17,6 +18,8 @@ extern s8 ptrS,ptrB;
 extern Param * param;
 extern bool g_stop_flag;
 extern bool switch_side;
+extern bool debug_print;
+extern bool debug;
 extern struct {
 	int left[7];
 	int right[7];
@@ -26,7 +29,7 @@ u8 target=0;       				//目标0-6
 
 static list_node * now_pos_ptr;
 static int pos_no = 0;
-static Pos_data * now_pos;     //当前点的数据指针
+Pos_data * now_pos;     //当前点的数据指针
 
 extern float pur_pitch;
 extern float pur_roll;
@@ -44,6 +47,50 @@ void cmd_stop_func(int argc,char *argv[]){
     }else if(argc == 2){
         g_stop_flag = atoi(argv[1]);
     }
+}
+
+void cmd_hello_func(int argc,char *argv[]){
+    USART_SendString(CMD_USARTx, "msg: Hello World\n");
+}
+
+void cmd_test_func(int argc,char *argv[]){
+	int n;
+	if(strcmp(argv[1],"debugp")==0)
+	{
+		debug_print=!debug_print;
+		USART_SendString(bluetooth,"msg: debug_print:%d\n",debug_print);
+	}else if(strcmp(argv[1],"debug")==0)
+	{
+		debug=!debug;
+		USART_SendString(bluetooth,"msg: debug:%d\n",debug);
+	}else if(strcmp(argv[1],"home")==0)
+	{
+		home_flag = true;
+	}else if(strcmp(argv[1],"chassis")==0){
+		maxon_setSpeed(MOTOR0_ID,atoi(argv[2]));
+		maxon_setSpeed(MOTOR1_ID,atoi(argv[2]));
+		maxon_setSpeed(MOTOR2_ID,atoi(argv[2]));
+		maxon_setSpeed(MOTOR3_ID,atoi(argv[2]));
+	}else if(strcmp(argv[1],"fly")==0){
+		if(argc == 4){
+			n = atoi(argv[3]);
+			if(strcmp(argv[2],"l")==0)
+			{
+				flywheel_left_flyn(n,flywheel_left.pur_duty,flywheel_left.pur_pitch,flywheel_left.pur_yaw);
+			}else{
+				flywheel_right_flyn(n,flywheel_right.pur_duty,flywheel_right.pur_pitch,flywheel_right.pur_yaw);
+			}
+		}
+	}
+	else if(strcmp(argv[1],"radar")==0)
+	{
+		if(strcmp(argv[2],"start")==0)
+		{
+			radar_start();
+		}else if(strcmp(argv[2],"stop")==0){
+			radar_stop();
+		}
+	}
 }
 
 void cmd_auto_func(int argc, char*argv[])
@@ -127,21 +174,6 @@ void cmd_auto_func(int argc, char*argv[])
 	}
 }
 
-void cmd_hello_func(int argc,char *argv[]){
-    USART_SendString(CMD_USARTx, "msg: Hello World\n");
-}
-
-void cmd_test_func(int argc,char *argv[]){
-	if(strcmp(argv[1],"home")==0)
-	{
-		home_flag = true;
-	}else if(strcmp(argv[1],"chassis")==0){
-		maxon_setSpeed(MOTOR0_ID,atoi(argv[2]));
-		maxon_setSpeed(MOTOR1_ID,atoi(argv[2]));
-		maxon_setSpeed(MOTOR2_ID,atoi(argv[2]));
-		maxon_setSpeed(MOTOR3_ID,atoi(argv[2]));
-	}	
-}
 
 void cmd_pos_func(int argc,char *argv[])
 {
@@ -349,6 +381,8 @@ void cmd_param_func(int argc,char *argv[]){
 		chassis.Start_distance = atof(argv[2]);
 	else if (strcmp(argv[1],"factor")== 0)
 		chassis.factor = atof(argv[2]);
+	else if (strcmp(argv[1],"xfactor")== 0)
+		chassis.xfactor = atof(argv[2]);
 	else if (strcmp(argv[1],"save") == 0)
 	{	
 		if(chassis_save()<0)
@@ -363,7 +397,6 @@ void cmd_param_func(int argc,char *argv[]){
 
 void cmd_switch_func(int argc,char *argv[])
 {
-	USART_SendString(bluetooth,"msg:left(0) or right(1):%d\n",LEFT_RIGHT);
 	if(strcmp(argv[1],"left") == 0)
 	{
 		LEFT_RIGHT = 0;
@@ -373,6 +406,7 @@ void cmd_switch_func(int argc,char *argv[])
 		LEFT_RIGHT = 1;
 		switch_side = true;
 	}
+	USART_SendString(bluetooth,"msg:left(0) or right(1):%d\n",LEFT_RIGHT);
 }
 
 void cmd_launch_func(int argc,char *argv[])
@@ -709,6 +743,7 @@ void cmd_launch_func(int argc,char *argv[])
 		else{
 			no = atoi(argv[2]);
 			target = no;
+			autorun.target_l = target;
 			USART_SendString(CMD_USARTx,"target:%d\n",target);
 		}
 	}else if(argc == 8) {

@@ -181,10 +181,11 @@ void gpio_config(void)
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource0, GPIO_AF_TIM5); 	
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource1, GPIO_AF_TIM5); */
 //----------------------------增量码盘---------------------------------------------------------------------------------------------
-	GPIO_Configuration(GPIO_Pin_0,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
+
+//	GPIO_Configuration(GPIO_Pin_0,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
 	GPIO_Configuration(GPIO_Pin_1,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
 	GPIO_Configuration(GPIO_Pin_12,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOD);
-	GPIO_Configuration(GPIO_Pin_13,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOD);
+//	GPIO_Configuration(GPIO_Pin_13,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOD);
 //----------------------------触碰开关---------------------------------------------------------------------------------------------
 	
 //	GPIO_Configuration(GPIO_Pin_5, GPIO_Mode_AF,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOE);
@@ -232,13 +233,13 @@ void EXTI_config()
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource13);
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource12);
 	EXTI_Configuration(EXTI_Line1,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
-	EXTI_Configuration(EXTI_Line0,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
-	EXTI_Configuration(EXTI_Line13,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
+//	EXTI_Configuration(EXTI_Line0,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
+//	EXTI_Configuration(EXTI_Line13,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
 	EXTI_Configuration(EXTI_Line12,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
-	EXTI_ClearITPendingBit(EXTI_Line0); 
+//	EXTI_ClearITPendingBit(EXTI_Line0); 
 	EXTI_ClearITPendingBit(EXTI_Line1); 
 	EXTI_ClearITPendingBit(EXTI_Line12); 
-	EXTI_ClearITPendingBit(EXTI_Line13); 
+//	EXTI_ClearITPendingBit(EXTI_Line13); 
 }
 
 void nvic_config()
@@ -255,7 +256,7 @@ void nvic_config()
 //	NVIC_Configuration(TIM8_TRG_COM_TIM14_IRQn,1,1,ENABLE);
 //	NVIC_Configuration(TIM5_IRQn,1,1,ENABLE);
 	NVIC_Configuration(EXTI15_10_IRQn, 0, 0, ENABLE);
-	NVIC_Configuration(EXTI0_IRQn, 0, 0, ENABLE);
+//	NVIC_Configuration(EXTI0_IRQn, 0, 0, ENABLE);
 	NVIC_Configuration(EXTI1_IRQn, 0, 0, ENABLE);
 	
 }

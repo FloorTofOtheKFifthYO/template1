@@ -4,12 +4,13 @@
 #include "flywheel_left.h"
 #include "flywheel_right.h"
 
+extern bool debug_print;
 
 int wait_cnt=-1;
 
 void EXTI15_10_IRQHandler(void)
 {
-	if(EXTI_GetITStatus(EXTI_Line13)!=RESET){//判断某个线上的中断是否发生
+	/*if(EXTI_GetITStatus(EXTI_Line13)!=RESET){//判断某个线上的中断是否发生
 		delay_ms(2);
 		if (GPIO_ReadInputDataBit(GPIOD,GPIO_Pin_13)==0){ 
 			if(home_flag){
@@ -20,13 +21,15 @@ void EXTI15_10_IRQHandler(void)
 			
 		}
 		EXTI_ClearITPendingBit(EXTI_Line13); //清除 LINE 上的中断标志位
-	}else if(EXTI_GetITStatus(EXTI_Line12)!=RESET){//判断某个线上的中断是否发生
+	}else */
+	if(EXTI_GetITStatus(EXTI_Line12)!=RESET){//判断某个线上的中断是否发生
 		delay_ms(2);
 		if (GPIO_ReadInputDataBit(GPIOD,GPIO_Pin_12)==0){ 
 			if(home_flag){
 				flywheel_left_pitchZero();
 				home_flag = false;
-				USART_SendString(bluetooth,"msg: home!\n");
+				if(debug_print)
+					USART_SendString(bluetooth,"msg: home!\n");
 			}
 			
 		}
@@ -34,7 +37,7 @@ void EXTI15_10_IRQHandler(void)
 	}
 }
 
-
+/*
 void EXTI0_IRQHandler(void)
 {
 	if(EXTI_GetITStatus(EXTI_Line0)!=RESET){//判断某个线上的中断是否发生
@@ -43,12 +46,13 @@ void EXTI0_IRQHandler(void)
 		{
 			if(home_flag){
 				flywheel_right_yawZero();
+				USART_SendString(bluetooth,"msg: home!\n");
 				home_flag = false;
 			}
 		}
 		EXTI_ClearITPendingBit(EXTI_Line0); //清除 LINE 上的中断标志位
 	}
-}
+}*/
 
 void EXTI1_IRQHandler(void)
 {
@@ -58,6 +62,8 @@ void EXTI1_IRQHandler(void)
 		{
 			if(home_flag){
 				flywheel_right_pitchZero();
+				if(debug_print)
+					USART_SendString(bluetooth,"msg: home!\n");
 				home_flag = false;
 			}
 		}

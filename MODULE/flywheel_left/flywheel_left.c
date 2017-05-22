@@ -10,6 +10,10 @@
 
 Flywheel_left flywheel_left;
 
+extern bool debug_print;
+
+static int left_ms = 0;
+
 static int fly_count = 0;
 static int fly_n = 0;//记录打出的个数
 
@@ -61,6 +65,7 @@ void flywheel_left_setPitch(float pitch)
 {
 	flywheel_left.pur_pitch = pitch;
 	RoboModule_SET_Position(PITCH_ID_LEFT,5000,pitch*100,PITCH_MAXSPEED);
+	//RoboModule_SET_Position(PITCH_ID_LEFT,5000,pitch*100,PITCH_MAXSPEED);
 }
 
 void flywheel_left_fly()
@@ -83,6 +88,7 @@ void flywheel_left_setBrushless(float duty)
 	flywheel_left.pur_duty = duty;
 	//setUnbrushSpeed(FLYWHEEL_ID_LEFT,(duty-7.7)/(10-7.7)*8*100);
 	setUnbrushSpeed_1(CLIENT_ID_LEFT,FLYWHEEL_CHANNEL_LEFT,(duty-7.7)/(10-7.7)*8*100);
+	//setUnbrushSpeed_1(CLIENT_ID_LEFT,FLYWHEEL_CHANNEL_LEFT,(duty-7.7)/(10-7.7)*8*100);
 }
 
 
@@ -106,6 +112,7 @@ void flywheel_left_setYaw(float yaw)
 {
 	flywheel_left.pur_yaw = yaw;
 	RoboModule_SET_Position(YAW_ID_LEFT,5000,yaw*100,YAW_MAXSPEED);
+	//RoboModule_SET_Position(YAW_ID_LEFT,5000,yaw*100,YAW_MAXSPEED);
 }
 
 /**
@@ -119,8 +126,10 @@ void flywheel_left_setYaw(float yaw)
   */
 void flywheel_left_TIM()
 {
+	left_ms++;
 	if(fly_count != 0)
 		fly_count--;
+	
 }
 
 /**
@@ -144,6 +153,7 @@ void flywheel_left_flyn(int n, float duty, float pitch, float yaw)
 	flywheel_left.pur_yaw = yaw;
 	flywheel_left.state = fly_l_finish;
 	flywheel_left.fly_flag = true;
+	left_ms = 0;
 }
 
 /*
@@ -159,7 +169,7 @@ bool flywheel_left_check()
 			if(flag == 1)
 			{
 				flag = 0;
-				fly_count = 700;
+				fly_count = 500;
 			}
 			return true;
 		}
@@ -170,12 +180,14 @@ bool flywheel_left_check()
 }
 
 void flywheel_left_fly1(){
-	fly_n = 2;
-	flywheel_left_fly();
-	flywheel_left_up(1);
-	fly_count = 300;
-	fly_n--;
-	flywheel_left.state = fly;
+	if(flywheel_left.state != fly){
+		fly_n = 2;
+		flywheel_left_fly();
+		flywheel_left_up(1);
+		fly_count = 300;
+		fly_n--;
+		flywheel_left.state = fly;
+	}
 }
 
 //抬飞盘
@@ -229,6 +241,16 @@ void flywheel_left_home()
 	flywheel_left_up(0);
 }
 
+void flywheel_left_Set()
+{
+	if(flywheel_left.state == fly_adj)
+	{
+		flywheel_left_setPitch(flywheel_left.pur_pitch);
+		flywheel_left_setYaw(flywheel_left.pur_yaw);
+		flywheel_left_setBrushless(flywheel_left.pur_duty);
+	}
+}
+
 /**
   * @brief main大循环中检查
   *     
@@ -247,7 +269,6 @@ void flywheel_left_main()
 				flywheel_left_setYaw(flywheel_left.pur_yaw);
 				flywheel_left_setBrushless(flywheel_left.pur_duty);
 				flywheel_left.state = fly_adj;
-				flywheel_left_setBrushless(flywheel_left.pur_duty);
 				flywheel_left.io[FLY_LEFT] = 0;
 				flywheel_left.io[UP_LEFT] = 1;
 				fly_count = 0;
@@ -255,14 +276,19 @@ void flywheel_left_main()
 			case fly_adj:
 				if(flywheel_left_check() && fly_count == 0 && autorun.state == pos_arrived)
 				{
+					if(debug_print)
+					{
+						USART_SendString(bluetooth,"msg: left switch:%d\n",left_ms);
+						left_ms = 0;
+					}
 					flywheel_left.state = fly;
 					if(fly_n == 0)
 					{
 						fly_count = 0;
-						flywheel_left.state = fly_ready;
+						flywheel_left.state = fly_l_finish;
 						flywheel_left.fly_flag = false;
 					}else{
-						USART_SendString(bluetooth,"msg:high fly!!\n");
+						USART_SendString(bluetooth,"msg:left fly!!\n");
 						flywheel_left_fly();
 						fly_count = 300;
 						fly_n--;
@@ -270,30 +296,29 @@ void flywheel_left_main()
 				}
 				break;
 			case fly:
-					
-					if(fly_n%2 == 0)
+				if(fly_n%2 == 0)
+				{
+					if(fly_count <= 300)
+						flywheel_left_up(1);
+				}
+				
+				if(fly_count == 0)
+				{
+					if(fly_n == 0)
 					{
-						if(fly_count <= 300)
-							flywheel_left_up(1);
+						fly_count = 0;
+						flywheel_left.state = fly_l_finish;
+						flywheel_left.fly_flag = false;
+					}else{
+						flywheel_left_fly();
+						if(fly_n%2 == 1){
+							flywheel_left_up(0);
+							fly_count = 700;
+						}else
+							fly_count = 300;
+						fly_n--;
 					}
-					
-					if(fly_count == 0)
-					{
-						if(fly_n == 0)
-						{
-							fly_count = 0;
-							flywheel_left.state = fly_l_finish;
-							flywheel_left.fly_flag = false;
-						}else{
-							flywheel_left_fly();
-							if(fly_n%2 == 1){
-								flywheel_left_up(0);
-								fly_count = 700;
-							}else
-								fly_count = 300;
-							fly_n--;
-						}
-					}
+				}
 				break;
 			case fly_l_finish:
 				if(flywheel_left.fly_flag)
