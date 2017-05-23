@@ -169,7 +169,7 @@ bool flywheel_left_check()
 			if(flag == 1)
 			{
 				flag = 0;
-				fly_count = 500;
+				fly_count = 300;
 			}
 			return true;
 		}
