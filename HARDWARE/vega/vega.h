@@ -11,6 +11,9 @@
  *          ,angle的值就会不断地更新。本代码是通过CAN总线来读取VEGA数据的，关于
  *          CAN总线的配置，请看can.h文件。
  */
+ 
+#ifndef _VEGA_H_
+#define _VEGA_H_
 #include "sys.h"
 
 
@@ -29,5 +32,5 @@ int vega_set_pos(int pos_x,int pos_y);
 int vega_reset(void);
 
 
-
+#endif
 

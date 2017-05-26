@@ -215,17 +215,17 @@ void chassis_auto()
 		chassis.START.Y = chassis.g_vega_pos_y* 0.0001 * 0.81;
 		chassis.START.ANG = (chassis.g_vega_angle/180.f)*PI;
 		ms = 0;
-		if(switch_side == 0)//红场
+		if(LEFT_RIGHT == 0)//红场
 		{
-			if(chassis.START.X < 0 || chassis.START.Y < 0)
+			if(chassis.END.X < 0 || chassis.END.Y < 0)
 			{
 				chassis.car_state = car_stop;
 				return;
 			}
 		}
-		else if(switch_side == 1) //蓝场
+		else if(LEFT_RIGHT == 1) //蓝场
 		{
-			if(chassis.START.X > 0 || chassis.START.Y > 0)
+			if(chassis.END.X > 0 || chassis.END.Y > 0)
 			{
 				chassis.car_state = car_stop;
 				return;

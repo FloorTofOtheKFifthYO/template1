@@ -14,12 +14,14 @@ void test_rcv_callback(CanRxMsg *can_rx_msg){
 				case 's':
 					 if(can_rx_msg->Data[1]){
 						 switch_side = true;
+						 LEFT_RIGHT = can_rx_msg->Data[1];
 						 temp[0] = 's';
 						 temp[1] = 1;
 						 can_send_msg(TEST_TX_ID,temp,2);
 					 }
 					 else{
-						 switch_side = false;
+						 switch_side = true;
+						 LEFT_RIGHT = can_rx_msg->Data[1];
 						 temp[0] = 's';
 						 temp[1] = 0;
 						 can_send_msg(TEST_TX_ID,temp,2);
@@ -110,10 +112,16 @@ void test_init()
 
 void test_left_target(u8 number)
 {
-
+	u8 temp[8];
+	temp[0] = 'l';
+	temp[1] = number;
+	can_send_msg(TEST_TX_ID,temp,2);
 }
 
 void test_right_target(u8 number)
 {
-
+	u8 temp[8];
+	temp[0] = 'r';
+	temp[1] = number;
+	can_send_msg(TEST_TX_ID,temp,2);
 }
