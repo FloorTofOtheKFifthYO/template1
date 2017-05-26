@@ -43,6 +43,8 @@ typedef struct
 	float pos_x,pos_y;
 	float angle;
 	
+	float temp_angle;
+	
 	//状态
 	enum {car_stop, car_running, car_ready} car_state;//车的运动状态
 	

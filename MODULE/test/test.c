@@ -2,6 +2,8 @@
 #include "can.h"
 #include "main.h"
 #include "auto.h"
+#include "flywheel_left.h"
+#include "flywheel_right.h"
 
 void test_rcv_callback(CanRxMsg *can_rx_msg){
 	u8 temp[8];
@@ -99,15 +101,21 @@ void test_rcv_callback(CanRxMsg *can_rx_msg){
 					}
 					can_send_msg(TEST_TX_ID,temp,5);
 					break;
+				case 'h':
+					if(debug)
+						param_save();
+					flywheel_left_home();
+					flywheel_right_home();
+					break;
 			}
 		}
     } 
-		
 }
 
 void test_init()
 {
 	can_add_callback(TEST_RX_ID,test_rcv_callback);
+	test_right_reboot();
 }
 
 void test_left_target(u8 number)
@@ -124,4 +132,11 @@ void test_right_target(u8 number)
 	temp[0] = 'r';
 	temp[1] = number;
 	can_send_msg(TEST_TX_ID,temp,2);
+}
+
+void test_right_reboot()
+{
+	u8 temp[8];
+	temp[0] = 'r';
+	can_send_msg(TEST_TX_ID,temp,1);
 }

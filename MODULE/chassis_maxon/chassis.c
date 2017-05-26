@@ -87,6 +87,7 @@ void chassis_init(void)
 	chassis.START.ANG = 0;
 	chassis.END = chassis.START;
 	chassis.car_state = car_stop;
+	chassis.temp_angle = 0;
 }
 
 
@@ -211,9 +212,10 @@ void chassis_auto()
 	
 	
 	if(chassis.car_state == car_ready){
+		vega_set_angle(chassis.temp_angle);
 		chassis.START.X = chassis.g_vega_pos_x* 0.0001 * 0.81;
 		chassis.START.Y = chassis.g_vega_pos_y* 0.0001 * 0.81;
-		chassis.START.ANG = (chassis.g_vega_angle/180.f)*PI;
+		chassis.START.ANG = (chassis.temp_angle/180.f)*PI;
 		ms = 0;
 		if(LEFT_RIGHT == 0)//ºì³¡
 		{
@@ -313,12 +315,12 @@ void chassis_auto()
 			TURN_speed= 0;
 		}
 		
-		if(TURN_speed>0 && TURN_speed<10)
+		if(TURN_speed>0 && TURN_speed<5)
 		{
-			TURN_speed = 10;
-		}else if (TURN_speed<0 && TURN_speed>-10)
+			TURN_speed = 5;
+		}else if (TURN_speed<0 && TURN_speed>-5)
 		{
-			TURN_speed = -10;
+			TURN_speed = -5;
 		}
 		
 		if(powf(error_X,2)+powf(error_Y,2) <= chassis.Move_radium)
@@ -357,6 +359,7 @@ void chassis_auto()
 			maxon_setSpeed(MOTOR2_ID,0);
 			maxon_setSpeed(MOTOR3_ID,0);
 			chassis.car_state = car_stop;
+			chassis.temp_angle = chassis.g_vega_angle;
 		}
 		else
 		{

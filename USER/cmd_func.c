@@ -28,7 +28,7 @@ extern struct {
 u8 target=0;       				//目标0-6
 
 static list_node * now_pos_ptr;
-static int pos_no = 0;
+static int pos_no = 1;
 Pos_data * now_pos;     //当前点的数据指针
 
 extern float pur_pitch;

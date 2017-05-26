@@ -110,7 +110,7 @@ void flywheel_left_setJmp(float duty)
   */
 void flywheel_left_setYaw(float yaw)
 {
-	if(yaw<0){
+	if(yaw<=0){
 		flywheel_left.pur_yaw = yaw;
 		RoboModule_SET_Position(YAW_ID_LEFT,5000,yaw*100,YAW_MAXSPEED);
 		//RoboModule_SET_Position(YAW_ID_LEFT,5000,yaw*100,YAW_MAXSPEED);

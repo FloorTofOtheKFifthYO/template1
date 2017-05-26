@@ -5,6 +5,7 @@
 #include "flywheel_right.h"
 #include "auto.h"
 #include "usart.h"
+#include "test.h"
 
 bool g_stop_flag = false;
 
@@ -52,14 +53,14 @@ int main(void)
 	delay_init(168);  //初始化延时函数
 	nvic_config();
 	usart_init(bluetooth,115200,true);
+	can_init();
+	test_init();
 	cmd_init();
 	EXTI_config();
 	
 reboot:	
 	g_stop_flag = false;
 	controller_usart_init(&Hx, &Hy);
-	
-	can_init();
 	
 	chassis_init();
 	
