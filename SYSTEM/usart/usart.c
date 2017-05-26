@@ -92,11 +92,11 @@ struct __FILE
 
 FILE __stdout;       
 //定义_sys_exit()以避免使用半主机模式    
-_sys_exit(int x) 
+int _sys_exit(int x) 
 { 
 	x = x; 
 } 
-_ttywrch(int ch)
+int _ttywrch(int ch)
 {
 ch = ch;
 }

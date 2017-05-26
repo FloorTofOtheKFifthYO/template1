@@ -15,7 +15,9 @@
 
 extern int wait_cnt;
 
+extern bool debug;
 
+extern bool switch_side;
 
 #endif
 

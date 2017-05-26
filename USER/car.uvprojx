@@ -14,7 +14,7 @@
         <TargetCommonOption>
           <Device>STM32F407ZG</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.1.0.8</PackID>
+          <PackID>Keil.STM32F4xx_DFP.2.11.0</PackID>
           <PackURL>http://www.keil.com/pack</PackURL>
           <Cpu>IROM(0x08000000,0x100000) IRAM(0x20000000,0x20000) IRAM2(0x10000000,0x10000) CPUTYPE("Cortex-M4") FPU2 CLOCK(168000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM;..\HARDWARE\motor_usart;..\MODULE\flywheel_left;..\HARDWARE\motor_brushless;..\HARDWARE\controller_usart;..\HARDWARE\motorCtrl;..\HARDWARE\relay;..\MODULE\flywheel_right;..\MODULE\client;..\HARDWARE\flywheel_close;..\HARDWARE\maxon;..\MODULE\chassis_maxon;..\HARDWARE\radar</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\controller;..\HARDWARE\vega;..\SYSTEM\CAN;..\SYSTEM\EXTI;..\SYSTEM\flash;..\SYSTEM\SPI;..\SYSTEM\TIM;..\HARDWARE\motor_usart;..\MODULE\flywheel_left;..\HARDWARE\motor_brushless;..\HARDWARE\controller_usart;..\HARDWARE\motorCtrl;..\HARDWARE\relay;..\MODULE\flywheel_right;..\MODULE\client;..\HARDWARE\flywheel_close;..\HARDWARE\maxon;..\MODULE\chassis_maxon;..\HARDWARE\radar;..\MODULE\test</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -482,6 +482,11 @@
               <FileName>chassis.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MODULE\chassis_maxon\chassis.c</FilePath>
+            </File>
+            <File>
+              <FileName>test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MODULE\test\test.c</FilePath>
             </File>
           </Files>
         </Group>

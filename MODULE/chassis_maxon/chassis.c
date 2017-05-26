@@ -6,6 +6,7 @@
 #include "maxon.h"
 #include "radar.h"
 #include "cmd.h"
+#include "main.h"
 
 Chassis chassis;
 
@@ -214,6 +215,23 @@ void chassis_auto()
 		chassis.START.Y = chassis.g_vega_pos_y* 0.0001 * 0.81;
 		chassis.START.ANG = (chassis.g_vega_angle/180.f)*PI;
 		ms = 0;
+		if(switch_side == 0)//ºì³¡
+		{
+			if(chassis.START.X < 0 || chassis.START.Y < 0)
+			{
+				chassis.car_state = car_stop;
+				return;
+			}
+		}
+		else if(switch_side == 1) //À¶³¡
+		{
+			if(chassis.START.X > 0 || chassis.START.Y > 0)
+			{
+				chassis.car_state = car_stop;
+				return;
+			}
+		}
+			
 		chassis.car_state = car_running;
 		
 		Oerror_X = chassis.END.X - chassis.START.X;
