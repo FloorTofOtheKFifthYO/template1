@@ -435,7 +435,7 @@ void auto_main()
 				
 				if(autorun.target_l == -2 && handle_l == false && autorun.target_r == -2 && handle_r == false)
 				{
-					autorun.target_l = -1;
+					autorun.target_l = 0;
 					handle_l = true;
 					autorun.target_r = -1;
 					handle_r = true;
@@ -528,7 +528,7 @@ void auto_main()
 				
 				if(autorun.target_l == -2 && handle_l == false)
 				{
-					autorun.target_l = -1;
+					autorun.target_l = 0;
 					handle_l = true;
 				}
 				
