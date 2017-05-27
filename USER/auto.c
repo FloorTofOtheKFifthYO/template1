@@ -364,7 +364,7 @@ void auto_main()
 			}
 			break;
 		case pos_running:
-			if(chassis.car_state == car_stop)
+			if(chassis.car_state == car_stop || chassis.fire)
 			{
 				radar_start();
 				autorun.state = pos_arrived;
@@ -435,9 +435,11 @@ void auto_main()
 				
 				if(autorun.target_l == -2 && handle_l == false && autorun.target_r == -2 && handle_r == false)
 				{
-					autorun.target_l = 0;
+					autorun.target_l = 1;
+					select_target_l = true;
 					handle_l = true;
-					autorun.target_r = -1;
+					autorun.target_r = 0;
+					select_target_r = true;
 					handle_r = true;
 				}
 				

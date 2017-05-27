@@ -7,6 +7,7 @@
 #include "radar.h"
 #include "cmd.h"
 #include "main.h"
+#include "auto.h"
 
 Chassis chassis;
 
@@ -87,6 +88,7 @@ void chassis_init(void)
 	chassis.START.ANG = 0;
 	chassis.END = chassis.START;
 	chassis.car_state = car_stop;
+	chassis.fire = false;
 	chassis.temp_angle = 0;
 }
 
@@ -205,6 +207,7 @@ void chassis_auto()
 	static float Oerror_X,Oerror_Y;
 	static float dir_dot_X, dir_dot_Y; 
 	static float distance;
+	static bool down = false;
 	float direction_angle;
 	
 	int arrived_flag;
@@ -212,6 +215,7 @@ void chassis_auto()
 	
 	
 	if(chassis.car_state == car_ready){
+		down = false;
 		vega_set_angle(chassis.temp_angle);
 		chassis.START.X = chassis.g_vega_pos_x* 0.0001 * 0.81;
 		chassis.START.Y = chassis.g_vega_pos_y* 0.0001 * 0.81;
@@ -241,6 +245,7 @@ void chassis_auto()
 		distance = sqrtf(powf(Oerror_X,2)+powf(Oerror_Y,2));
 		Oerror_X = Oerror_X/distance;
 		Oerror_Y = Oerror_Y/distance;
+		chassis.fire = false;
 	}
 	if(chassis.car_state == car_running){
 		arrived_flag = 0;
@@ -267,6 +272,7 @@ void chassis_auto()
 
 				ChassisSpeed = sqrtf(Sroute)*chassis.Move_speed * sqrtf(chassis.factor);
 		}else {
+			down = true;
 			/*if(Eroute > 0.5)
 				ChassisSpeed = sqrtf(Eroute) * chassis.Move_speed;
 			else
@@ -315,12 +321,12 @@ void chassis_auto()
 			TURN_speed= 0;
 		}
 		
-		if(TURN_speed>0 && TURN_speed<5)
+		if(TURN_speed>0 && TURN_speed<10)
 		{
-			TURN_speed = 5;
-		}else if (TURN_speed<0 && TURN_speed>-5)
+			TURN_speed = 10;
+		}else if (TURN_speed<0 && TURN_speed>-10)
 		{
-			TURN_speed = -5;
+			TURN_speed = -10;
 		}
 		
 		if(powf(error_X,2)+powf(error_Y,2) <= chassis.Move_radium)
@@ -347,6 +353,9 @@ void chassis_auto()
 		//USART_SendString(bluetooth,",%d,%d,%d,%d,%f\n",ReturnData(MOTOR0_ID)->Speed,ReturnData(MOTOR1_ID)->Speed,ReturnData(MOTOR2_ID)->Speed,ReturnData(MOTOR3_ID)->Speed,Sroute);
 		
 		//USART_SendString(bluetooth,"dot x:%f,y:%f\n",dir_dot_X,dir_dot_Y);
+		
+		if(TURN_speed<5 && ChassisSpeed < 5 && autorun.state == pos_running && down == true)
+			chassis.fire = true;
 		
 		if(arrived_flag == 2)
 		{
