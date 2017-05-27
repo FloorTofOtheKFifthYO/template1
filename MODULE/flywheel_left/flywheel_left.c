@@ -171,7 +171,7 @@ bool flywheel_left_check()
 			if(flag == 1)
 			{
 				flag = 0;
-				fly_count = 300;
+				fly_count = switch_time[autorun.last_l][strategy.left[autorun.target_l]];
 			}
 			return true;
 		}
@@ -186,10 +186,22 @@ void flywheel_left_fly1(){
 		fly_n = 2;
 		flywheel_left_fly();
 		flywheel_left_up(1);
-		fly_count = 300;
+		fly_count = 150;
 		fly_n--;
 		flywheel_left.state = fly;
 	}
+}
+
+void flywheel_left_flys(int n){
+	if(n >= 0)
+		if(flywheel_left.state != fly){
+			fly_n = 2*n;
+			flywheel_left_fly();
+			flywheel_left_up(1);
+			fly_count = 150;
+			fly_n--;
+			flywheel_left.state = fly;
+		}
 }
 
 //Ãß∑…≈Ã
@@ -292,7 +304,7 @@ void flywheel_left_main()
 					}else{
 						USART_SendString(bluetooth,"msg:left fly!!\n");
 						flywheel_left_fly();
-						fly_count = 300;
+						fly_count = 150;
 						fly_n--;
 					}
 				}
@@ -315,9 +327,9 @@ void flywheel_left_main()
 						flywheel_left_fly();
 						if(fly_n%2 == 1){
 							flywheel_left_up(0);
-							fly_count = 700;
+							fly_count = launch_left_time[strategy.left[autorun.target_l]];
 						}else
-							fly_count = 300;
+							fly_count = 150;
 						fly_n--;
 					}
 				}

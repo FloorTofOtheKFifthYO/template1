@@ -183,8 +183,8 @@ void gpio_config(void)
 //----------------------------增量码盘---------------------------------------------------------------------------------------------
 
 //	GPIO_Configuration(GPIO_Pin_0,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
-	GPIO_Configuration(GPIO_Pin_1,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
-	GPIO_Configuration(GPIO_Pin_12,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOD);
+//	GPIO_Configuration(GPIO_Pin_1,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
+//	GPIO_Configuration(GPIO_Pin_12,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOD);
 //	GPIO_Configuration(GPIO_Pin_13,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOD);
 //----------------------------触碰开关---------------------------------------------------------------------------------------------
 	
@@ -251,13 +251,13 @@ void nvic_config()
 //	NVIC_Configuration(USART1_IRQn,2,3,ENABLE);
 	NVIC_Configuration(USART6_IRQn,2,3,ENABLE);
 //	NVIC_Configuration(USART3_IRQn,2,3,ENABLE);
-	NVIC_Configuration(TIM2_IRQn,0,2,ENABLE);
-	NVIC_Configuration(TIM8_UP_TIM13_IRQn,1,1,ENABLE);
+//	NVIC_Configuration(TIM2_IRQn,0,2,ENABLE);
+//	NVIC_Configuration(TIM8_UP_TIM13_IRQn,1,1,ENABLE);
 //	NVIC_Configuration(TIM8_TRG_COM_TIM14_IRQn,1,1,ENABLE);
 //	NVIC_Configuration(TIM5_IRQn,1,1,ENABLE);
-	NVIC_Configuration(EXTI15_10_IRQn, 0, 0, ENABLE);
+//	NVIC_Configuration(EXTI15_10_IRQn, 0, 0, ENABLE);
 //	NVIC_Configuration(EXTI0_IRQn, 0, 0, ENABLE);
-	NVIC_Configuration(EXTI1_IRQn, 0, 0, ENABLE);
+//	NVIC_Configuration(EXTI1_IRQn, 0, 0, ENABLE);
 	
 }
 

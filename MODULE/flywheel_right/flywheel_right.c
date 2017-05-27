@@ -10,10 +10,6 @@
 
 Flywheel_right flywheel_right;
 
-extern struct {
-	int left[7];
-	int right[7];
-}strategy;
 
 extern bool debug_print;
 
@@ -177,9 +173,7 @@ bool flywheel_right_check()
 			if(flag == 1)
 			{
 				flag = 0;
-				fly_count = 700;
-				if(strategy.right[autorun.target_r] == 3)
-					fly_count = 2000;
+				fly_count = switch_time[autorun.last_r][strategy.right[autorun.target_r]];
 			}
 			return true;
 		}
@@ -194,9 +188,21 @@ void flywheel_right_fly1(){
 		fly_n = 2;
 		flywheel_right_fly();
 		flywheel_right_up(1);
-		fly_count = 300;
+		fly_count = 150;
 		fly_n--;
 		flywheel_right.state = r_fly;
+	}
+}
+
+void flywheel_right_flys(int n){
+	if(n>0)
+		if(flywheel_right.state != r_fly ){
+			fly_n = 2*n;
+			flywheel_right_fly();
+			flywheel_right_up(1);
+			fly_count = 150;
+			fly_n--;
+			flywheel_right.state = r_fly;
 	}
 }
 
@@ -307,7 +313,7 @@ void flywheel_right_main()
 					}else{
 						USART_SendString(bluetooth,"msg:right fly!!\n");
 						flywheel_right_fly();
-						fly_count = 300;
+						fly_count = 150;
 						fly_n--;
 					}
 				}
@@ -331,9 +337,9 @@ void flywheel_right_main()
 					flywheel_right_fly();
 					if(fly_n%2 == 1){
 						flywheel_right_up(0);
-						fly_count = 700;
+						fly_count = launch_right_time[strategy.right[autorun.target_r]];
 					}else
-						fly_count = 300;
+						fly_count = 150;
 					fly_n--;
 				}
 			}

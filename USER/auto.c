@@ -6,12 +6,25 @@
 #include "flywheel_left.h"
 #include "flywheel_right.h"
 #include "radar.h"
+#include "test.h"
 
-struct {
-	int left[7];
-	int right[7];
-}strategy;
+struct strategy strategy;
 
+
+int switch_time[8][8] = {//最后一行是一开始的转移到某台的参数
+	{0   ,1000,1000,1000,1000,1000,1000,1000},
+	{1000,0   ,1000,1000,1000,1000,1000,1000},
+	{1000,1000,0   ,1000,1000,1000,1000,1000},
+	{1000,1000,1000,0   ,1000,1000,1000,1000},
+	{1000,1000,1000,1000,0   ,1000,1000,1000},
+	{1000,1000,1000,1000,1000,0   ,1000,1000},
+	{1000,1000,1000,1000,1000,1000,0   ,1000},
+	{1000,1000,1000,1000,1000,1000,1000,0   }
+};
+
+int launch_left_time[7]={700,700,700,700,700,700,700};
+
+int launch_right_time[7]={700,700,700,700,700,700,700};
 
 extern Pos_data * now_pos;     //当前点的数据指针
 
@@ -110,18 +123,28 @@ void auto_init()
 	autorun.start_run_flag = false;
 	autorun.launch_l_continute = false;
 	autorun.launch_r_continute = false;
+	autorun.last_l = 8;
+	autorun.last_r = 8;
 	//暂定这么多，可能会改
 }
 
 void auto_select_l(int target)
 {
 	select_target_l = true;
+	if(autorun.target_l<0 || autorun.target_l>6)
+		autorun.last_l = strategy.left[autorun.target_l];
+	else
+		autorun.last_l = 8;
 	autorun.target_l = target+1;
 }
 
 void auto_select_r(int target)
 {
 	select_target_r = true;
+	if(autorun.target_r<0 || autorun.target_r>6)
+		autorun.last_r = strategy.right[autorun.target_r];
+	else
+		autorun.last_r = 8;
 	autorun.target_r = target;
 }
 
@@ -137,7 +160,7 @@ void auto_select_r(int target)
 int auto_save()
 {
 	u32 addr = AUTO_FLASH_ADDR_START;
-	int i;
+	int i,j;
 	load_area[LEFT_RIGHT] = autorun.load_area;
 	FLASH_Unlock();  //解锁FLASH，写数据
     FLASH_DataCacheCmd(DISABLE);
@@ -162,6 +185,21 @@ int auto_save()
 		FLASH_ProgramWord(addr,strategy.left[i]);
 		addr+=4;
 		FLASH_ProgramWord(addr,strategy.right[i]);
+		addr+=4;
+	}
+	for(i = 0;i<8;i++)
+	{
+		for(j = 0;j<8;i++)
+		{
+			FLASH_ProgramWord(addr,switch_time[i][j]);
+			addr+=4;
+		}
+	}
+	for(i = 0;i<7;i++)
+	{
+		FLASH_ProgramWord(addr,launch_left_time[i]);
+		addr+=4;
+		FLASH_ProgramWord(addr,launch_left_time[i]);
 		addr+=4;
 	}
 	FLASH_DataCacheCmd(ENABLE);
@@ -282,8 +320,10 @@ void auto_main()
 				{
 					launch_data_l = launch_ptr_l->data;
 					if(launch_data_l != NULL){
-						flywheel_left_flyn(3,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
-						USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",launch_data_l->pitch,launch_data_l->yaw,launch_data_l->speed);
+						flywheel_left_flyn(1,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
+						test_left_target(strategy.left[autorun.target_l]);
+						if(debug_print)
+							USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",launch_data_l->pitch,launch_data_l->yaw,launch_data_l->speed);
 					}
 				}
 				
@@ -296,8 +336,10 @@ void auto_main()
 				{
 					launch_data_r = launch_ptr_r->data;
 					if(launch_data_r != NULL){
-						flywheel_right_flyn(2,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
-						USART_SendString(bluetooth,"right:x pitch:%f turn:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->turn,launch_data_r->yaw,launch_data_r->speed);
+						test_right_target(strategy.right[autorun.target_r]);
+						flywheel_right_flyn(3,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
+						if(debug_print)
+							USART_SendString(bluetooth,"right:x pitch:%f turn:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->turn,launch_data_r->yaw,launch_data_r->speed);
 					}
 				}
 				autorun.state = pos_running;
@@ -311,9 +353,7 @@ void auto_main()
 				chassis.END.X = pos_data->x;
 				chassis.END.Y = pos_data->y;
 				chassis.END.ANG = pos_data->ang;
-				
-				//加坐标的判断	！！！
-				
+
 				chassis.car_state = car_ready;
 				OPEN_Hander = 0;
 				
@@ -330,6 +370,7 @@ void auto_main()
 				{
 					launch_data_l = launch_ptr_l->data;
 					if(launch_data_l != NULL){
+						test_left_target(strategy.left[autorun.target_l]);
 						if(autorun.target_l==0)
 							flywheel_left_flyn(1,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
 						else
@@ -348,6 +389,7 @@ void auto_main()
 					{
 						launch_data_r = launch_ptr_r->data;
 						if(launch_data_r != NULL){
+							test_right_target(strategy.right[autorun.target_r]);
 							if(autorun.target_r==0)
 								flywheel_right_flyn(3,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
 							else
@@ -387,6 +429,10 @@ void auto_main()
 					autorun.launch_l_continute = false;
 					if(autorun.target_l == 0)
 						radar_shoot();
+					if(autorun.target_l<0 || autorun.target_l>6)
+						autorun.last_l = strategy.left[autorun.target_l];
+					else
+						autorun.last_l = 8;
 					autorun.target_l++;
 					USART_SendString(bluetooth,"msg: target%d\n",autorun.target_l);
 					
@@ -398,6 +444,7 @@ void auto_main()
 						{
 							launch_data_l = launch_ptr_l->data;
 							if(launch_data_l != NULL){
+								test_left_target(strategy.left[autorun.target_l]);
 								flywheel_left_flyn(3,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
 								if(debug_print)
 									USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",launch_data_l->pitch,launch_data_l->yaw,launch_data_l->speed);
@@ -415,6 +462,10 @@ void auto_main()
 				if(autorun.target_l == -2 && flywheel_right.state == fly_r_finish && autorun.target_r != -2 && autorun.launch_r_continute == true)
 				{
 					autorun.launch_r_continute = false;
+					if(autorun.target_r<0 || autorun.target_r>6)
+						autorun.last_r = strategy.right[autorun.target_r];
+					else
+						autorun.last_r = 8;
 					autorun.target_r++;
 					USART_SendString(bluetooth,"msg: target%d\n",autorun.target_r);
 					if(autorun.target_r == 7 || strategy.right[autorun.target_r] == -1)
@@ -425,6 +476,7 @@ void auto_main()
 						{
 							launch_data_r = launch_ptr_r->data;
 							if(launch_data_r != NULL){
+								test_right_target(strategy.right[autorun.target_r]);
 								flywheel_right_flyn(3,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
 								if(debug_print)
 									USART_SendString(bluetooth,"right:x pitch:%f turn:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->turn,launch_data_r->yaw,launch_data_r->speed);
@@ -452,6 +504,7 @@ void auto_main()
 						{
 							launch_data_l = launch_ptr_l->data;
 							if(launch_data_l != NULL){
+								test_left_target(strategy.left[autorun.target_l]);
 								flywheel_left_flyn(0,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
 								if(debug_print)
 									USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",launch_data_l->pitch,launch_data_l->yaw,launch_data_l->speed);
@@ -472,6 +525,7 @@ void auto_main()
 						{
 							launch_data_r = launch_ptr_r->data;
 							if(launch_data_r != NULL){
+								test_right_target(strategy.right[autorun.target_r]);
 								flywheel_right_flyn(0,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
 								if(debug_print)
 									USART_SendString(bluetooth,"right:x pitch:%f turn:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->turn,launch_data_r->yaw,launch_data_r->speed);
@@ -487,6 +541,10 @@ void auto_main()
 					autorun.launch_l_continute = false;
 					if(autorun.target_l == 0)
 						radar_shoot();
+					if(autorun.target_l<0 || autorun.target_l>6)
+						autorun.last_l = strategy.left[autorun.target_l];
+					else
+						autorun.last_l = 8;
 					autorun.target_l++;
 					USART_SendString(bluetooth,"msg: target%d\n",autorun.target_l);
 					if(autorun.target_l == 7 || strategy.left[autorun.target_l] == -1)
@@ -495,6 +553,7 @@ void auto_main()
 						launch_ptr_l = pos_data->d[strategy.left[autorun.target_l]].launch_ptr->link;
 						if(launch_ptr_l != NULL)
 						{
+							test_left_target(strategy.left[autorun.target_l]);
 							launch_data_l = launch_ptr_l->data;
 							if(launch_data_l != NULL){
 								flywheel_left_flyn(3,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
@@ -508,6 +567,10 @@ void auto_main()
 				if(flywheel_right.state == fly_r_finish && autorun.target_r != -2 && autorun.launch_r_continute == true && handle_r == false)
 				{
 					autorun.launch_r_continute = false;
+					if(autorun.target_r<0 || autorun.target_r>6)
+						autorun.last_r = strategy.right[autorun.target_r];
+					else
+						autorun.last_r = 8;
 					autorun.target_r++;
 					USART_SendString(bluetooth,"msg: target%d\n",autorun.target_r);
 					if(autorun.target_r == 7 || strategy.right[autorun.target_r] == -1)
@@ -518,6 +581,7 @@ void auto_main()
 						{
 							launch_data_r = launch_ptr_r->data;
 							if(launch_data_r != NULL){
+								test_right_target(strategy.right[autorun.target_r]);
 								flywheel_right_flyn(3,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
 								if(debug_print)
 									USART_SendString(bluetooth,"right:x pitch:%f turn:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->turn,launch_data_r->yaw,launch_data_r->speed);
@@ -556,6 +620,7 @@ void auto_main()
 						launch_ptr_l = pos_data->d[strategy.left[autorun.target_l]].launch_ptr->link;
 						if(launch_ptr_l != NULL)
 						{
+							test_left_target(strategy.left[autorun.target_l]);
 							launch_data_l = launch_ptr_l->data;
 							if(launch_data_l != NULL){
 								flywheel_left_flyn(0,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
@@ -578,6 +643,7 @@ void auto_main()
 						{
 							launch_data_r = launch_ptr_r->data;
 							if(launch_data_r != NULL){
+								test_right_target(strategy.right[autorun.target_r]);
 								flywheel_right_flyn(0,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
 								if(debug_print)
 									USART_SendString(bluetooth,"right:x pitch:%f turn:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->turn,launch_data_r->yaw,launch_data_r->speed);

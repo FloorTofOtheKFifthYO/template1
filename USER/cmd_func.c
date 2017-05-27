@@ -20,10 +20,6 @@ extern bool g_stop_flag;
 extern bool switch_side;
 extern bool debug_print;
 extern bool debug;
-extern struct {
-	int left[7];
-	int right[7];
-}strategy;
 
 u8 target=0;       				//Ä¿±ê0-6
 

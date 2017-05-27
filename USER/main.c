@@ -56,7 +56,7 @@ int main(void)
 	can_init();
 	test_init();
 	cmd_init();
-	EXTI_config();
+//	EXTI_config();
 	
 reboot:	
 	g_stop_flag = false;

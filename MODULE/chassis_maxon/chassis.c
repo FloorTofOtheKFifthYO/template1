@@ -254,7 +254,7 @@ void chassis_auto()
 		Sroute = sqrt(powf(Serror_X,2)+powf(Serror_Y,2))+chassis.Start_distance;
 		Eroute = sqrt(powf(error_X,2)+powf(error_Y,2));
 		
-		i = Sroute+0.5;
+		i = Sroute+0.8;
 		
 		dir_dot_X = Oerror_X*i + chassis.START.X;
 		dir_dot_Y = Oerror_Y*i + chassis.START.Y;

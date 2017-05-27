@@ -118,6 +118,8 @@ void flywheel_left_TIM();
   */
 void flywheel_left_flyn(int n, float duty, float pitch, float yaw);
 
+void flywheel_left_flys(int n);
+
 /**
   * @brief main大循环中检查
   *     

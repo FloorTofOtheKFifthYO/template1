@@ -9,10 +9,7 @@
 
 extern bool g_stop_flag;
 extern int wait_cnt;
-extern struct {
-	int left[7];
-	int right[7];
-}strategy;
+
 extern Pos_data * now_pos;     //当前点的数据指针
 extern bool handle_l;
 extern bool handle_r;
@@ -26,7 +23,7 @@ extern bool handle_r;
 #define DELT_SPEED_LEFT 0.00001
 #define FACTOR_SPEED_LEFT 1
 
-#define DELT_YAW_RIGHT -0.005
+#define DELT_YAW_RIGHT -0.01
 #define DELT_SPEED_RIGHT 0.00005
 #define FACTOR_SPEED_RIGHT 1
 
@@ -399,6 +396,8 @@ void control_usart_main()
 		}
 		if (RL.ispressed) {
 			RL.ispressed = false;
+			flywheel_left_flys(3);
+			
 		}
 		
 	}else{ 
@@ -461,6 +460,7 @@ void control_usart_main()
 		}
 		if (RL.ispressed) {
 			RL.ispressed = false;
+			flywheel_right_flys(3);
 		}
 	}else{
 		

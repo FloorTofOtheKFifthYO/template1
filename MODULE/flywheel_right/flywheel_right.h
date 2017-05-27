@@ -148,4 +148,6 @@ void flywheel_right_up(int i);
 
 void flywheel_right_Set();
 
+void flywheel_right_flys(int n);
+
 #endif

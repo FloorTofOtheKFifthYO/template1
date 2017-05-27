@@ -31,12 +31,26 @@ typedef struct {
 	bool launch_l_continute;
 	bool launch_r_continute;
 	
+	int last_l;
+	int last_r;
 	int target_l;
 	int target_r;
 
 } AutoStrategy;
 
 extern AutoStrategy autorun;
+
+struct strategy{
+	int left[7];
+	int right[7];
+};
+
+extern struct strategy strategy;
+extern int switch_time[8][8];
+
+extern int launch_left_time[7];
+
+extern int launch_right_time[7];
 
 /**
   * @brief  ≥ı ºªØ
