@@ -91,11 +91,83 @@ void cmd_test_func(int argc,char *argv[]){
 
 void cmd_auto_func(int argc, char*argv[])
 {
-	int n1,n2;
+	int n1,n2,time;
 	if (strcmp(argv[1],"load") == 0)
 	{
 		autorun.load_run_flag = true;
-	}else if (strcmp(argv[1],"target") == 0)
+	}else if(strcmp(argv[1],"switchtime")==0)
+	{
+		if(argc != 5){
+			USART_SendString(bluetooth,"msg: please enter:\n");
+            USART_SendString(bluetooth,"msg:    auto switchtime <n1> <n2> <time>\n");
+				for(n1 = 0;n1<8;n1++)
+			{
+				for(n2=0;n2<8;n2++)
+				{
+					USART_SendString(bluetooth,"%d ",switch_time[n1][n2]);
+				}
+				USART_SendString(bluetooth,"\n");
+			}
+			return;
+		}
+			
+		n1 = atoi(argv[2]);
+		n2 = atoi(argv[3]);
+		time = atoi(argv[4]);
+		
+		switch_time[n1][n2] = time;
+		
+		for(n1 = 0;n1<8;n1++)
+		{
+			for(n2=0;n2<8;n2++)
+			{
+				USART_SendString(bluetooth,"%d ",switch_time[n1][n2]);
+			}
+			USART_SendString(bluetooth,"\n");
+		}
+	}else if(strcmp(argv[1],"launchtime")==0)
+	{
+		if(argc != 5){
+			USART_SendString(bluetooth,"msg: please enter:\n");
+            USART_SendString(bluetooth,"msg:    auto launchtime <l/r> <n1> <time>\n");
+			USART_SendString(bluetooth,"left:");
+			for(n1=0;n1<7;n1++)
+			{
+				USART_SendString(bluetooth,"%d ",launch_left_time[n1]);
+			}
+			USART_SendString(bluetooth,"\n");
+			USART_SendString(bluetooth,"right:");
+			for(n1=0;n1<7;n1++)
+			{
+				USART_SendString(bluetooth,"%d ",launch_right_time[n1]);
+			}
+			USART_SendString(bluetooth,"\n");
+			return;
+		}
+			
+		
+		n1 = atoi(argv[3]);
+		time = atoi(argv[4]);
+		if(strcmp(argv[2],"l")==0){
+			launch_left_time[n1] = time;
+			USART_SendString(bluetooth,"left:");
+			for(n1=0;n1<7;n1++)
+			{
+				USART_SendString(bluetooth,"%d ",launch_left_time[n1]);
+			}
+			USART_SendString(bluetooth,"\n");
+		}else{
+			launch_right_time[n1] = time;
+			USART_SendString(bluetooth,"right:");
+			for(n1=0;n1<7;n1++)
+			{
+				USART_SendString(bluetooth,"%d ",launch_right_time[n1]);
+			}
+			USART_SendString(bluetooth,"\n");
+		}
+		
+	}
+	else if (strcmp(argv[1],"target") == 0)
 	{
 		if(argc != 5){
 			USART_SendString(bluetooth,"msg: Error!please enter:\n");

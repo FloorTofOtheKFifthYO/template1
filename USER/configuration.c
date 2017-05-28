@@ -251,7 +251,7 @@ void nvic_config()
 //	NVIC_Configuration(USART1_IRQn,2,3,ENABLE);
 	NVIC_Configuration(USART6_IRQn,2,3,ENABLE);
 //	NVIC_Configuration(USART3_IRQn,2,3,ENABLE);
-//	NVIC_Configuration(TIM2_IRQn,0,2,ENABLE);
+	NVIC_Configuration(TIM2_IRQn,0,2,ENABLE);
 //	NVIC_Configuration(TIM8_UP_TIM13_IRQn,1,1,ENABLE);
 //	NVIC_Configuration(TIM8_TRG_COM_TIM14_IRQn,1,1,ENABLE);
 //	NVIC_Configuration(TIM5_IRQn,1,1,ENABLE);

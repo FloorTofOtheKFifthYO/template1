@@ -78,6 +78,7 @@ reboot:
 	
     while(1) 
 	{
+		test_main();
 		bottons_check();
 		//sticks_check(Hx,Hy);
 		/********ÊÖ±ú²¿·Ö***********/

@@ -15,4 +15,6 @@ void test_right_target(u8 number);
 
 void test_right_reboot();
 
+void test_main();
+
 #endif

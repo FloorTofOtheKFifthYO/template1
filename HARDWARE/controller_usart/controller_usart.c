@@ -225,7 +225,7 @@ void control_usart_main()
     list_node * ptr;
 	
 	Xianding = 0;
-	ChassisSpeed = 500;
+	ChassisSpeed = 300;
 	if (!L2.ispressed&&!R2.ispressed){
 		
 		if (LU.ispressed) direction_angle = 3*PI/4;
@@ -245,6 +245,7 @@ void control_usart_main()
 		}
 		
 		if (RL.ispressed) {
+			RL.ispressed = false;
 			if(LEFT_RIGHT==0)//ºì³¡
 			{
 				switch(autorun.state)//start,load_running,load_arrived,pos_running,pos_arrived,handle_control,start_running

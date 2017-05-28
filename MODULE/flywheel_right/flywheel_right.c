@@ -292,7 +292,7 @@ void flywheel_right_main()
 			{
 				if(handle_r == false && autorun.target_r == 0 && flag == 0)
 				{
-					fly_count = 300;
+					fly_count = 500;
 					flag = 1;
 				}
 				if(fly_count == 0)
