@@ -135,8 +135,14 @@ void auto_init()
 	autorun.load_run_flag = false;
 	autorun.pos_run_flag = false;
 	autorun.start_run_flag = false;
-	autorun.launch_l_continute = true;
-	autorun.launch_r_continute = true;
+	if(debug)
+	{
+		autorun.launch_l_continute = false;
+		autorun.launch_r_continute = false;
+	}else{
+		autorun.launch_l_continute = true;
+		autorun.launch_r_continute = true;
+	}
 	autorun.last_l = 7;
 	autorun.last_r = 7;
 	//暂定这么多，可能会改
