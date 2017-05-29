@@ -11,6 +11,8 @@ bool g_stop_flag = false;
 
 bool debug_print = false;
 
+bool auto_mode = false;
+
 bool debug = false;
 
 bool switch_side = false;

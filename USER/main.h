@@ -19,5 +19,7 @@ extern bool debug;
 
 extern bool switch_side;
 
+extern bool auto_mode;
+
 #endif
 
