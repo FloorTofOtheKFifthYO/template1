@@ -315,12 +315,12 @@ void chassis_auto()
 			TURN_speed= 0;
 		}
 		
-		if(TURN_speed>0 && TURN_speed<5)
+		if(TURN_speed>0 && TURN_speed<8)
 		{
-			TURN_speed = 5;
-		}else if (TURN_speed<0 && TURN_speed>-5)
+			TURN_speed = 8;
+		}else if (TURN_speed<0 && TURN_speed>-8)
 		{
-			TURN_speed = -5;
+			TURN_speed = -8;
 		}
 		
 		if(powf(error_X,2)+powf(error_Y,2) <= chassis.Move_radium)
@@ -330,7 +330,7 @@ void chassis_auto()
 			ChassisSpeed = 0;
 		}else {
 			
-			if(distance<=1 || powf(error_X,2)+powf(error_Y,2) <= 0.5 || Sroute >= distance)
+			if(distance<=1 || powf(error_X,2)+powf(error_Y,2) <= 0.8 || Sroute >= distance)
 			{	
 				direction_angle = atan2(error_Y,error_X);
 			}
