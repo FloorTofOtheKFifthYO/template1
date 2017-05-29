@@ -45,6 +45,22 @@ void test_rcv_callback(CanRxMsg *can_rx_msg){
 						can_send_msg(TEST_TX_ID,temp,2);
 					}
 					break;
+				case 'm':
+					if(can_rx_msg->Data[1])
+					{
+						auto_mode = false;
+						temp[0] = 'm';
+						temp[1] = 1;
+						can_send_msg(TEST_TX_ID,temp,2);
+					}
+					else
+					{
+						auto_mode = true;
+						temp[0] = 'm';
+						temp[1] = 0;
+						can_send_msg(TEST_TX_ID,temp,2);
+					}
+					break;
 			}
         }else if(can_rx_msg->DLC == 1)
 		{

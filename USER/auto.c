@@ -7,6 +7,7 @@
 #include "flywheel_right.h"
 #include "radar.h"
 #include "test.h"
+#include "main.h"
 
 struct strategy strategy;
 
@@ -35,8 +36,6 @@ bool handle_l = false;
 bool handle_r = false;
 static bool first_run = true;
 POSITION load_area[2];
-extern bool debug;
-extern bool debug_print;
 
 /**
   * @brief  初始化
@@ -135,7 +134,7 @@ void auto_init()
 	autorun.load_run_flag = false;
 	autorun.pos_run_flag = false;
 	autorun.start_run_flag = false;
-	if(debug)
+	if(debug || !auto_mode)
 	{
 		autorun.launch_l_continute = false;
 		autorun.launch_r_continute = false;
@@ -427,7 +426,7 @@ void auto_main()
 			}
 			break;
 		case pos_running:
-			if(chassis.car_state == car_stop)
+			if(chassis.car_state == car_stop || chassis.fire)
 			{
 				radar_start();
 				autorun.state = pos_arrived;
@@ -508,9 +507,11 @@ void auto_main()
 				
 				if(autorun.target_l == -2 && handle_l == false && autorun.target_r == -2 && handle_r == false)
 				{
-					autorun.target_l = -1;
+					autorun.target_l = 1;
+					select_target_l = true;
 					handle_l = true;
-					autorun.target_r = -1;
+					autorun.target_r = 0;
+					select_target_r = true;
 					handle_r = true;
 				}
 				
@@ -559,7 +560,8 @@ void auto_main()
 				//循环发射所有台子，发完之后直接转移到下一状态
 				if(flywheel_left.state == fly_l_finish && autorun.target_l != -2 && autorun.launch_l_continute == true&& handle_l == false)
 				{
-					//autorun.launch_l_continute = false;
+					if(!auto_mode)
+						autorun.launch_l_continute = false;
 					if(autorun.target_l == 0)
 						radar_shoot();
 					if(autorun.target_l<0 || autorun.target_l>6)
@@ -588,7 +590,8 @@ void auto_main()
 				}
 				if(flywheel_right.state == fly_r_finish && autorun.target_r != -2 && autorun.launch_r_continute == true && handle_r == false)
 				{
-					//autorun.launch_r_continute = false;
+					if(!auto_mode)
+						autorun.launch_l_continute = false;
 					if(autorun.target_r<=0 || autorun.target_r>6)
 						autorun.last_r = 7;
 					else

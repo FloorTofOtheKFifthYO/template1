@@ -48,6 +48,8 @@ typedef struct
 	//状态
 	enum {car_stop, car_running, car_ready} car_state;//车的运动状态
 	
+	bool fire;
+	
 	//控制
 	POSITION END, START;
 	

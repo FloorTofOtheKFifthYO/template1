@@ -17,6 +17,8 @@ extern int wait_cnt;
 
 extern bool debug;
 
+extern bool debug_print;
+
 extern bool switch_side;
 
 extern bool auto_mode;
