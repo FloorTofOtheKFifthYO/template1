@@ -591,7 +591,7 @@ void auto_main()
 				if(flywheel_right.state == fly_r_finish && autorun.target_r != -2 && autorun.launch_r_continute == true && handle_r == false)
 				{
 					if(!auto_mode)
-						autorun.launch_l_continute = false;
+						autorun.launch_r_continute = false;
 					if(autorun.target_r<=0 || autorun.target_r>6)
 						autorun.last_r = 7;
 					else
