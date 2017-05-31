@@ -154,7 +154,7 @@ void auto_select_l(int target)
 		autorun.last_l = 7;
 	else
 		autorun.last_l = strategy.left[autorun.target_l];
-	autorun.target_l = target+1;
+	autorun.target_l = target;
 	
 }
 
@@ -394,7 +394,7 @@ void auto_main()
 					if(launch_data_l != NULL){
 						test_left_target(strategy.left[autorun.target_l]);
 						if(autorun.target_l==0)
-							flywheel_left_flyn(1,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
+							flywheel_left_flyn(3,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
 						else
 							flywheel_left_flyn(0,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
 						if(debug_print)
@@ -430,8 +430,8 @@ void auto_main()
 		case pos_running:
 			if(chassis.car_state == car_stop || chassis.fire)
 			{
-				if(autorun.target_l != 0)
-					radar_shoot();
+				//if(autorun.target_l != 0)
+				radar_shoot();
 				autorun.state = pos_arrived;
 			}else if(autorun.load_run_flag)//跑的过程中突然改变方向
 			{
@@ -510,7 +510,7 @@ void auto_main()
 				
 				if(autorun.target_l == -2 && handle_l == false && autorun.target_r == -2 && handle_r == false)
 				{
-					autorun.target_l = 0;
+					autorun.target_l = -1;
 					//select_target_l = true;
 					handle_l = true;
 					autorun.target_r = -1;
@@ -565,8 +565,8 @@ void auto_main()
 				{
 					if(!auto_mode)
 						autorun.launch_l_continute = false;
-					if(autorun.target_l == 0)
-						radar_shoot();
+					/*if(autorun.target_l == 0)
+						radar_shoot();*/
 					if(autorun.target_l<0 || autorun.target_l>6)
 						autorun.last_l = 7;
 					else
@@ -623,17 +623,21 @@ void auto_main()
 				
 				if(autorun.target_l == -2 && handle_l == false)
 				{
-					autorun.target_l = 1;
-					if(!auto_mode)
+					autorun.target_l = -1;
+					if(!auto_mode){
+						autorun.target_l = 0;
 						select_target_l = true;
+					}
 					handle_l = true;
 				}
 				
 				if(autorun.target_r == -2 && handle_r == false)
 				{
-					autorun.target_r = 0;
-					if(!auto_mode)
+					autorun.target_r = -1;
+					if(!auto_mode){
+						autorun.target_r = 0;
 						select_target_r = true;
+					}
 					handle_r = true;
 				}
 				

@@ -60,3 +60,9 @@ void radar_stop()
 	u8 can_tx_msg[4]={'s','t','o','p'};
 	can_send_msg(RADAR_TX_ID,can_tx_msg,4);
 }
+
+void radar_double()
+{
+	u8 can_tx_msg[6]={'d','o','u','b','l','e'};
+	can_send_msg(RADAR_TX_ID,can_tx_msg,6);
+}

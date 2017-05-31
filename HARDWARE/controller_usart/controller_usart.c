@@ -6,6 +6,7 @@
 #include "chassis.h"
 #include <math.h>
 #include "auto.h"
+#include "radar.h"
 
 extern bool g_stop_flag;
 extern int wait_cnt;
@@ -94,8 +95,8 @@ const float convert[7][4][2] ={
 								}}
 							};
 
-bottons LU,LR,LD,LL,RU,RR,RD,RL,L1,L2,R1,R2;
-bottons* b[12]={&LU,&LR,&LD,&LL,&RU,&RR,&RD,&RL,&L1,&L2,&R1,&R2};
+bottons LU,LR,LD,LL,RU,RR,RD,RL,L1,L2,R1,R2,Start,Select;
+bottons* b[14]={&LU,&LR,&LD,&LL,&RU,&RR,&RD,&RL,&L1,&L2,&R1,&R2,&Start,&Select};
 sticks L,R;
 sticks* s[2]={&L,&R};
 
@@ -154,6 +155,12 @@ void USART6_IRQHandler(void)
 				break;
 			case 'K':        
 				ptrB=RL_KEY;
+				break;
+			case 'H':
+				//start
+				radar_double();
+				break;
+			case 'G':
 				break;
 			default:
 				break;
@@ -375,7 +382,7 @@ void control_usart_main()
 				autorun.launch_l_continute = true;
 			}else if(autorun.state == pos_arrived && handle_l == true)
 			{
-				auto_select_l((autorun.target_l) % 3);
+				auto_select_l((autorun.target_l+1) % 3);
 			}
 		}
 		if (RR.ispressed) {

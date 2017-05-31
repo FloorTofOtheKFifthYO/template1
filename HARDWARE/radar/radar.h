@@ -15,6 +15,8 @@ void radar_start();
 
 void radar_stop();
 
+void radar_double();
+
 void radar_shoot();
 
 #endif
