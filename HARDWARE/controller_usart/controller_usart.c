@@ -95,8 +95,8 @@ const float convert[7][4][2] ={
 								}}
 							};
 
-bottons LU,LR,LD,LL,RU,RR,RD,RL,L1,L2,R1,R2,Start,Select;
-bottons* b[14]={&LU,&LR,&LD,&LL,&RU,&RR,&RD,&RL,&L1,&L2,&R1,&R2,&Start,&Select};
+bottons LU,LR,LD,LL,RU,RR,RD,RL,L1,L2,R1,R2/*,Start,Select*/;
+bottons* b[14]={&LU,&LR,&LD,&LL,&RU,&RR,&RD,&RL,&L1,&L2,&R1,&R2/*,&Start,&Select*/};
 sticks L,R;
 sticks* s[2]={&L,&R};
 

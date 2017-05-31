@@ -397,7 +397,7 @@ void chassis_auto()
 		
 		//USART_SendString(bluetooth,"dot x:%f,y:%f\n",dir_dot_X,dir_dot_Y);
 		
-		if(TURN_speed<5 && ChassisSpeed < 5 && autorun.state == pos_running && down == true)
+		if(TURN_speed<5 && ChassisSpeed < 3 && autorun.state == pos_running && down == true)
 			chassis.fire = true;
 		
 		if(arrived_flag == 2)

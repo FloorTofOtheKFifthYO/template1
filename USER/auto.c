@@ -510,10 +510,10 @@ void auto_main()
 				
 				if(autorun.target_l == -2 && handle_l == false && autorun.target_r == -2 && handle_r == false)
 				{
-					autorun.target_l = -1;
+					autorun.target_l = 2;
 					//select_target_l = true;
 					handle_l = true;
-					autorun.target_r = -1;
+					autorun.target_r = 3;
 					//select_target_r = true;
 					handle_r = true;
 				}
@@ -623,7 +623,7 @@ void auto_main()
 				
 				if(autorun.target_l == -2 && handle_l == false)
 				{
-					autorun.target_l = -1;
+					autorun.target_l = 2;
 					if(!auto_mode){
 						autorun.target_l = 0;
 						select_target_l = true;
@@ -633,7 +633,7 @@ void auto_main()
 				
 				if(autorun.target_r == -2 && handle_r == false)
 				{
-					autorun.target_r = -1;
+					autorun.target_r = 3;
 					if(!auto_mode){
 						autorun.target_r = 0;
 						select_target_r = true;
