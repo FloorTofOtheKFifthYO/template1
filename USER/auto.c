@@ -261,6 +261,7 @@ void auto_main()
 		//发射机构复位
 		flywheel_left_home();
 		flywheel_right_home();
+		radar_stop();
 		
 		autorun.state = start_running;
 	}
@@ -362,6 +363,7 @@ void auto_main()
 							USART_SendString(bluetooth,"right:x pitch:%f turn:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->turn,launch_data_r->yaw,launch_data_r->speed);
 					}
 				}
+				
 				autorun.state = pos_running;
 			}
 			break;
@@ -428,7 +430,8 @@ void auto_main()
 		case pos_running:
 			if(chassis.car_state == car_stop || chassis.fire)
 			{
-				radar_start();
+				if(autorun.target_l != 0)
+					radar_shoot();
 				autorun.state = pos_arrived;
 			}else if(autorun.load_run_flag)//跑的过程中突然改变方向
 			{
@@ -447,8 +450,8 @@ void auto_main()
 				if(flywheel_left.state == fly_l_finish && autorun.target_l != -2 && autorun.launch_l_continute == true)
 				{
 					autorun.launch_l_continute = false;
-					if(autorun.target_l == 0)
-						radar_shoot();
+					/*if(autorun.target_l == 0)
+						radar_shoot();*/
 					if(autorun.target_l<0 || autorun.target_l>6)
 						autorun.last_l = 7;
 					else
@@ -507,11 +510,11 @@ void auto_main()
 				
 				if(autorun.target_l == -2 && handle_l == false && autorun.target_r == -2 && handle_r == false)
 				{
-					autorun.target_l = 1;
-					select_target_l = true;
+					autorun.target_l = 0;
+					//select_target_l = true;
 					handle_l = true;
-					autorun.target_r = 0;
-					select_target_r = true;
+					autorun.target_r = -1;
+					//select_target_r = true;
 					handle_r = true;
 				}
 				
@@ -527,7 +530,7 @@ void auto_main()
 							launch_data_l = launch_ptr_l->data;
 							if(launch_data_l != NULL){
 								test_left_target(strategy.left[autorun.target_l]);
-								flywheel_left_flyn(0,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
+								flywheel_left_flyn(3,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
 								if(debug_print)
 									USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",launch_data_l->pitch,launch_data_l->yaw,launch_data_l->speed);
 								
@@ -548,7 +551,7 @@ void auto_main()
 							launch_data_r = launch_ptr_r->data;
 							if(launch_data_r != NULL){
 								test_right_target(strategy.right[autorun.target_r]);
-								flywheel_right_flyn(0,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
+								flywheel_right_flyn(3,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
 								if(debug_print)
 									USART_SendString(bluetooth,"right:x pitch:%f turn:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->turn,launch_data_r->yaw,launch_data_r->speed);
 							}
@@ -621,14 +624,16 @@ void auto_main()
 				if(autorun.target_l == -2 && handle_l == false)
 				{
 					autorun.target_l = 1;
-					select_target_l = true;
+					if(!auto_mode)
+						select_target_l = true;
 					handle_l = true;
 				}
 				
 				if(autorun.target_r == -2 && handle_r == false)
 				{
 					autorun.target_r = 0;
-					select_target_r = true;
+					if(!auto_mode)
+						select_target_r = true;
 					handle_r = true;
 				}
 				
@@ -699,6 +704,7 @@ void auto_main()
 				//发射机构复位
 				flywheel_left_home();
 				flywheel_right_home();
+				radar_stop();
 				
 				autorun.state = load_running;
 			}

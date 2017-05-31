@@ -299,26 +299,51 @@ void chassis_auto()
 			ChassisSpeed = chassis.Speed_min;
 		}
 		
-		if(errorAngle >= chassis.Angle_radium && errorAngle < 2)
-		{          //角度调整
-			TURN_speed = -1*chassis.Angle_speed*errorAngle;
-		}
-		else if(errorAngle <=-chassis.Angle_radium && errorAngle > -2)
+		if(autorun.state == load_running){
+			if(errorAngle >= 0.005 && errorAngle < 2)
+			{          //角度调整
+				TURN_speed = -1*chassis.Angle_speed*errorAngle;
+			}
+			else if(errorAngle <=-0.005 && errorAngle > -2)
+			{
+				TURN_speed = -1*chassis.Angle_speed*errorAngle;
+			}
+			else if(errorAngle>=2)
+			{
+				TURN_speed =-1*chassis.Angle_speed*2;
+			}
+			else if(errorAngle<=-2)
+			{
+				TURN_speed =-1*chassis.Angle_speed*(-2);
+			}
+			else
+			{
+				arrived_flag += 1;
+				TURN_speed= 0;
+			}
+		}else
 		{
-			TURN_speed = -1*chassis.Angle_speed*errorAngle;
-		}
-		else if(errorAngle>=2)
-		{
-			TURN_speed =-1*chassis.Angle_speed*2;
-		}
-		else if(errorAngle<=-2)
-		{
-			TURN_speed =-1*chassis.Angle_speed*(-2);
-		}
-		else
-		{
-			arrived_flag += 1;
-			TURN_speed= 0;
+			if(errorAngle >= chassis.Angle_radium && errorAngle < 2)
+			{          //角度调整
+				TURN_speed = -1*chassis.Angle_speed*errorAngle;
+			}
+			else if(errorAngle <=-chassis.Angle_radium && errorAngle > -2)
+			{
+				TURN_speed = -1*chassis.Angle_speed*errorAngle;
+			}
+			else if(errorAngle>=2)
+			{
+				TURN_speed =-1*chassis.Angle_speed*2;
+			}
+			else if(errorAngle<=-2)
+			{
+				TURN_speed =-1*chassis.Angle_speed*(-2);
+			}
+			else
+			{
+				arrived_flag += 1;
+				TURN_speed= 0;
+			}
 		}
 		
 		if(TURN_speed>0 && TURN_speed<8)
@@ -328,21 +353,39 @@ void chassis_auto()
 		{
 			TURN_speed = -8;
 		}
-		
-		if(powf(error_X,2)+powf(error_Y,2) <= chassis.Move_radium)
-		{//已经到达
-			i = 1;
-			arrived_flag += 1;
-			ChassisSpeed = 0;
-		}else {
-			
-			if(distance<=1 || powf(error_X,2)+powf(error_Y,2) <= 0.8 || Sroute >= distance)
-			{	
-				direction_angle = atan2(error_Y,error_X);
+		if(autorun.state == load_running)
+		{
+			if(powf(error_X,2)+powf(error_Y,2) <= 0.0001)
+			{//已经到达
+				i = 1;
+				arrived_flag += 1;
+				ChassisSpeed = 0;
+			}else {
+				
+				if(distance<=1 || powf(error_X,2)+powf(error_Y,2) <= 0.8 || Sroute >= distance)
+				{	
+					direction_angle = atan2(error_Y,error_X);
+				}
+				else
+					direction_angle = atan2(direrror_Y,direrror_X);
 			}
-			else
-				direction_angle = atan2(direrror_Y,direrror_X);
+		}else{
+			if(powf(error_X,2)+powf(error_Y,2) <= chassis.Move_radium)
+			{//已经到达
+				i = 1;
+				arrived_flag += 1;
+				ChassisSpeed = 0;
+			}else {
+				
+				if(distance<=1 || powf(error_X,2)+powf(error_Y,2) <= 0.8 || Sroute >= distance)
+				{	
+					direction_angle = atan2(error_Y,error_X);
+				}
+				else
+					direction_angle = atan2(direrror_Y,direrror_X);
+			}
 		}
+		
 
 		Chassis_motor0 = -(ChassisSpeed * cos((CH_angle_M0 - chassis.angle) - direction_angle) - TURN_speed);//Y轴方向，这里direction_angle代表小车相对于场地坐标系的方向
 		Chassis_motor1 = -(ChassisSpeed * cos((CH_angle_M1 - chassis.angle) - direction_angle) - TURN_speed);

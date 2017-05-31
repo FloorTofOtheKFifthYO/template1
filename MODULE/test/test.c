@@ -4,6 +4,7 @@
 #include "auto.h"
 #include "flywheel_left.h"
 #include "flywheel_right.h"
+#include "radar.h"
 bool send_flag = true;
 void test_rcv_callback(CanRxMsg *can_rx_msg){
 	u8 temp[8];
@@ -74,6 +75,7 @@ void test_rcv_callback(CanRxMsg *can_rx_msg){
 						param_save();
 					flywheel_left_home();
 					flywheel_right_home();
+					radar_stop();
 					break;
 			}
 		}

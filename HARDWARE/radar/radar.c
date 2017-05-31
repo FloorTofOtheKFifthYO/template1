@@ -43,14 +43,16 @@ void radar_init(float *_theta,float *_distance)
 
 void radar_start()
 {
-	u8 can_tx_msg[5]={'s','t','a','r','t'};
-	can_send_msg(RADAR_TX_ID,can_tx_msg,5);
+	u8 can_tx_msg[6]={'s','t','a','r','t',0};
+	can_tx_msg[5] = LEFT_RIGHT;
+	can_send_msg(RADAR_TX_ID,can_tx_msg,6);
 }
 
 void radar_shoot()
 {
-	u8 can_tx_msg[5]={'s','h','o','o','t'};
-	can_send_msg(RADAR_TX_ID,can_tx_msg,5);
+	u8 can_tx_msg[6]={'s','h','o','o','t',0};
+	can_tx_msg[5] = LEFT_RIGHT;
+	can_send_msg(RADAR_TX_ID,can_tx_msg,6);
 }
 
 void radar_stop()
