@@ -492,7 +492,7 @@ void auto_main()
 		case pos_arrived:
 		
 			if(debug){
-				if(flywheel_left.state == fly_l_finish && autorun.target_l != -2 && autorun.launch_l_continute == true)
+				if(flywheel_left.state == fly_l_finish && autorun.target_l != -2 && autorun.launch_l_continute == true && handle_r == false)
 				{
 					autorun.launch_l_continute = false;
 					/*if(autorun.target_l == 0)
@@ -523,11 +523,12 @@ void auto_main()
 				
 				if(autorun.target_l == -2 && finish_left == false)
 				{
+					autorun.target_l = 2;
 					flywheel_left_home();
 					finish_left = true;
 				}
 				
-				if(autorun.target_l == -2 && flywheel_right.state == fly_r_finish && autorun.target_r != -2 && autorun.launch_r_continute == true)
+				if(finish_left == true && flywheel_right.state == fly_r_finish && autorun.target_r != -2 && autorun.launch_r_continute == true&&handle_r == false)
 				{
 					autorun.launch_r_continute = false;
 					if(autorun.target_r<0 || autorun.target_r>6)
@@ -553,7 +554,7 @@ void auto_main()
 					}
 				}
 				
-				if(autorun.target_l == -2 && handle_l == false && autorun.target_r == -2 && handle_r == false)
+				if(finish_left == true && handle_l == false && autorun.target_r == -2 && handle_r == false)
 				{
 					autorun.target_l = 2;
 					//select_target_l = true;
