@@ -4,6 +4,7 @@
 #include "flywheel_left.h"
 #include "flywheel_right.h"
 #include "chassis.h"
+#include "main.h"
 #include <math.h>
 #include "auto.h"
 #include "radar.h"
@@ -453,7 +454,6 @@ void control_usart_main()
 		if (RR.ispressed) {
 			RR.ispressed = false;
 			USART_SendString(bluetooth,"right:x pitch:%f yaw:%f speed:%f\n",flywheel_right.pur_pitch,flywheel_right.pur_yaw,flywheel_right.pur_duty);
-			
 			ptr = list_locate(&now_pos->r[strategy.right[autorun.target_r]].launch_ptr, 1);
 			
 			if (ptr == NULL)
@@ -471,7 +471,10 @@ void control_usart_main()
 		}
 		if (RL.ispressed) {
 			RL.ispressed = false;
-			flywheel_right_flys(3);
+			if(debug)
+				flywheel_right_flys(3);
+			else
+				flywheel_right_flys(2);
 		}
 	}else{
 		
@@ -479,10 +482,40 @@ void control_usart_main()
 	
 	if (L1.ispressed) 
 	{
-		
+		if(RD.ispressed){ 
+			RD.ispressed = false;
+			flywheel_left_fly1();
+		}
+		if (RU.ispressed)
+		{
+			RU.ispressed = false;
+			auto_ball_l(2);
+		}
+		if (RL.ispressed) {
+			RL.ispressed = false;
+			if(debug)
+				flywheel_left_flys(3);
+			else
+				flywheel_left_flys(2);
+		}
 	}		
 	if (R1.ispressed) {
-		
+		if(RD.ispressed){ 
+			RD.ispressed = false;
+			flywheel_right_fly1();
+		}
+		if (RU.ispressed)
+		{
+			RU.ispressed = false;
+			auto_ball_r(4);
+		}
+		if (RL.ispressed) {
+			RL.ispressed = false;
+			if(debug)
+				flywheel_right_flys(3);
+			else
+				flywheel_right_flys(2);
+		}
 	}	
 	
 	

@@ -497,10 +497,16 @@ void auto_main()
 					autorun.launch_l_continute = false;
 					/*if(autorun.target_l == 0)
 						radar_shoot();*/
-					if(autorun.target_l<0 || autorun.target_l>6)
-						autorun.last_l = 7;
-					else
-						autorun.last_l = strategy.left[autorun.target_l];
+					if(spe_l == true)
+					{
+						spe_l = false;
+						autorun.last_l = autorun.ball_l;
+					}else{
+						if(autorun.target_l<0 || autorun.target_l>6)
+							autorun.last_l = 7;
+						else
+							autorun.last_l = strategy.left[autorun.target_l];
+					}
 					autorun.target_l++;
 					USART_SendString(bluetooth,"msg: target%d\n",autorun.target_l);
 					
@@ -531,10 +537,16 @@ void auto_main()
 				if(finish_left == true && flywheel_right.state == fly_r_finish && autorun.target_r != -2 && autorun.launch_r_continute == true&&handle_r == false)
 				{
 					autorun.launch_r_continute = false;
-					if(autorun.target_r<0 || autorun.target_r>6)
-						autorun.last_r = 7;
-					else
-						autorun.last_r = strategy.right[autorun.target_r];
+					if(spe_r == true)
+					{
+						spe_r = false;
+						autorun.last_r = autorun.ball_r;
+					}else{
+						if(autorun.target_r<0 || autorun.target_r>6)
+							autorun.last_r = 7;
+						else
+							autorun.last_r = strategy.left[autorun.target_r];
+					}
 					autorun.target_r++;
 					USART_SendString(bluetooth,"msg: target%d\n",autorun.target_r);
 					if(autorun.target_r == 7 || strategy.right[autorun.target_r] == -1)
@@ -651,10 +663,16 @@ void auto_main()
 						autorun.launch_l_continute = false;
 					/*if(autorun.target_l == 0)
 						radar_shoot();*/
-					if(autorun.target_l<0 || autorun.target_l>6)
-						autorun.last_l = 7;
-					else
-						autorun.last_l = strategy.left[autorun.target_l];
+					if(spe_l == true)
+					{
+						spe_l = false;
+						autorun.last_l = autorun.ball_l;
+					}else{
+						if(autorun.target_l<0 || autorun.target_l>6)
+							autorun.last_l = 7;
+						else
+							autorun.last_l = strategy.left[autorun.target_l];
+					}
 						
 					autorun.target_l++;
 					USART_SendString(bluetooth,"msg: target%d\n",autorun.target_l);
@@ -679,10 +697,16 @@ void auto_main()
 				{
 					if(!auto_mode)
 						autorun.launch_r_continute = false;
-					if(autorun.target_r<=0 || autorun.target_r>6)
-						autorun.last_r = 7;
-					else
-						autorun.last_r = strategy.right[autorun.target_r];
+					if(spe_r == true)
+					{
+						spe_r = false;
+						autorun.last_r = autorun.ball_r;
+					}else{
+						if(autorun.target_r<0 || autorun.target_r>6)
+							autorun.last_r = 7;
+						else
+							autorun.last_r = strategy.left[autorun.target_r];
+					}
 					autorun.target_r++;
 					USART_SendString(bluetooth,"msg: target%d\n",autorun.target_r);
 					if(autorun.target_r == 7 || strategy.right[autorun.target_r] == -1)
