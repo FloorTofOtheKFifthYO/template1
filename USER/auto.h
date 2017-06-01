@@ -31,6 +31,8 @@ typedef struct {
 	bool launch_l_continute;
 	bool launch_r_continute;
 	
+	int ball_l;
+	int ball_r;
 	int last_l;
 	int last_r;
 	int target_l;
@@ -88,5 +90,9 @@ int auto_save();
 void auto_select_l(int target);
 
 void auto_select_r(int target);
+
+void auto_ball_l(int target);
+
+void auto_ball_r(int target);
 
 #endif

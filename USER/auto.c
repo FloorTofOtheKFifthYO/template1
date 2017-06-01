@@ -35,6 +35,14 @@ static bool select_target_r = false;
 bool handle_l = false;
 bool handle_r = false;
 static bool first_run = true;
+
+static bool select_ball_l = false;
+static bool select_ball_r = false;
+
+//下面两个标志位是为了特殊发射的和普通发射的切换设的标志位
+static bool spe_l=false;
+static bool	spe_r=false;
+
 POSITION load_area[2];
 
 /**
@@ -150,10 +158,18 @@ void auto_init()
 void auto_select_l(int target)
 {
 	select_target_l = true;
-	if(autorun.target_l<0 || autorun.target_l>6)
-		autorun.last_l = 7;
-	else
-		autorun.last_l = strategy.left[autorun.target_l];
+	
+	if(spe_l == true)
+	{
+		spe_l = false;
+		autorun.last_l = autorun.ball_l;
+	}else{
+		if(autorun.target_l<0 || autorun.target_l>6)
+			autorun.last_l = 7;
+		else
+			autorun.last_l = strategy.left[autorun.target_l];
+	}
+	
 	autorun.target_l = target;
 	
 }
@@ -161,11 +177,40 @@ void auto_select_l(int target)
 void auto_select_r(int target)
 {
 	select_target_r = true;
-	if(autorun.target_r<0 || autorun.target_r>6)
-		autorun.last_r = 7;
-	else
-		autorun.last_r = strategy.right[autorun.target_r];
+	if(spe_r == true)
+	{
+		spe_r = false;
+		autorun.last_r = autorun.ball_r;
+	}else{
+		if(autorun.target_r<0 || autorun.target_r>6)
+			autorun.last_r = 7;
+		else
+			autorun.last_r = strategy.left[autorun.target_r];
+	}
 	autorun.target_r = target;
+}
+
+
+void auto_ball_l(int target)
+{
+	select_ball_l = true;
+	if(spe_l == false)
+	{
+		spe_l = true;
+	}
+		
+	autorun.ball_l = target;
+}
+
+void auto_ball_r(int target)
+{
+	select_ball_r = true;
+	if(spe_r == false)
+	{
+		spe_r = true;
+	}
+		
+	autorun.ball_r = target;
 }
 
 /**
@@ -558,6 +603,44 @@ void auto_main()
 						}
 					}
 				}
+				
+				if(select_ball_l)
+				{
+					select_ball_l = false;
+					
+					USART_SendString(bluetooth,"msg: spe l target%d\n",autorun.ball_l);
+					launch_ptr_l = pos_data->d[autorun.ball_l].launch_ptr->link;
+					if(launch_ptr_l != NULL)
+					{
+						launch_data_l = launch_ptr_l->data;
+						if(launch_data_l != NULL){
+							test_left_target(autorun.ball_l);
+							flywheel_left_flyn(3,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
+							if(debug_print)
+								USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",launch_data_l->pitch,launch_data_l->yaw,launch_data_l->speed);
+						}
+					}
+					
+				}
+				
+				if(select_ball_r)
+				{
+					select_ball_r = false;
+					
+					USART_SendString(bluetooth,"msg: spe r target%d\n",autorun.ball_r);
+					launch_ptr_r = pos_data->r[autorun.ball_r].launch_ptr->link;
+					if(launch_ptr_r != NULL)
+					{
+						launch_data_r = launch_ptr_r->data;
+						if(launch_data_r != NULL){
+							test_left_target(autorun.ball_r);
+							flywheel_right_flyn(3,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
+							if(debug_print)
+								USART_SendString(bluetooth,"right:x pitch:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->yaw,launch_data_r->speed);
+						}
+					}
+					
+				}
 			
 			}else{
 				//循环发射所有台子，发完之后直接转移到下一状态
@@ -691,7 +774,46 @@ void auto_main()
 						}
 					}
 				}
-			
+				
+				
+				if(select_ball_l)
+				{
+					select_ball_l = false;
+					
+					USART_SendString(bluetooth,"msg: spe l target%d\n",autorun.ball_l);
+					launch_ptr_l = pos_data->d[autorun.ball_l].launch_ptr->link;
+					if(launch_ptr_l != NULL)
+					{
+						launch_data_l = launch_ptr_l->data;
+						if(launch_data_l != NULL){
+							test_left_target(autorun.ball_l);
+							flywheel_left_flyn(3,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
+							if(debug_print)
+								USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",launch_data_l->pitch,launch_data_l->yaw,launch_data_l->speed);
+						}
+					}
+					
+				}
+				
+				if(select_ball_r)
+				{
+					select_ball_r = false;
+					
+					USART_SendString(bluetooth,"msg: spe r target%d\n",autorun.ball_r);
+					launch_ptr_r = pos_data->r[autorun.ball_r].launch_ptr->link;
+					if(launch_ptr_r != NULL)
+					{
+						launch_data_r = launch_ptr_r->data;
+						if(launch_data_r != NULL){
+							test_left_target(autorun.ball_r);
+							flywheel_right_flyn(3,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
+							if(debug_print)
+								USART_SendString(bluetooth,"right:x pitch:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->yaw,launch_data_r->speed);
+						}
+					}
+					
+				}
+				
 			}
 		
 			
