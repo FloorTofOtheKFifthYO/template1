@@ -166,7 +166,7 @@ void auto_select_l(int target)
 	{
 		spe_l = false;
 		autorun.last_l = autorun.ball_l;
-		autorun.target_l = 4;
+		autorun.target_l = 2;
 	}else{
 		if(autorun.target_l<0 || autorun.target_l>6)
 			autorun.last_l = 7;
@@ -650,7 +650,7 @@ void auto_main()
 					{
 						launch_data_r = launch_ptr_r->data;
 						if(launch_data_r != NULL){
-							test_left_target(autorun.ball_r);
+							test_right_target(autorun.ball_r);
 							flywheel_right_flyn(0,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
 							if(debug_print)
 								USART_SendString(bluetooth,"right:x pitch:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->yaw,launch_data_r->speed);
