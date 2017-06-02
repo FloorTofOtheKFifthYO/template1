@@ -91,7 +91,7 @@ void auto_select_l(int target);
 
 void auto_select_r(int target);
 
-void auto_ball_l(int target);
+void auto_ball_l();
 
 void auto_ball_r(int target);
 

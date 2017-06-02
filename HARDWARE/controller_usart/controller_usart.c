@@ -489,7 +489,7 @@ void control_usart_main()
 		if (RU.ispressed)
 		{
 			RU.ispressed = false;
-			auto_ball_l(2);
+			auto_ball_l();
 		}
 		if (RL.ispressed) {
 			RL.ispressed = false;

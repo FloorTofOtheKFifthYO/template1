@@ -152,6 +152,9 @@ void auto_init()
 	}
 	autorun.last_l = 7;
 	autorun.last_r = 7;
+	
+	autorun.ball_l = 2;
+	
 	//暂定这么多，可能会改
 }
 
@@ -163,14 +166,14 @@ void auto_select_l(int target)
 	{
 		spe_l = false;
 		autorun.last_l = autorun.ball_l;
+		autorun.target_l = 4;
 	}else{
 		if(autorun.target_l<0 || autorun.target_l>6)
 			autorun.last_l = 7;
 		else
 			autorun.last_l = strategy.left[autorun.target_l];
+		autorun.target_l = target;
 	}
-	
-	autorun.target_l = target;
 	
 }
 
@@ -181,17 +184,18 @@ void auto_select_r(int target)
 	{
 		spe_r = false;
 		autorun.last_r = autorun.ball_r;
+		autorun.target_r = 3;
 	}else{
 		if(autorun.target_r<0 || autorun.target_r>6)
 			autorun.last_r = 7;
 		else
 			autorun.last_r = strategy.left[autorun.target_r];
+		autorun.target_r = target;
 	}
-	autorun.target_r = target;
 }
 
 
-void auto_ball_l(int target)
+void auto_ball_l()
 {
 	select_ball_l = true;
 	if(spe_l == false)
@@ -199,7 +203,7 @@ void auto_ball_l(int target)
 		spe_l = true;
 	}
 		
-	autorun.ball_l = target;
+	autorun.ball_l = 5-autorun.ball_l;
 }
 
 void auto_ball_r(int target)
@@ -628,7 +632,7 @@ void auto_main()
 						launch_data_l = launch_ptr_l->data;
 						if(launch_data_l != NULL){
 							test_left_target(autorun.ball_l);
-							flywheel_left_flyn(3,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
+							flywheel_left_flyn(0,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
 							if(debug_print)
 								USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",launch_data_l->pitch,launch_data_l->yaw,launch_data_l->speed);
 						}
@@ -647,7 +651,7 @@ void auto_main()
 						launch_data_r = launch_ptr_r->data;
 						if(launch_data_r != NULL){
 							test_left_target(autorun.ball_r);
-							flywheel_right_flyn(3,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
+							flywheel_right_flyn(0,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
 							if(debug_print)
 								USART_SendString(bluetooth,"right:x pitch:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->yaw,launch_data_r->speed);
 						}
@@ -812,7 +816,7 @@ void auto_main()
 						launch_data_l = launch_ptr_l->data;
 						if(launch_data_l != NULL){
 							test_left_target(autorun.ball_l);
-							flywheel_left_flyn(3,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
+							flywheel_left_flyn(0,launch_data_l->speed,launch_data_l->pitch,launch_data_l->yaw);
 							if(debug_print)
 								USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",launch_data_l->pitch,launch_data_l->yaw,launch_data_l->speed);
 						}
@@ -831,7 +835,7 @@ void auto_main()
 						launch_data_r = launch_ptr_r->data;
 						if(launch_data_r != NULL){
 							test_left_target(autorun.ball_r);
-							flywheel_right_flyn(3,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
+							flywheel_right_flyn(0,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
 							if(debug_print)
 								USART_SendString(bluetooth,"right:x pitch:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->yaw,launch_data_r->speed);
 						}
