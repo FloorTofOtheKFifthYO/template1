@@ -292,14 +292,15 @@ void chassis_auto()
 		else 
 			ChassisSpeed = 31.6 * (powf(error_X,2)+powf(error_Y,2)) * Move_speed;
 		*/
-		if(ChassisSpeed>chassis.Speed_max)
-			ChassisSpeed = chassis.Speed_max;
-		else if(ChassisSpeed < chassis.Speed_min)
-		{
-			ChassisSpeed = chassis.Speed_min;
-		}
+		
 		
 		if(autorun.state == load_running){
+			if(ChassisSpeed>chassis.Speed_max)
+				ChassisSpeed = chassis.Speed_max;
+			else if(ChassisSpeed < 10)
+			{
+				ChassisSpeed = 10;
+			}
 			if(errorAngle >= 0.005 && errorAngle < 2)
 			{          //角度调整
 				TURN_speed = -1*chassis.Angle_speed*errorAngle;
@@ -321,8 +322,38 @@ void chassis_auto()
 				arrived_flag += 1;
 				TURN_speed= 0;
 			}
+			
+			if(TURN_speed>0 && TURN_speed<5)
+			{
+				TURN_speed = 5;
+			}else if (TURN_speed<0 && TURN_speed>-5)
+			{
+				TURN_speed = -5;
+			}
+			
+			if(powf(error_X,2)+powf(error_Y,2) <= 0.0002)
+			{//已经到达
+				i = 1;
+				arrived_flag += 1;
+				ChassisSpeed = 0;
+			}else {
+				
+				if(distance<=1 || powf(error_X,2)+powf(error_Y,2) <= 0.8 || Sroute >= distance)
+				{	
+					direction_angle = atan2(error_Y,error_X);
+				}
+				else
+					direction_angle = atan2(direrror_Y,direrror_X);
+			}
+			
 		}else
 		{
+			if(ChassisSpeed>chassis.Speed_max)
+				ChassisSpeed = chassis.Speed_max;
+			else if(ChassisSpeed < chassis.Speed_min)
+			{
+				ChassisSpeed = chassis.Speed_min;
+			}
 			if(errorAngle >= chassis.Angle_radium && errorAngle < 2)
 			{          //角度调整
 				TURN_speed = -1*chassis.Angle_speed*errorAngle;
@@ -344,32 +375,14 @@ void chassis_auto()
 				arrived_flag += 1;
 				TURN_speed= 0;
 			}
-		}
-		
-		if(TURN_speed>0 && TURN_speed<8)
-		{
-			TURN_speed = 8;
-		}else if (TURN_speed<0 && TURN_speed>-8)
-		{
-			TURN_speed = -8;
-		}
-		if(autorun.state == load_running)
-		{
-			if(powf(error_X,2)+powf(error_Y,2) <= 0.0001)
-			{//已经到达
-				i = 1;
-				arrived_flag += 1;
-				ChassisSpeed = 0;
-			}else {
-				
-				if(distance<=1 || powf(error_X,2)+powf(error_Y,2) <= 0.8 || Sroute >= distance)
-				{	
-					direction_angle = atan2(error_Y,error_X);
-				}
-				else
-					direction_angle = atan2(direrror_Y,direrror_X);
+			
+			if(TURN_speed>0 && TURN_speed<8)
+			{
+				TURN_speed = 8;
+			}else if (TURN_speed<0 && TURN_speed>-8)
+			{
+				TURN_speed = -8;
 			}
-		}else{
 			if(powf(error_X,2)+powf(error_Y,2) <= chassis.Move_radium)
 			{//已经到达
 				i = 1;
@@ -384,6 +397,7 @@ void chassis_auto()
 				else
 					direction_angle = atan2(direrror_Y,direrror_X);
 			}
+			
 		}
 		
 

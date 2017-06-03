@@ -40,8 +40,8 @@ static bool select_ball_l = false;
 static bool select_ball_r = false;
 
 //下面两个标志位是为了特殊发射的和普通发射的切换设的标志位
-static bool spe_l=false;
-static bool	spe_r=false;
+bool spe_l=false;
+bool spe_r=false;
 
 POSITION load_area[2];
 
@@ -834,8 +834,8 @@ void auto_main()
 					{
 						launch_data_r = launch_ptr_r->data;
 						if(launch_data_r != NULL){
-							test_left_target(autorun.ball_r);
-							flywheel_right_flyn(0,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
+							test_right_target(autorun.ball_r);
+							flywheel_right_flyn(2,launch_data_r->speed,launch_data_r->pitch,launch_data_r->yaw);
 							if(debug_print)
 								USART_SendString(bluetooth,"right:x pitch:%f yaw:%f speed:%f\n",launch_data_r->pitch,launch_data_r->yaw,launch_data_r->speed);
 						}

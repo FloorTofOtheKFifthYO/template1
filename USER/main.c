@@ -34,7 +34,7 @@ void TIM2_IRQHandler(void){
 		}
 		if(tmpcount==250||tmpcount==750)
 			flywheel_left_Set();
-		else if(tmpcount==500||tmpcount==0)
+		else if(tmpcount==500||tmpcount==1)
 			flywheel_right_Set();
 		control_usart_TIM();
 		flywheel_left_TIM();

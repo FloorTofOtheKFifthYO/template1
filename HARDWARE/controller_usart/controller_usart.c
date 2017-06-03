@@ -16,6 +16,9 @@ extern Pos_data * now_pos;     //当前点的数据指针
 extern bool handle_l;
 extern bool handle_r;
 
+extern bool spe_l;
+extern bool spe_r;
+
 #define BT_UP 0
 #define BT_RIGHT 1
 #define BT_DOWN 2
@@ -237,7 +240,7 @@ void control_usart_main()
 	
 	
 	
-	if (!L2.ispressed&&!R2.ispressed){
+	if (!L2.ispressed&&!R2.ispressed&&!L1.ispressed&&!R1.ispressed){
 		
 		if (LU.ispressed) direction_angle = 3*PI/4;
 		else if (LD.ispressed) direction_angle = -PI/4;
@@ -249,6 +252,7 @@ void control_usart_main()
 		
 		if (RU.ispressed)
 		{ 
+			RU.ispressed = false;
 			if(autorun.state == start)
 			{
 				autorun.pos_run_flag = true;
@@ -352,7 +356,7 @@ void control_usart_main()
 	//chassis_handle(direction_angle, ChassisSpeed);
 		
 	}
-	if (L2.ispressed && !R2.ispressed) {
+	if (L2.ispressed && !R2.ispressed&&!L1.ispressed&&!R1.ispressed) {
 		//USART_SendString(bluetooth,"msg: L2\n");
 		if (LU.ispressed){
 			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[strategy.left[autorun.target_l]][0][0]*DELT_YAW_LEFT);
@@ -392,7 +396,10 @@ void control_usart_main()
 		if (RR.ispressed) {
 			RR.ispressed = false;
 			USART_SendString(bluetooth,"left:x pitch:%f yaw:%f speed:%f\n",flywheel_left.pur_pitch,flywheel_left.pur_yaw,flywheel_left.pur_duty);
-			ptr = list_locate(&now_pos->d[strategy.left[autorun.target_l]].launch_ptr, 1);
+			if(spe_l)
+				ptr = list_locate(&now_pos->d[autorun.ball_l].launch_ptr, 1);
+			else
+				ptr = list_locate(&now_pos->d[strategy.left[autorun.target_l]].launch_ptr, 1);
 			
 			if (ptr == NULL)
 			{
@@ -416,7 +423,7 @@ void control_usart_main()
 		//USART_SendString(bluetooth,"msg: 000!\n");
 			
 	}
-	if (R2.ispressed && !L2.ispressed){
+	if (R2.ispressed && !L2.ispressed&&!L1.ispressed&&!R1.ispressed){
 		if (LU.ispressed){
 			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[strategy.right[autorun.target_r]][0][0]*DELT_YAW_RIGHT);
 			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[strategy.right[autorun.target_r]][0][1]*DELT_SPEED_RIGHT);
@@ -454,7 +461,10 @@ void control_usart_main()
 		if (RR.ispressed) {
 			RR.ispressed = false;
 			USART_SendString(bluetooth,"right:x pitch:%f yaw:%f speed:%f\n",flywheel_right.pur_pitch,flywheel_right.pur_yaw,flywheel_right.pur_duty);
-			ptr = list_locate(&now_pos->r[strategy.right[autorun.target_r]].launch_ptr, 1);
+			if(spe_r)
+				ptr = list_locate(&now_pos->r[autorun.ball_r].launch_ptr, 1);
+			else
+				ptr = list_locate(&now_pos->r[strategy.right[autorun.target_r]].launch_ptr, 1);
 			
 			if (ptr == NULL)
 			{
