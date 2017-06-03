@@ -492,6 +492,25 @@ void control_usart_main()
 	
 	if (L1.ispressed) 
 	{
+		if (LU.ispressed){
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.ball_l][0][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.ball_l][0][1]*DELT_SPEED_LEFT);
+		}
+		if (LR.ispressed){
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.ball_l][1][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.ball_l][1][1]*DELT_SPEED_LEFT);
+		
+		}
+		if (LD.ispressed){
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.ball_l][2][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.ball_l][2][1]*DELT_SPEED_LEFT);
+		
+		}
+		if (LL.ispressed){
+			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.ball_l][3][0]*DELT_YAW_LEFT);
+			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.ball_l][3][1]*DELT_SPEED_LEFT);
+		
+		}
 		if(RD.ispressed){ 
 			RD.ispressed = false;
 			flywheel_left_fly1();
@@ -510,6 +529,27 @@ void control_usart_main()
 		}
 	}		
 	if (R1.ispressed) {
+		
+		if (LU.ispressed){
+			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[autorun.ball_r][0][0]*DELT_YAW_RIGHT);
+			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[autorun.ball_r][0][1]*DELT_SPEED_RIGHT);
+		}
+		if (LR.ispressed){
+			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[autorun.ball_r][1][0]*DELT_YAW_RIGHT);
+			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[autorun.ball_r][1][1]*DELT_SPEED_RIGHT);
+		
+		}
+		if (LD.ispressed){
+			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[autorun.ball_r][2][0]*DELT_YAW_RIGHT);
+			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[autorun.ball_r][2][1]*DELT_SPEED_RIGHT);
+		
+		}
+		if (LL.ispressed){
+			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[autorun.ball_r][3][0]*DELT_YAW_RIGHT);
+			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[autorun.ball_r][3][1]*DELT_SPEED_RIGHT);
+		
+		}
+		
 		if(RD.ispressed){ 
 			RD.ispressed = false;
 			flywheel_right_fly1();
