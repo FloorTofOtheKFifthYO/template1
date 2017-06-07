@@ -18,6 +18,9 @@
 #define AUTO_FLASH_ADDR_START ((uint32_t)0x08060000)
 #define AUTO_FLASH_ADDR_END ((uint32_t)0x0807FFFF)
 
+#define LEFT_N 3
+#define RIGHT_N 4
+
 typedef struct {
 	POSITION start_area;
 	POSITION load_area;

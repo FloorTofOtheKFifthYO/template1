@@ -10,6 +10,8 @@
 
 Flywheel_left flywheel_left;
 
+extern bool handle_l;
+
 extern bool debug_print;
 
 static int left_ms = 0;
@@ -186,7 +188,7 @@ void flywheel_left_fly1(){
 		fly_n = 2;
 		flywheel_left_fly();
 		flywheel_left_up(1);
-		fly_count = 150;
+		fly_count = 200;
 		fly_n--;
 		flywheel_left.state = fly;
 	}
@@ -198,7 +200,7 @@ void flywheel_left_flys(int n){
 			fly_n = 2*n;
 			flywheel_left_fly();
 			flywheel_left_up(1);
-			fly_count = 150;
+			fly_count = 200;
 			fly_n--;
 			flywheel_left.state = fly;
 		}
@@ -276,6 +278,7 @@ void flywheel_left_Set()
   */
 void flywheel_left_main()
 {
+	static int flag = 0;
 		switch(flywheel_left.state)
 		{
 			case fly_ready:
@@ -290,29 +293,37 @@ void flywheel_left_main()
 			case fly_adj:
 				if(flywheel_left_check() && fly_count == 0 && autorun.state == pos_arrived)
 				{
-					if(debug_print)
+					if(handle_l == false && autorun.target_l == 0 && flag == 0)
 					{
-						USART_SendString(bluetooth,"msg: left switch:%d\n",left_ms);
-						left_ms = 0;
+						fly_count = 100;
+						flag = 1;
 					}
-					flywheel_left.state = fly;
-					if(fly_n == 0)
+					if(fly_count == 0)
 					{
-						fly_count = 0;
-						flywheel_left.state = fly_l_finish;
-						flywheel_left.fly_flag = false;
-					}else{
-						USART_SendString(bluetooth,"msg:left fly!!\n");
-						flywheel_left_fly();
-						fly_count = 150;
-						fly_n--;
+						if(debug_print)
+						{
+							USART_SendString(bluetooth,"msg: left switch:%d\n",left_ms);
+							left_ms = 0;
+						}
+						flywheel_left.state = fly;
+						if(fly_n == 0)
+						{
+							fly_count = 0;
+							flywheel_left.state = fly_l_finish;
+							flywheel_left.fly_flag = false;
+						}else{
+							USART_SendString(bluetooth,"msg:left fly!!\n");
+							flywheel_left_fly();
+							fly_count = 200;
+							fly_n--;
+						}
 					}
 				}
 				break;
 			case fly:
 				if(fly_n%2 == 0)
 				{
-					if(fly_count <= 300)
+					if(launch_left_time[strategy.left[autorun.target_l]] - fly_count >= 200)
 						flywheel_left_up(1);
 				}
 				
@@ -329,7 +340,7 @@ void flywheel_left_main()
 							flywheel_left_up(0);
 							fly_count = launch_left_time[strategy.left[autorun.target_l]];
 						}else
-							fly_count = 150;
+							fly_count = 200;
 						fly_n--;
 					}
 				}

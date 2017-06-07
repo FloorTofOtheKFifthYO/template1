@@ -188,7 +188,7 @@ void flywheel_right_fly1(){
 		fly_n = 2;
 		flywheel_right_fly();
 		flywheel_right_up(1);
-		fly_count = 150;
+		fly_count = 200;
 		fly_n--;
 		flywheel_right.state = r_fly;
 	}
@@ -200,7 +200,7 @@ void flywheel_right_flys(int n){
 			fly_n = 2*n;
 			flywheel_right_fly();
 			flywheel_right_up(1);
-			fly_count = 150;
+			fly_count = 200;
 			fly_n--;
 			flywheel_right.state = r_fly;
 	}
@@ -313,7 +313,7 @@ void flywheel_right_main()
 					}else{
 						USART_SendString(bluetooth,"msg:right fly!!\n");
 						flywheel_right_fly();
-						fly_count = 150;
+						fly_count = 200;
 						fly_n--;
 					}
 				}
@@ -322,7 +322,7 @@ void flywheel_right_main()
 		case r_fly:
 			if(fly_n%2 == 0)
 			{
-				if(fly_count <= 300)
+				if(launch_right_time[strategy.right[autorun.target_r]] - fly_count >= 300)
 					flywheel_right_up(1);
 			}
 			
@@ -339,7 +339,7 @@ void flywheel_right_main()
 						flywheel_right_up(0);
 						fly_count = launch_right_time[strategy.right[autorun.target_r]];
 					}else
-						fly_count = 150;
+						fly_count = 200;
 					fly_n--;
 				}
 			}

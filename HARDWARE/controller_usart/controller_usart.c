@@ -19,17 +19,20 @@ extern bool handle_r;
 extern bool spe_l;
 extern bool spe_r;
 
+extern Launch_data * launch_data_l;
+extern Launch_data * launch_data_r;
+
 #define BT_UP 0
 #define BT_RIGHT 1
 #define BT_DOWN 2
 #define BT_LEFT 3
 
-#define DELT_YAW_LEFT -0.01
-#define DELT_SPEED_LEFT 0.00001
+#define DELT_YAW_LEFT -0.015
+#define DELT_SPEED_LEFT 	0.00003
 #define FACTOR_SPEED_LEFT 1
 
-#define DELT_YAW_RIGHT -0.01
-#define DELT_SPEED_RIGHT 0.00005
+#define DELT_YAW_RIGHT -0.02
+#define DELT_SPEED_RIGHT 	0.00007
 #define FACTOR_SPEED_RIGHT 1
 
 //иосробвС
@@ -361,21 +364,38 @@ void control_usart_main()
 		if (LU.ispressed){
 			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[strategy.left[autorun.target_l]][0][0]*DELT_YAW_LEFT);
 			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[strategy.left[autorun.target_l]][0][1]*DELT_SPEED_LEFT);
+			if(launch_data_l != NULL && !debug)
+			{
+				launch_data_l->yaw = flywheel_left.pur_yaw;
+				launch_data_l->speed = flywheel_left.pur_duty;
+			}
 		}
 		if (LR.ispressed){
 			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[strategy.left[autorun.target_l]][1][0]*DELT_YAW_LEFT);
 			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[strategy.left[autorun.target_l]][1][1]*DELT_SPEED_LEFT);
-		
+			if(launch_data_l != NULL && !debug)
+			{
+				launch_data_l->yaw = flywheel_left.pur_yaw;
+				launch_data_l->speed = flywheel_left.pur_duty;
+			}
 		}
 		if (LD.ispressed){
 			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[strategy.left[autorun.target_l]][2][0]*DELT_YAW_LEFT);
 			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[strategy.left[autorun.target_l]][2][1]*DELT_SPEED_LEFT);
-		
+			if(launch_data_l != NULL && !debug)
+			{
+				launch_data_l->yaw = flywheel_left.pur_yaw;
+				launch_data_l->speed = flywheel_left.pur_duty;
+			}
 		}
 		if (LL.ispressed){
 			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[strategy.left[autorun.target_l]][3][0]*DELT_YAW_LEFT);
 			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[strategy.left[autorun.target_l]][3][1]*DELT_SPEED_LEFT);
-		
+			if(launch_data_l != NULL && !debug)
+			{
+				launch_data_l->yaw = flywheel_left.pur_yaw;
+				launch_data_l->speed = flywheel_left.pur_duty;
+			}
 		}
 		if(RD.ispressed){ 
 			RD.ispressed = false;
@@ -427,21 +447,38 @@ void control_usart_main()
 		if (LU.ispressed){
 			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[strategy.right[autorun.target_r]][0][0]*DELT_YAW_RIGHT);
 			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[strategy.right[autorun.target_r]][0][1]*DELT_SPEED_RIGHT);
+			if(launch_data_r != NULL && !debug)
+			{
+				launch_data_r->yaw = flywheel_right.pur_yaw;
+				launch_data_r->speed = flywheel_right.pur_duty;
+			}
 		}
 		if (LR.ispressed){
 			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[strategy.right[autorun.target_r]][1][0]*DELT_YAW_RIGHT);
 			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[strategy.right[autorun.target_r]][1][1]*DELT_SPEED_RIGHT);
-		
+			if(launch_data_r != NULL && !debug)
+			{
+				launch_data_r->yaw = flywheel_right.pur_yaw;
+				launch_data_r->speed = flywheel_right.pur_duty;
+			}
 		}
 		if (LD.ispressed){
 			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[strategy.right[autorun.target_r]][2][0]*DELT_YAW_RIGHT);
 			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[strategy.right[autorun.target_r]][2][1]*DELT_SPEED_RIGHT);
-		
+			if(launch_data_r != NULL && !debug)
+			{
+				launch_data_r->yaw = flywheel_right.pur_yaw;
+				launch_data_r->speed = flywheel_right.pur_duty;
+			}
 		}
 		if (LL.ispressed){
 			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[strategy.right[autorun.target_r]][3][0]*DELT_YAW_RIGHT);
 			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[strategy.right[autorun.target_r]][3][1]*DELT_SPEED_RIGHT);
-		
+			if(launch_data_r != NULL && !debug)
+			{
+				launch_data_r->yaw = flywheel_right.pur_yaw;
+				launch_data_r->speed = flywheel_right.pur_duty;
+			}
 		}
 		if(RD.ispressed){ 
 			RD.ispressed = false;
@@ -495,21 +532,38 @@ void control_usart_main()
 		if (LU.ispressed){
 			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.ball_l][0][0]*DELT_YAW_LEFT);
 			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.ball_l][0][1]*DELT_SPEED_LEFT);
+			if(launch_data_l != NULL && !debug)
+			{
+				launch_data_l->yaw = flywheel_left.pur_yaw;
+				launch_data_l->speed = flywheel_left.pur_duty;
+			}
 		}
 		if (LR.ispressed){
 			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.ball_l][1][0]*DELT_YAW_LEFT);
 			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.ball_l][1][1]*DELT_SPEED_LEFT);
-		
+			if(launch_data_l != NULL && !debug)
+			{
+				launch_data_l->yaw = flywheel_left.pur_yaw;
+				launch_data_l->speed = flywheel_left.pur_duty;
+			}
 		}
 		if (LD.ispressed){
 			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.ball_l][2][0]*DELT_YAW_LEFT);
 			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.ball_l][2][1]*DELT_SPEED_LEFT);
-		
+			if(launch_data_l != NULL && !debug)
+			{
+				launch_data_l->yaw = flywheel_left.pur_yaw;
+				launch_data_l->speed = flywheel_left.pur_duty;
+			}
 		}
 		if (LL.ispressed){
 			flywheel_left_setYaw(flywheel_left.pur_yaw+2*convert[autorun.ball_l][3][0]*DELT_YAW_LEFT);
 			flywheel_left_setBrushless(flywheel_left.pur_duty+2*convert[autorun.ball_l][3][1]*DELT_SPEED_LEFT);
-		
+			if(launch_data_l != NULL && !debug)
+			{
+				launch_data_l->yaw = flywheel_left.pur_yaw;
+				launch_data_l->speed = flywheel_left.pur_duty;
+			}
 		}
 		if(RD.ispressed){ 
 			RD.ispressed = false;
@@ -533,21 +587,38 @@ void control_usart_main()
 		if (LU.ispressed){
 			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[autorun.ball_r][0][0]*DELT_YAW_RIGHT);
 			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[autorun.ball_r][0][1]*DELT_SPEED_RIGHT);
+			if(launch_data_r != NULL && !debug)
+			{
+				launch_data_r->yaw = flywheel_right.pur_yaw;
+				launch_data_r->speed = flywheel_right.pur_duty;
+			}
 		}
 		if (LR.ispressed){
 			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[autorun.ball_r][1][0]*DELT_YAW_RIGHT);
 			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[autorun.ball_r][1][1]*DELT_SPEED_RIGHT);
-		
+			if(launch_data_r != NULL && !debug)
+			{
+				launch_data_r->yaw = flywheel_right.pur_yaw;
+				launch_data_r->speed = flywheel_right.pur_duty;
+			}
 		}
 		if (LD.ispressed){
 			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[autorun.ball_r][2][0]*DELT_YAW_RIGHT);
 			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[autorun.ball_r][2][1]*DELT_SPEED_RIGHT);
-		
+			if(launch_data_r != NULL && !debug)
+			{
+				launch_data_r->yaw = flywheel_right.pur_yaw;
+				launch_data_r->speed = flywheel_right.pur_duty;
+			}
 		}
 		if (LL.ispressed){
 			flywheel_right_setYaw(flywheel_right.pur_yaw+2*convert[autorun.ball_r][3][0]*DELT_YAW_RIGHT);
 			flywheel_right_setBrushless(flywheel_right.pur_duty+2*convert[autorun.ball_r][3][1]*DELT_SPEED_RIGHT);
-		
+			if(launch_data_r != NULL && !debug)
+			{
+				launch_data_r->yaw = flywheel_right.pur_yaw;
+				launch_data_r->speed = flywheel_right.pur_duty;
+			}
 		}
 		
 		if(RD.ispressed){ 
