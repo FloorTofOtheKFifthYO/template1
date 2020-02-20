@@ -196,7 +196,6 @@ int param_save(void)
     if(addr > PARAM_FLASH_ADDR_END){   //如果超过FLASH的存储空间，则报错返回
         return -2;
     }
-
     return 1;
 }
 

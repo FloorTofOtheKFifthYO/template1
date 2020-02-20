@@ -4,7 +4,7 @@ GPIO_InitTypeDef GPIO_InitStructure;
 NVIC_InitTypeDef NVIC_InitStructure;
 EXTI_InitTypeDef exti_init_structure;
 
-u8 LEFT_RIGHT = 0;
+u8 LEFT_RIGHT = 0;//红场为0，蓝场为1
 u8 OPEN_Hander = 0;
 
 /*
@@ -113,6 +113,7 @@ void system_clk_set(void){
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3,ENABLE);	//使能USART3时钟
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4,ENABLE);	//使能USART3时钟
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5,ENABLE);   //使能UART5时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6,ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);   //使能syscfg时钟，用于外部中断
 	
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE); 
@@ -136,24 +137,32 @@ void gpio_config(void)
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource10,GPIO_AF_USART1); //GPIOA10复用为USART1
 	
 	GPIO_Configuration(GPIO_Pin_5 | GPIO_Pin_6,GPIO_Mode_AF,
-	                   GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOB);
+	                   GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOD);
 	GPIO_PinAFConfig(GPIOD,GPIO_PinSource5,GPIO_AF_USART2); 
 	GPIO_PinAFConfig(GPIOD,GPIO_PinSource6,GPIO_AF_USART2); 
 	
-	GPIO_PinAFConfig(GPIOC,GPIO_PinSource12,GPIO_AF_UART5); //GPIOC12复用为USART5
-	GPIO_PinAFConfig(GPIOD,GPIO_PinSource2,GPIO_AF_UART5); //GPIOD2复用为USART5
-	GPIO_Configuration(GPIO_Pin_12,GPIO_Mode_AF,
-					   GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOC);
-
-	GPIO_Configuration(GPIO_Pin_2 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_8 | GPIO_Pin_9,
-					   GPIO_Mode_AF,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOD);
-	GPIO_PinAFConfig(GPIOD,GPIO_PinSource8,GPIO_AF_USART3); //GPIOD8复用为USART3
-	GPIO_PinAFConfig(GPIOD,GPIO_PinSource9,GPIO_AF_USART3); //GPIOD9复用为USART3
+	GPIO_Configuration(GPIO_Pin_10 | GPIO_Pin_11 ,
+					   GPIO_Mode_AF,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOB);
+	GPIO_PinAFConfig(GPIOB,GPIO_PinSource10,GPIO_AF_USART3); //GPIOD8复用为USART3
+	GPIO_PinAFConfig(GPIOB,GPIO_PinSource11,GPIO_AF_USART3); //GPIOD9复用为USART3
 	
 	GPIO_Configuration(GPIO_Pin_10 | GPIO_Pin_11,GPIO_Mode_AF,
 	                   GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOC);
 	GPIO_PinAFConfig(GPIOC,GPIO_PinSource10,GPIO_AF_UART4); //GPIOB6复用为USART4
 	GPIO_PinAFConfig(GPIOC,GPIO_PinSource11,GPIO_AF_UART4); //GPIOB7复用为USART4
+	
+	
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource12,GPIO_AF_UART5); //GPIOC12复用为USART5
+	GPIO_PinAFConfig(GPIOD,GPIO_PinSource2,GPIO_AF_UART5); //GPIOD2复用为USART5
+	GPIO_Configuration(GPIO_Pin_12,GPIO_Mode_AF,
+					   GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOC);
+	GPIO_Configuration(GPIO_Pin_2,GPIO_Mode_AF,
+					   GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOD);
+	
+	GPIO_Configuration(GPIO_Pin_6 | GPIO_Pin_7,GPIO_Mode_AF,
+	                   GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOC);
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource6,GPIO_AF_USART6); //GPIOC6复用为USART6
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource7,GPIO_AF_USART6); //GPIOC7复用为USART6
 //----------------------------USART---------------------------------------------------------------------------------------------	
 //	GPIO_Configuration(GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15,
 //	                   GPIO_Mode_AF,GPIO_OType_PP,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
@@ -172,16 +181,18 @@ void gpio_config(void)
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource0, GPIO_AF_TIM5); 	
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource1, GPIO_AF_TIM5); */
 //----------------------------增量码盘---------------------------------------------------------------------------------------------
-	
-	GPIO_Configuration(GPIO_Pin_11,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOF);
-	GPIO_Configuration(GPIO_Pin_8,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOE);
+
+//	GPIO_Configuration(GPIO_Pin_0,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
+//	GPIO_Configuration(GPIO_Pin_1,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOB);
+//	GPIO_Configuration(GPIO_Pin_12,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOD);
+//	GPIO_Configuration(GPIO_Pin_13,GPIO_Mode_IN,GPIO_OType_OD,GPIO_Speed_100MHz,GPIO_PuPd_UP,GPIOD);
 //----------------------------触碰开关---------------------------------------------------------------------------------------------
 	
 //	GPIO_Configuration(GPIO_Pin_5, GPIO_Mode_AF,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOE);
 //	GPIO_PinAFConfig(GPIOE, GPIO_PinSource5, GPIO_AF_TIM9);
-	GPIO_Configuration(GPIO_Pin_8|GPIO_Pin_9, GPIO_Mode_AF,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOF);
-	GPIO_PinAFConfig(GPIOF, GPIO_PinSource8, GPIO_AF_TIM13);
-	GPIO_PinAFConfig(GPIOF, GPIO_PinSource9, GPIO_AF_TIM14);
+//	GPIO_Configuration(GPIO_Pin_1|GPIO_Pin_0, GPIO_Mode_AF,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_UP,GPIOF);
+//	GPIO_PinAFConfig(GPIOF, GPIO_PinSource8, GPIO_AF_TIM13);
+//	GPIO_PinAFConfig(GPIOF, GPIO_PinSource9, GPIO_AF_TIM14);
 //----------------------------PWM---------------------------------------------------------------------------------------------
 
 //	GPIO_Configuration(GPIO_Pin_11|GPIO_Pin_12|GPIO_Pin_13,GPIO_Mode_OUT,GPIO_OType_PP,GPIO_Speed_50MHz,GPIO_PuPd_DOWN,GPIOG);
@@ -217,12 +228,18 @@ void EXTI_Configuration(uint32_t EXTI_Line,
 
 void EXTI_config()
 {
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource11);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource8);
-	EXTI_Configuration(EXTI_Line11,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
-	EXTI_Configuration(EXTI_Line8,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
-	EXTI_ClearITPendingBit(EXTI_Line11); 
-	EXTI_ClearITPendingBit(EXTI_Line8); 
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource1);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource0);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource13);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource12);
+	EXTI_Configuration(EXTI_Line1,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
+//	EXTI_Configuration(EXTI_Line0,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
+//	EXTI_Configuration(EXTI_Line13,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
+	EXTI_Configuration(EXTI_Line12,EXTI_Mode_Interrupt,EXTI_Trigger_Falling,ENABLE);
+//	EXTI_ClearITPendingBit(EXTI_Line0); 
+	EXTI_ClearITPendingBit(EXTI_Line1); 
+	EXTI_ClearITPendingBit(EXTI_Line12); 
+//	EXTI_ClearITPendingBit(EXTI_Line13); 
 }
 
 void nvic_config()
@@ -231,15 +248,16 @@ void nvic_config()
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2 2:2   抢占：响应    共 3级:3级
 	
 	NVIC_Configuration(UART5_IRQn,2,3,ENABLE);
-	NVIC_Configuration(USART1_IRQn,2,3,ENABLE);
-	NVIC_Configuration(USART3_IRQn,2,3,ENABLE);
+//	NVIC_Configuration(USART1_IRQn,2,3,ENABLE);
+	NVIC_Configuration(USART6_IRQn,2,3,ENABLE);
+//	NVIC_Configuration(USART3_IRQn,2,3,ENABLE);
 	NVIC_Configuration(TIM2_IRQn,0,2,ENABLE);
-	NVIC_Configuration(TIM8_UP_TIM13_IRQn,1,1,ENABLE);
+//	NVIC_Configuration(TIM8_UP_TIM13_IRQn,1,1,ENABLE);
 //	NVIC_Configuration(TIM8_TRG_COM_TIM14_IRQn,1,1,ENABLE);
 //	NVIC_Configuration(TIM5_IRQn,1,1,ENABLE);
-	NVIC_Configuration(EXTI15_10_IRQn, 0, 0, ENABLE);
-	NVIC_Configuration(EXTI9_5_IRQn, 0, 0, ENABLE);
-
+//	NVIC_Configuration(EXTI15_10_IRQn, 0, 0, ENABLE);
+//	NVIC_Configuration(EXTI0_IRQn, 0, 0, ENABLE);
+//	NVIC_Configuration(EXTI1_IRQn, 0, 0, ENABLE);
 	
 }
 

@@ -22,18 +22,20 @@
 
 typedef struct
 {
-	//成员
-	Client	left;
-	
 	//状态
 	enum {fly_ready, fly_adj, fly,fly_l_finish} state;
 	
 	//控制
 	bool fly_flag;	//允许调整
+
 	float pur_duty;	
 	float pur_pitch;
 	float pur_yaw;
 	float pur_jmp;
+	u8 fly_relay;
+	u8 up_relay;
+	
+	u8 io[3];
 }Flywheel_left;
 
 extern Flywheel_left flywheel_left;
@@ -89,6 +91,8 @@ void flywheel_left_setYaw(float yaw);
 
 void flywheel_left_fly();
 
+void flywheel_left_Set();
+
 /**
   * @brief  tim2中调用，进行延时等操作
   *     
@@ -112,7 +116,9 @@ void flywheel_left_TIM();
   *          
   * @retval 
   */
-void flywheel_left_flyn(int n, float duty, float pitch, float yaw, float jmp);
+void flywheel_left_flyn(int n, float duty, float pitch, float yaw);
+
+void flywheel_left_flys(int n);
 
 /**
   * @brief main大循环中检查
@@ -139,5 +145,10 @@ void flywheel_left_home();
 void flywheel_left_pitchZero();
 
 void flywheel_left_yawZero();
+
+//发射一个飞盘
+void flywheel_left_fly1();
+
+void flywheel_left_up(int i);
 
 #endif

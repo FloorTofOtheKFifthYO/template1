@@ -5,7 +5,7 @@
 u8 sendToSetSpeed[10] = {0x55,0xAA,0x01,0x00,0x04,0x00,0x00,0x00,0x00,0x00};
 u8 sendToSetSpeedPI[10] = {0x55,0xAA,0x01,0x00,0x84,0x00,0x00,0x00,0x00,0x00};
 
-void setspeed(USART_TypeDef* USARTx, int speed){
+void maxon_setSpeed(USART_TypeDef* USARTx, int speed){
 	int i,j;
 	u8 temp = 0;
 	int check = 0;
@@ -29,7 +29,9 @@ void setspeed(USART_TypeDef* USARTx, int speed){
 	}
 }
 
-void setspeed_p(u8 number , int p){
+//p:7000 i:4000
+
+void maxon_setSpeed_p(USART_TypeDef* USARTx , int p){
 	int i,j;
 	u8 temp = 0;
 	int check = 0;
@@ -45,13 +47,13 @@ void setspeed_p(u8 number , int p){
 	
 
 	for(j = 0 ; j<10 ; j++){
-		while (USART_GetFlagStatus(MOTOR_UART, USART_FLAG_TXE) == RESET);
-		USART_SendData(MOTOR_UART, (u8) sendToSetSpeedPI[j]);
+		while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
+		USART_SendData(USARTx, (u8) sendToSetSpeedPI[j]);
 		//USART_SendData(UART5, (u8) sendToSetSpeedPI[j]);
 	}
 }
 
-void setspeed_i(u8 number , int si){
+void maxon_setSpeed_i(USART_TypeDef* USARTx , int si){
 	u8 temp = 0;
 	int i;
 	int j;
@@ -69,19 +71,19 @@ void setspeed_i(u8 number , int si){
 	
 	
 	for(j = 0 ; j<10 ; j++){
-		while (USART_GetFlagStatus(MOTOR_UART, USART_FLAG_TXE) == RESET);
-		USART_SendData(MOTOR_UART, (u8) sendToSetSpeedPI[j]);
+		while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
+		USART_SendData(USARTx, (u8) sendToSetSpeedPI[j]);
 		//USART_SendData(UART5, (u8) sendToSetSpeedPI[j]);
 	}
 }
 
 
-void save(){
+void maxon_save(USART_TypeDef* USARTx){
 	int j;
 	u8 saveinfo[8] = {0x55 , 0xAA , 0x01 , 0x00 , 0x03 , 0x01 ,0x00 , 0x04};
 	
 	for(j = 0 ; j<8 ; j++){
-		while (USART_GetFlagStatus(MOTOR_UART, USART_FLAG_TXE) == RESET);
-		USART_SendData(MOTOR_UART, (u8) saveinfo[j]);
+		while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
+		USART_SendData(USARTx, (u8) saveinfo[j]);
 	}
 }

@@ -2,7 +2,6 @@
 #include <string.h>
 #include "auto.h"
 #include <math.h>
-#include "step.h"
 #include "usart.h"
 #include "flywheel_close.h"
 
@@ -10,6 +9,12 @@
 #define YAW_MAXSPEED 0
 
 Flywheel_left flywheel_left;
+
+extern bool handle_l;
+
+extern bool debug_print;
+
+static int left_ms = 0;
 
 static int fly_count = 0;
 static int fly_n = 0;//记录打出的个数
@@ -31,20 +36,16 @@ void flywheel_left_init()
 	delay_ms(5);
 	RoboModule_CHOICE_mode(PositionMode ,PITCH_ID_LEFT,YAW_ID_LEFT ,0);
 	RoboModule_Add_Callback(databack,RoboModule_Feedback_Callback,PITCH_ID_LEFT,YAW_ID_LEFT,0);
-	RoboModule_SETUP(9,0,PITCH_ID_LEFT,YAW_ID_LEFT,0);
+	RoboModule_SETUP(23,0,PITCH_ID_LEFT,YAW_ID_LEFT,0);
 	
-	unbrush_init(FLYWHEEL_ID_LEFT);
+
+	flywheel_left.io[0] = 0;
+	flywheel_left.io[1] = 0;
+	flywheel_left.io[2] = 0;
 	
-	//从板设置
-	flywheel_left.left.can_id = CLIENT_ID_LEFT;
-	Client_RESET(flywheel_left.left);
-	delay_ms(5);
-	flywheel_left.left.pwm1 = 770;
-	flywheel_left.left.pwm2 = 600;
-	for(i = 0;i<4;i++)
-		flywheel_left.left.relay[i] = 0;
-	Client_SET(flywheel_left.left);
-	
+	init_subsector(CLIENT_ID_LEFT,1,FLYWHEEL_CHANNEL_LEFT,50,FLYWHEEL_FEEDBACK_LEFT);
+	setUnbrushSpeed_1(CLIENT_ID_LEFT,FLYWHEEL_CHANNEL_LEFT,0);
+	set_IO(CLIENT_ID_LEFT,flywheel_left.io);
 	flywheel_left.pur_duty = 7.7;
 	flywheel_left.pur_jmp = 6;
 	flywheel_left.pur_pitch = 0;
@@ -66,13 +67,13 @@ void flywheel_left_setPitch(float pitch)
 {
 	flywheel_left.pur_pitch = pitch;
 	RoboModule_SET_Position(PITCH_ID_LEFT,5000,pitch*100,PITCH_MAXSPEED);
-	//Step1_moveto(pitch*100);
+	//RoboModule_SET_Position(PITCH_ID_LEFT,5000,pitch*100,PITCH_MAXSPEED);
 }
 
 void flywheel_left_fly()
 {
-	flywheel_left.left.relay[FLY_LEFT] = 1 - flywheel_left.left.relay[FLY_LEFT];
-	Client_SET(flywheel_left.left);
+	flywheel_left.io[FLY_LEFT] = 1 - flywheel_left.io[FLY_LEFT];
+	set_IO(CLIENT_ID_LEFT,flywheel_left.io);
 }
 
 /**
@@ -87,15 +88,17 @@ void flywheel_left_fly()
 void flywheel_left_setBrushless(float duty)
 {
 	flywheel_left.pur_duty = duty;
-	setUnbrushSpeed(FLYWHEEL_ID_LEFT,(duty-7.7)/(10-7.7)*8*100);
+	//setUnbrushSpeed(FLYWHEEL_ID_LEFT,(duty-7.7)/(10-7.7)*8*100);
+	setUnbrushSpeed_1(CLIENT_ID_LEFT,FLYWHEEL_CHANNEL_LEFT,(duty-7.7)/(10-7.7)*8*100);
+	//setUnbrushSpeed_1(CLIENT_ID_LEFT,FLYWHEEL_CHANNEL_LEFT,(duty-7.7)/(10-7.7)*8*100);
 }
 
 
 void flywheel_left_setJmp(float duty)
 {
-	flywheel_left.pur_jmp = duty;
+/*	flywheel_left.pur_jmp = duty;
 	flywheel_left.left.pwm2 = duty*100;
-	Client_SET(flywheel_left.left);
+	Client_SET(flywheel_left.left);*/
 }
 
 /**
@@ -109,8 +112,11 @@ void flywheel_left_setJmp(float duty)
   */
 void flywheel_left_setYaw(float yaw)
 {
-	flywheel_left.pur_yaw = yaw;
-	RoboModule_SET_Position(YAW_ID_LEFT,5000,yaw*100,YAW_MAXSPEED);
+	if(yaw<=0){
+		flywheel_left.pur_yaw = yaw;
+		RoboModule_SET_Position(YAW_ID_LEFT,5000,yaw*100,YAW_MAXSPEED);
+		//RoboModule_SET_Position(YAW_ID_LEFT,5000,yaw*100,YAW_MAXSPEED);
+	}
 }
 
 /**
@@ -124,8 +130,10 @@ void flywheel_left_setYaw(float yaw)
   */
 void flywheel_left_TIM()
 {
+	left_ms++;
 	if(fly_count != 0)
 		fly_count--;
+	
 }
 
 /**
@@ -140,15 +148,16 @@ void flywheel_left_TIM()
   *          
   * @retval 
   */
-void flywheel_left_flyn(int n, float duty, float pitch, float yaw, float jmp)
+void flywheel_left_flyn(int n, float duty, float pitch, float yaw)
 {
 	fly_n = n*2;
 	
 	flywheel_left.pur_duty = duty;
 	flywheel_left.pur_pitch = pitch;
-	flywheel_left.pur_jmp = jmp;
 	flywheel_left.pur_yaw = yaw;
+	flywheel_left.state = fly_l_finish;
 	flywheel_left.fly_flag = true;
+	left_ms = 0;
 }
 
 /*
@@ -158,15 +167,13 @@ void flywheel_left_flyn(int n, float duty, float pitch, float yaw, float jmp)
 bool flywheel_left_check()
 {
 	static int flag = 1;
-//	if(fabs(ReturnData(PITCH_ID_LEFT)->Position -flywheel_left.pur_pitch*100)<=10 && 
-//		fabs(ReturnData(YAW_ID_LEFT)->Position -flywheel_left.pur_yaw*10000)<=50)
 	if( fabs(ReturnData(PITCH_ID_LEFT)->Position -flywheel_left.pur_pitch*100)<=30 && 
 		fabs(ReturnData(YAW_ID_LEFT)->Position -flywheel_left.pur_yaw*100)<=30)
 		{
 			if(flag == 1)
 			{
 				flag = 0;
-				fly_count = 500;
+				fly_count = switch_time[autorun.last_l][strategy.left[autorun.target_l]];
 			}
 			return true;
 		}
@@ -176,16 +183,46 @@ bool flywheel_left_check()
 	}
 }
 
+void flywheel_left_fly1(){
+	if(flywheel_left.state != fly){
+		fly_n = 2;
+		flywheel_left_fly();
+		flywheel_left_up(1);
+		fly_count = 200;
+		fly_n--;
+		flywheel_left.state = fly;
+	}
+}
+
+void flywheel_left_flys(int n){
+	if(n >= 0)
+		if(flywheel_left.state != fly){
+			fly_n = 2*n;
+			flywheel_left_fly();
+			flywheel_left_up(1);
+			fly_count = 200;
+			fly_n--;
+			flywheel_left.state = fly;
+		}
+}
+
+//抬飞盘
+void flywheel_left_up(int i)
+{
+	if(i == -1)
+		flywheel_left.io[UP_LEFT] = 1 - flywheel_left.io[UP_LEFT];
+	else if(flywheel_left.io[UP_LEFT] != i){
+		flywheel_left.io[UP_LEFT] = i;
+		set_IO(CLIENT_ID_LEFT,flywheel_left.io);
+	}
+}
+
 void flywheel_left_stop()
 {
-	flywheel_left.pur_duty = 7.7;
-	flywheel_left.pur_jmp = 6;
-	flywheel_left.pur_pitch = 0;
-	flywheel_left.pur_yaw = 0;
 	flywheel_left_setBrushless(7.7);
 	flywheel_left_setPitch(ReturnData(PITCH_ID_LEFT)->Position/100.f);
 	flywheel_left_setYaw(ReturnData(YAW_ID_LEFT)->Position/100.f);
-	flywheel_left_setJmp(6);
+	//flywheel_left_setJmp(6);
 }
 
 
@@ -216,13 +253,24 @@ void flywheel_left_home()
 	flywheel_left_setBrushless(7.7);
 	flywheel_left_setPitch(0);
 	flywheel_left_setYaw(0);
-	flywheel_left_setJmp(6);
+	//flywheel_left_setJmp(6);
+	flywheel_left_up(0);
+}
+
+void flywheel_left_Set()
+{
+	if(flywheel_left.state == fly_adj)
+	{
+		flywheel_left_setPitch(flywheel_left.pur_pitch);
+		flywheel_left_setYaw(flywheel_left.pur_yaw);
+		flywheel_left_setBrushless(flywheel_left.pur_duty);
+	}
 }
 
 /**
   * @brief main大循环中检查
   *     
-  * @note
+  * @note 状态转移
   *
   * @param
   *          
@@ -230,6 +278,7 @@ void flywheel_left_home()
   */
 void flywheel_left_main()
 {
+	static int flag = 0;
 		switch(flywheel_left.state)
 		{
 			case fly_ready:
@@ -237,44 +286,64 @@ void flywheel_left_main()
 				flywheel_left_setYaw(flywheel_left.pur_yaw);
 				flywheel_left_setBrushless(flywheel_left.pur_duty);
 				flywheel_left.state = fly_adj;
-				flywheel_left.left.pwm1 = flywheel_left.pur_duty*100;
-				flywheel_left.left.pwm2 = flywheel_left.pur_jmp*100;
-				flywheel_left.left.relay[FLY_LEFT] = 0;
-				Client_SET(flywheel_left.left);
+				flywheel_left.io[FLY_LEFT] = 0;
+				flywheel_left.io[UP_LEFT] = 1;
+				fly_count = 0;
+				set_IO(CLIENT_ID_LEFT,flywheel_left.io);
 			case fly_adj:
 				if(flywheel_left_check() && fly_count == 0 && autorun.state == pos_arrived)
 				{
-					flywheel_left.state = fly;
-					if(fly_n == 0)
+					if(handle_l == false && autorun.target_l == 0 && flag == 0)
 					{
-						fly_count = 0;
-						flywheel_left.state = fly_ready;
-						flywheel_left.fly_flag = false;
-					}else{
-						USART_SendString(bluetooth,"msg:high fly!!\n");
-						flywheel_left_fly();
-						fly_count = 300;
-						fly_n--;
+						fly_count = 100;
+						flag = 1;
 					}
-				}
-				break;
-			case fly:
 					if(fly_count == 0)
 					{
+						if(debug_print)
+						{
+							USART_SendString(bluetooth,"msg: left switch:%d\n",left_ms);
+							left_ms = 0;
+						}
+						flywheel_left.state = fly;
 						if(fly_n == 0)
 						{
 							fly_count = 0;
 							flywheel_left.state = fly_l_finish;
 							flywheel_left.fly_flag = false;
 						}else{
+							USART_SendString(bluetooth,"msg:left fly!!\n");
 							flywheel_left_fly();
-							if(fly_n%2 == 1)
-								fly_count = 1000;
-							else
-								fly_count = 300;
+							fly_count = 200;
 							fly_n--;
 						}
 					}
+				}
+				break;
+			case fly:
+				if(fly_n%2 == 0)
+				{
+					if(launch_left_time[strategy.left[autorun.target_l]] - fly_count >= 200)
+						flywheel_left_up(1);
+				}
+				
+				if(fly_count == 0)
+				{
+					if(fly_n == 0)
+					{
+						fly_count = 0;
+						flywheel_left.state = fly_l_finish;
+						flywheel_left.fly_flag = false;
+					}else{
+						flywheel_left_fly();
+						if(fly_n%2 == 1){
+							flywheel_left_up(0);
+							fly_count = launch_left_time[strategy.left[autorun.target_l]];
+						}else
+							fly_count = 200;
+						fly_n--;
+					}
+				}
 				break;
 			case fly_l_finish:
 				if(flywheel_left.fly_flag)

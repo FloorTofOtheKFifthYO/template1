@@ -400,6 +400,9 @@ void RoboModule_Feedback_Callback(CanRxMsg *can_rx_msg){
 	u8 i = 0;
 	u8 j = 0;
 	
+	if(Tell_ApartNumber == 0x08)
+		i = i;
+	
 	switch(Tell_ApartOFFSET){
 		case databack:
 			Backdata->Current = can_rx_msg->Data[0];

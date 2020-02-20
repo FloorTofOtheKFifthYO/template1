@@ -4,7 +4,7 @@
 #include "stdarg.h"
 
 
-void usart_init(USART_TypeDef *USARTx, uint32_t USART_BaudRate);
+void usart_init(USART_TypeDef *USARTx, uint32_t USART_BaudRate,bool RX);
 
 //void usart_init(int *x,int *y);
 

@@ -4,25 +4,28 @@
 #include "chassis.h"
 #include "flywheel_left.h"
 #include "flywheel_right.h"
-#include "encoder.h"
 #include "global.h"
 #include "configuration.h"
 #include "string.h"
 #include "auto.h"
 #include "delay.h"
+#include "radar.h"
 #include "math.h"
+#include "maxon.h"
 #include "param.h"
 
 extern s8 ptrS,ptrB;
 extern Param * param;
 extern bool g_stop_flag;
 extern bool switch_side;
+extern bool debug_print;
+extern bool debug;
 
 u8 target=0;       				//目标0-6
 
 static list_node * now_pos_ptr;
-static int pos_no = 0;
-static Pos_data * now_pos;     //当前点的数据指针
+static int pos_no = 1;
+Pos_data * now_pos;     //当前点的数据指针
 
 extern float pur_pitch;
 extern float pur_roll;
@@ -42,11 +45,157 @@ void cmd_stop_func(int argc,char *argv[]){
     }
 }
 
+void cmd_hello_func(int argc,char *argv[]){
+    USART_SendString(CMD_USARTx, "msg: Hello World\n");
+}
+
+void cmd_test_func(int argc,char *argv[]){
+	int n;
+	if(strcmp(argv[1],"debugp")==0)
+	{
+		debug_print=!debug_print;
+		USART_SendString(bluetooth,"msg: debug_print:%d\n",debug_print);
+	}else if(strcmp(argv[1],"debug")==0)
+	{
+		debug=!debug;
+		USART_SendString(bluetooth,"msg: debug:%d\n",debug);
+	}else if(strcmp(argv[1],"home")==0)
+	{
+		home_flag = true;
+	}else if(strcmp(argv[1],"chassis")==0){
+		maxon_setSpeed(MOTOR0_ID,atoi(argv[2]));
+		maxon_setSpeed(MOTOR1_ID,atoi(argv[2]));
+		maxon_setSpeed(MOTOR2_ID,atoi(argv[2]));
+		maxon_setSpeed(MOTOR3_ID,atoi(argv[2]));
+	}else if(strcmp(argv[1],"fly")==0){
+		if(argc == 4){
+			n = atoi(argv[3]);
+			if(strcmp(argv[2],"l")==0)
+			{
+				flywheel_left_flyn(n,flywheel_left.pur_duty,flywheel_left.pur_pitch,flywheel_left.pur_yaw);
+			}else{
+				flywheel_right_flyn(n,flywheel_right.pur_duty,flywheel_right.pur_pitch,flywheel_right.pur_yaw);
+			}
+		}
+	}
+	else if(strcmp(argv[1],"radar")==0)
+	{
+		if(strcmp(argv[2],"start")==0)
+		{
+			radar_start();
+		}else if(strcmp(argv[2],"stop")==0){
+			radar_stop();
+		}
+	}
+}
+
 void cmd_auto_func(int argc, char*argv[])
 {
+	int n1,n2,time;
 	if (strcmp(argv[1],"load") == 0)
 	{
 		autorun.load_run_flag = true;
+	}else if(strcmp(argv[1],"switchtime")==0)
+	{
+		if(argc != 5){
+			USART_SendString(bluetooth,"msg: please enter:\n");
+            USART_SendString(bluetooth,"msg:    auto switchtime <n1> <n2> <time>\n");
+				for(n1 = 0;n1<8;n1++)
+			{
+				for(n2=0;n2<8;n2++)
+				{
+					USART_SendString(bluetooth,"%d ",switch_time[n1][n2]);
+				}
+				USART_SendString(bluetooth,"\n");
+			}
+			return;
+		}
+			
+		n1 = atoi(argv[2]);
+		n2 = atoi(argv[3]);
+		time = atoi(argv[4]);
+		
+		switch_time[n1][n2] = time;
+		
+		for(n1 = 0;n1<8;n1++)
+		{
+			for(n2=0;n2<8;n2++)
+			{
+				USART_SendString(bluetooth,"%d ",switch_time[n1][n2]);
+			}
+			USART_SendString(bluetooth,"\n");
+		}
+	}else if(strcmp(argv[1],"launchtime")==0)
+	{
+		if(argc != 5){
+			USART_SendString(bluetooth,"msg: please enter:\n");
+            USART_SendString(bluetooth,"msg:    auto launchtime <l/r> <n1> <time>\n");
+			USART_SendString(bluetooth,"left:");
+			for(n1=0;n1<7;n1++)
+			{
+				USART_SendString(bluetooth,"%d ",launch_left_time[n1]);
+			}
+			USART_SendString(bluetooth,"\n");
+			USART_SendString(bluetooth,"right:");
+			for(n1=0;n1<7;n1++)
+			{
+				USART_SendString(bluetooth,"%d ",launch_right_time[n1]);
+			}
+			USART_SendString(bluetooth,"\n");
+			return;
+		}
+			
+		
+		n1 = atoi(argv[3]);
+		time = atoi(argv[4]);
+		if(strcmp(argv[2],"l")==0){
+			launch_left_time[n1] = time;
+			USART_SendString(bluetooth,"left:");
+			for(n1=0;n1<7;n1++)
+			{
+				USART_SendString(bluetooth,"%d ",launch_left_time[n1]);
+			}
+			USART_SendString(bluetooth,"\n");
+		}else{
+			launch_right_time[n1] = time;
+			USART_SendString(bluetooth,"right:");
+			for(n1=0;n1<7;n1++)
+			{
+				USART_SendString(bluetooth,"%d ",launch_right_time[n1]);
+			}
+			USART_SendString(bluetooth,"\n");
+		}
+		
+	}
+	else if (strcmp(argv[1],"target") == 0)
+	{
+		if(argc != 5){
+			USART_SendString(bluetooth,"msg: Error!please enter:\n");
+            USART_SendString(bluetooth,"msg:    auto target <l or r> <n1> <n2>\n");
+			USART_SendString(bluetooth,"left: ");
+			for(n1 = 0;n1 < 7;n1++)
+				USART_SendString(bluetooth,"%d ",strategy.left[n1]);
+			USART_SendString(bluetooth,"\nright: ");
+			for(n1 = 0;n1 < 7;n1++)
+				USART_SendString(bluetooth,"%d ",strategy.right[n1]);
+			USART_SendString(bluetooth,"\n");
+			return;
+		}
+		n1 = atoi(argv[3]);
+		n2 = atoi(argv[4]);
+		if(strcmp(argv[2],"l") == 0)
+		{
+			strategy.left[n1] = n2;
+		}else{
+			strategy.right[n1] = n2;
+		}
+		USART_SendString(bluetooth,"left: ");
+		for(n1 = 0;n1 < 7;n1++)
+			USART_SendString(bluetooth,"%d ",strategy.left[n1]);
+		USART_SendString(bluetooth,"\nright: ");
+		for(n1 = 0;n1 < 7;n1++)
+			USART_SendString(bluetooth,"%d ",strategy.right[n1]);
+		USART_SendString(bluetooth,"\n");
 	}else if (strcmp(argv[1],"select") == 0)
 	{
 		if(strcmp(argv[2],"l") == 0)
@@ -93,26 +242,6 @@ void cmd_auto_func(int argc, char*argv[])
 	}
 }
 
-void cmd_hello_func(int argc,char *argv[]){
-    USART_SendString(CMD_USARTx, "msg: Hello World\n");
-}
-
-void cmd_test_func(int argc,char *argv[]){
-	if(strcmp(argv[1],"home")==0)
-	{
-		home_flag = true;
-	}else if(strcmp(argv[1],"left") == 0)
-	{
-		flywheel_left.fly_flag = true;
-		if(argc == 3)
-			flywheel_left_flyn(atoi(argv[2]),7.7,0,0,6);
-	}else if(strcmp(argv[1],"right") == 0)
-	{	
-		flywheel_right.fly_flag = true;
-		if(argc == 3)
-			flywheel_right_flyn(atoi(argv[2]),7.7,0,0,0,6);
-	}
-}
 
 void cmd_pos_func(int argc,char *argv[])
 {
@@ -320,6 +449,8 @@ void cmd_param_func(int argc,char *argv[]){
 		chassis.Start_distance = atof(argv[2]);
 	else if (strcmp(argv[1],"factor")== 0)
 		chassis.factor = atof(argv[2]);
+	else if (strcmp(argv[1],"xfactor")== 0)
+		chassis.xfactor = atof(argv[2]);
 	else if (strcmp(argv[1],"save") == 0)
 	{	
 		if(chassis_save()<0)
@@ -334,7 +465,6 @@ void cmd_param_func(int argc,char *argv[]){
 
 void cmd_switch_func(int argc,char *argv[])
 {
-	USART_SendString(bluetooth,"msg:left(0) or right(1):%d\n",LEFT_RIGHT);
 	if(strcmp(argv[1],"left") == 0)
 	{
 		LEFT_RIGHT = 0;
@@ -344,6 +474,7 @@ void cmd_switch_func(int argc,char *argv[])
 		LEFT_RIGHT = 1;
 		switch_side = true;
 	}
+	USART_SendString(bluetooth,"msg:left(0) or right(1):%d\n",LEFT_RIGHT);
 }
 
 void cmd_launch_func(int argc,char *argv[])
@@ -362,24 +493,9 @@ void cmd_launch_func(int argc,char *argv[])
         }
 		if(strcmp(argv[2],"l")==0)
 		{
-			flywheel_left_fly();
+			flywheel_left_fly1();
 		}else{
-			if(flywheel_right.right.relay[FLY_RIGHT] == 1)
-			{
-				flywheel_right_fly();
-				delay_ms(300);
-			}
-			if(flywheel_right.right.relay[UP_RIGHT] == 0)
-			{
-				flywheel_right_up();
-				delay_ms(300);
-			}
-			flywheel_right_fly();
-			delay_ms(300);
-			flywheel_right_fly();
-			flywheel_right_up();
-			delay_ms(300);
-			flywheel_right_up();
+			flywheel_right_fly1();
 		}			
 		//USART_SendString(bluetooth,"msg: fly\r");
 	}else if(strcmp(argv[1],"continute")==0)
@@ -411,9 +527,9 @@ void cmd_launch_func(int argc,char *argv[])
 		jmp = atof(argv[8]);
 		if(strcmp(argv[2],"l")==0)
 		{
-			flywheel_left_flyn(no,speed,pitch,yaw,jmp);
+			flywheel_left_flyn(no,speed,pitch,yaw);
 		}else{
-			flywheel_right_flyn(no,speed,turn,pitch,yaw,jmp);
+			flywheel_right_flyn(no,speed,pitch,yaw);
 		}			
 		//USART_SendString(bluetooth,"msg: fly\r");
 	}else if (strcmp(argv[1],"stop")==0)
@@ -448,13 +564,13 @@ void cmd_launch_func(int argc,char *argv[])
 		{	flywheel_left_setBrushless(speed);//左边调整
 			flywheel_left_setPitch(pitch);
 			flywheel_left_setYaw(yaw);
-			flywheel_left_setJmp(jmp);
+			//flywheel_left_setJmp(jmp);
 		}else{
 			flywheel_right_setBrushless(speed);//左边调整
 			flywheel_right_setPitch(pitch);
 			flywheel_right_setYaw(yaw);
-			flywheel_right_setTurn(turn);
-			flywheel_right_setJmp(jmp);
+			//flywheel_right_setTurn(turn);
+			//flywheel_right_setJmp(jmp);
 		}
 		OPEN_Hander = 0;
     }else if (strcmp(argv[1], "set")==0)
@@ -471,16 +587,7 @@ void cmd_launch_func(int argc,char *argv[])
 				flywheel_left_setPitch(pitch);//左边调整
 			else
 				flywheel_right_setPitch(pitch);//右边调整
-		}else if(strcmp(argv[3], "turn")==0)
-		{
-			OPEN_Hander = 0;
-			turn = atof(argv[4]);
-			//上面的转角调整
-			if(strcmp(argv[2], "l") == 0)
-				;//左边调整
-			else
-				flywheel_right_setTurn(turn);//右边调整
-        }else if(strcmp(argv[3], "speed")==0)
+		}else if(strcmp(argv[3], "speed")==0)
 		{
 			speed = atof(argv[4]);
 			if(strcmp(argv[2], "l") == 0)
@@ -494,7 +601,7 @@ void cmd_launch_func(int argc,char *argv[])
 				flywheel_left_setYaw(yaw);//左边调整
 			else
 				flywheel_right_setYaw(yaw);//右边调整
-        }else if(strcmp(argv[3], "jmp")==0)
+        }/*else if(strcmp(argv[3], "jmp")==0)
 		{
 			jmp = atof(argv[4]);
 			//跳台调整
@@ -502,7 +609,7 @@ void cmd_launch_func(int argc,char *argv[])
 				flywheel_left_setJmp(jmp);//左边调整
 			else
 				flywheel_right_setJmp(jmp);//右边调整
-        }
+        }*/
 		else if(argc == 8) {
 		//直接调整
 			pitch = atof(argv[3]);
@@ -516,13 +623,13 @@ void cmd_launch_func(int argc,char *argv[])
 				flywheel_left_setBrushless(speed);//左边调整
 				flywheel_left_setPitch(pitch);
 				flywheel_left_setYaw(yaw);
-				flywheel_left_setJmp(jmp);
+				//flywheel_left_setJmp(jmp);
 			}else{
 				flywheel_right_setBrushless(speed);//左边调整
 				flywheel_right_setPitch(pitch);
 				flywheel_right_setYaw(yaw);
-				flywheel_right_setTurn(turn);
-				flywheel_right_setJmp(jmp);
+				//flywheel_right_setTurn(turn);
+				//flywheel_right_setJmp(jmp);
 			}
 		}
 		
@@ -704,6 +811,7 @@ void cmd_launch_func(int argc,char *argv[])
 		else{
 			no = atoi(argv[2]);
 			target = no;
+			autorun.target_l = target;
 			USART_SendString(CMD_USARTx,"target:%d\n",target);
 		}
 	}else if(argc == 8) {
@@ -716,9 +824,9 @@ void cmd_launch_func(int argc,char *argv[])
 		//调整姿态
 		if(strcmp(argv[1], "l") == 0)
 		{
-			flywheel_left_flyn(atoi(argv[8]),speed,pitch,yaw,jmp);
+			flywheel_left_flyn(atoi(argv[8]),speed,pitch,yaw);
 		}else{
-			flywheel_right_flyn(atoi(argv[8]),speed,turn,pitch,yaw,jmp);
+			flywheel_right_flyn(atoi(argv[8]),speed,pitch,yaw);
 		}
 	}
 }
